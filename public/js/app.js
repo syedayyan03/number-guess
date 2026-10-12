@@ -380,7 +380,12 @@ class NumberVerseApp {
 
   leaveRoom() {
     window.soundFx.playClick();
-    window.location.href = window.location.pathname;
+    if (this.socket) {
+      this.socket.emit('leave_room');
+    }
+    this.roomState = null;
+    this.clearCountdownIntervals();
+    this.showScreen('welcome');
   }
 
   toggleReady() {

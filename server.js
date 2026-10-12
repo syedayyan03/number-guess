@@ -79,19 +79,22 @@ function getAllCodebreakerCandidates() {
 
 function sanitizeRoomState(room) {
   const isPlaying = room.status === 'playing';
-  const playersList = Object.values(room.players).map(p => ({
-    id: p.id,
-    name: p.name,
-    avatar: p.avatar,
-    isBot: p.isBot,
-    botLevel: p.botLevel,
-    score: p.score,
-    roundScore: p.roundScore,
-    isReady: p.isReady,
-    connected: p.connected,
-    attemptsCount: p.attempts.length,
-    lastGuess: p.attempts[p.attempts.length - 1] || null
-  }));
+  // In lobby or between games, only show currently connected players or bots (no ghosts!)
+  const playersList = Object.values(room.players)
+    .filter(p => p.isBot || p.connected)
+    .map(p => ({
+      id: p.id,
+      name: p.name,
+      avatar: p.avatar,
+      isBot: p.isBot,
+      botLevel: p.botLevel,
+      score: p.score,
+      roundScore: p.roundScore,
+      isReady: p.isReady,
+      connected: p.connected,
+      attemptsCount: p.attempts.length,
+      lastGuess: p.attempts[p.attempts.length - 1] || null
+    }));
 
   return {
     id: room.id,
@@ -669,8 +672,12 @@ io.on('connection', (socket) => {
 
   // Quick match / join public room
   socket.on('quick_match', ({ name, avatar }) => {
+    // Only match into rooms that are waiting, have space, and have at least 1 currently connected human player
     let publicRoom = Object.values(rooms).find(
-      r => r.isPublic && r.status === 'waiting' && Object.keys(r.players).length < 8
+      r => r.isPublic && 
+           r.status === 'waiting' && 
+           Object.values(r.players).some(p => !p.isBot && p.connected) &&
+           Object.values(r.players).filter(p => p.isBot || p.connected).length < 8
     );
 
     if (publicRoom) {
@@ -897,6 +904,36 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Explicit Leave Room (User clicks Back to Menu / Leave Room)
+  socket.on('leave_room', () => {
+    if (!currentRoomId || !rooms[currentRoomId]) return;
+    const room = rooms[currentRoomId];
+    socket.leave(currentRoomId);
+
+    if (room.players[socket.id]) {
+      delete room.players[socket.id];
+      room.turnOrder = room.turnOrder.filter(id => id !== socket.id);
+    }
+
+    const remainingHumans = Object.values(room.players).filter(p => !p.isBot && p.connected);
+    if (remainingHumans.length === 0) {
+      clearAllBotTimeouts(room);
+      if (room.timer) clearInterval(room.timer);
+      delete rooms[currentRoomId];
+    } else {
+      if (room.hostId === socket.id) {
+        room.hostId = remainingHumans[0].id;
+        io.to(room.id).emit('host_changed', { hostId: room.hostId });
+      }
+      io.to(room.id).emit('player_left', {
+        playerId: socket.id,
+        roomState: sanitizeRoomState(room)
+      });
+    }
+
+    currentRoomId = null;
+  });
+
   // Restart match after game over
   socket.on('restart_game', () => {
     if (!currentRoomId || !rooms[currentRoomId]) return;
@@ -948,20 +985,31 @@ io.on('connection', (socket) => {
     const room = rooms[currentRoomId];
 
     if (room.players[socket.id]) {
-      room.players[socket.id].connected = false;
+      if (room.status === 'waiting') {
+        // In lobby, immediately remove disconnected player so they don't persist as ghosts!
+        delete room.players[socket.id];
+        room.turnOrder = room.turnOrder.filter(id => id !== socket.id);
+      } else {
+        // In active game, mark disconnected to preserve current scores/history
+        room.players[socket.id].connected = false;
+      }
+      
       io.to(room.id).emit('player_left', {
         playerId: socket.id,
         roomState: sanitizeRoomState(room)
       });
     }
 
-    if (room.hostId === socket.id) {
-      const remainingHumans = Object.values(room.players).filter(p => !p.isBot && p.connected && p.id !== socket.id);
-      if (remainingHumans.length > 0) {
-        room.hostId = remainingHumans[0].id;
-        io.to(room.id).emit('host_changed', { hostId: room.hostId });
+    const remainingHumans = Object.values(room.players).filter(p => !p.isBot && p.connected);
+
+    if (remainingHumans.length === 0) {
+      // If no active humans are left in lobby, remove room immediately
+      if (room.status === 'waiting') {
+        clearAllBotTimeouts(room);
+        if (room.timer) clearInterval(room.timer);
+        delete rooms[currentRoomId];
       } else {
-        // Give 60 seconds grace period in case the host's phone locked screen, switched apps, or reconnected!
+        // In active match, allow 30 seconds reconnect window
         if (room.deleteTimeout) clearTimeout(room.deleteTimeout);
         room.deleteTimeout = setTimeout(() => {
           const activeHumans = Object.values(room.players).filter(p => !p.isBot && p.connected);
@@ -970,8 +1018,12 @@ io.on('connection', (socket) => {
             if (room.timer) clearInterval(room.timer);
             delete rooms[currentRoomId];
           }
-        }, 60000);
+        }, 30000);
       }
+    } else if (room.hostId === socket.id) {
+      // Reassign host to remaining active human
+      room.hostId = remainingHumans[0].id;
+      io.to(room.id).emit('host_changed', { hostId: room.hostId });
     }
   });
 });
