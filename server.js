@@ -14,7 +14,15 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // In-memory Game Rooms
 const rooms = {};
@@ -935,34 +943,43 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Explicit Leave Room (User clicks Back to Menu / Leave Room)
-  socket.on('leave_room', () => {
-    if (!currentRoomId || !rooms[currentRoomId]) return;
-    const room = rooms[currentRoomId];
-    socket.leave(currentRoomId);
+  // Helper function to remove a player cleanly
+  function removePlayerFromRoom(roomId, playerId) {
+    if (!roomId || !rooms[roomId]) return;
+    const room = rooms[roomId];
 
-    if (room.players[socket.id]) {
-      delete room.players[socket.id];
-      room.turnOrder = room.turnOrder.filter(id => id !== socket.id);
+    if (room.players[playerId]) {
+      delete room.players[playerId];
+      room.turnOrder = room.turnOrder.filter(id => id !== playerId);
+
+      io.to(room.id).emit('player_left', {
+        playerId,
+        roomState: sanitizeRoomState(room)
+      });
     }
 
     const remainingHumans = Object.values(room.players).filter(p => !p.isBot && p.connected);
     if (remainingHumans.length === 0) {
       clearAllBotTimeouts(room);
       if (room.timer) clearInterval(room.timer);
-      delete rooms[currentRoomId];
-    } else {
-      if (room.hostId === socket.id) {
-        room.hostId = remainingHumans[0].id;
-        io.to(room.id).emit('host_changed', { hostId: room.hostId });
-      }
+      delete rooms[roomId];
+    } else if (room.hostId === playerId) {
+      room.hostId = remainingHumans[0].id;
+      io.to(room.id).emit('host_changed', { hostId: room.hostId });
       io.to(room.id).emit('player_left', {
-        playerId: socket.id,
+        playerId,
         roomState: sanitizeRoomState(room)
       });
     }
+  }
 
+  // Explicit Leave Room (User clicks Leave Room or navigates away)
+  socket.on('leave_room', () => {
+    if (!currentRoomId) return;
+    const rId = currentRoomId;
     currentRoomId = null;
+    socket.leave(rId);
+    removePlayerFromRoom(rId, socket.id);
   });
 
   // Restart match after game over
@@ -1010,52 +1027,12 @@ io.on('connection', (socket) => {
     io.to(room.id).emit('new_chat', chatMsg);
   });
 
-  // Disconnect
+  // Disconnect (tab closed, internet lost, app exited)
   socket.on('disconnect', () => {
-    if (!currentRoomId || !rooms[currentRoomId]) return;
-    const room = rooms[currentRoomId];
-
-    if (room.players[socket.id]) {
-      if (room.status === 'waiting') {
-        // In lobby, immediately remove disconnected player so they don't persist as ghosts!
-        delete room.players[socket.id];
-        room.turnOrder = room.turnOrder.filter(id => id !== socket.id);
-      } else {
-        // In active game, mark disconnected to preserve current scores/history
-        room.players[socket.id].connected = false;
-      }
-      
-      io.to(room.id).emit('player_left', {
-        playerId: socket.id,
-        roomState: sanitizeRoomState(room)
-      });
-    }
-
-    const remainingHumans = Object.values(room.players).filter(p => !p.isBot && p.connected);
-
-    if (remainingHumans.length === 0) {
-      // If no active humans are left in lobby, remove room immediately
-      if (room.status === 'waiting') {
-        clearAllBotTimeouts(room);
-        if (room.timer) clearInterval(room.timer);
-        delete rooms[currentRoomId];
-      } else {
-        // In active match, allow 30 seconds reconnect window
-        if (room.deleteTimeout) clearTimeout(room.deleteTimeout);
-        room.deleteTimeout = setTimeout(() => {
-          const activeHumans = Object.values(room.players).filter(p => !p.isBot && p.connected);
-          if (activeHumans.length === 0) {
-            clearAllBotTimeouts(room);
-            if (room.timer) clearInterval(room.timer);
-            delete rooms[currentRoomId];
-          }
-        }, 30000);
-      }
-    } else if (room.hostId === socket.id) {
-      // Reassign host to remaining active human
-      room.hostId = remainingHumans[0].id;
-      io.to(room.id).emit('host_changed', { hostId: room.hostId });
-    }
+    if (!currentRoomId) return;
+    const rId = currentRoomId;
+    currentRoomId = null;
+    removePlayerFromRoom(rId, socket.id);
   });
 });
 
