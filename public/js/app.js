@@ -521,8 +521,8 @@ class NumberVerseApp {
             ${p.isReady ? 'Ready' : 'Waiting'}
           </span>
           ${canKick ? `
-            <button onclick="app.kickPlayer('${p.id}')" title="Remove Player" class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition border border-transparent hover:border-rose-500/20">
-              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            <button onclick="app.kickPlayer('${p.id}')" title="Kick / Remove player" class="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.04] text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/30 transition text-xs font-bold" aria-label="Remove player">
+              ✕
             </button>
           ` : ''}
         </div>
