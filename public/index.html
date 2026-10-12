@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NumberVerse • Multiplayer Number Deduction</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Socket.io -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="w-full border-b border-white/5 bg-[#0a0d14]/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <!-- Brand -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="app.showScreen('welcome')">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-mono font-bold text-sm shadow-md shadow-indigo-600/30">
+          #
+        </div>
+        <div>
+          <div class="font-bold text-base tracking-tight text-white flex items-center gap-2">
+            NumberVerse
+            <span class="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400">Multiplayer</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Room Pill -->
+      <div id="nav-room-badge" class="hidden items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span class="text-slate-400">Room:</span>
+        <span id="nav-room-id" class="font-bold text-indigo-400">ABC12</span>
+        <button id="nav-copy-btn" onclick="app.copyRoomLink()" title="Copy Invite Link" class="text-slate-400 hover:text-white ml-1 transition">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="flex items-center gap-2">
+        <button onclick="app.toggleHowToPlay()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span>Rules</span>
+        </button>
+        <button id="sound-toggle-btn" onclick="app.toggleSound()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition" title="Toggle Sound">
+          <i data-lucide="volume-2" id="sound-icon" class="w-4 h-4 text-emerald-400"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-center">
+
+    <!-- ============================================== -->
+    <!-- SCREEN 1: WELCOME / LOBBY ENTRY -->
+    <!-- ============================================== -->
+    <section id="screen-welcome" class="w-full max-w-2xl flex flex-col items-center py-6">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-3">
+          Realtime Number Deduction
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
+          Guess the secret number.
+        </h2>
+        <p class="text-slate-400 text-sm max-w-md mx-auto">
+          Play turn-by-turn against smart AI bots, or invite friends to a private room.
+        </p>
+      </div>
+
+      <!-- Identity Card -->
+      <div class="clean-card w-full p-6 mb-6">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Player Profile</div>
+        
+        <!-- Avatar Initial Monogram Selection -->
+        <div class="mb-5">
+          <label class="block text-xs text-slate-400 font-medium mb-2.5">Select Profile Icon</label>
+          <div class="flex flex-wrap gap-2.5" id="avatar-selector">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Name Input -->
+        <div>
+          <label class="block text-xs text-slate-400 font-medium mb-1.5">Your Name</label>
+          <div class="relative">
+            <input type="text" id="player-nickname" maxlength="16" placeholder="Enter player name..." 
+                   class="clean-input w-full px-4 py-3 text-sm focus:outline-none font-medium">
+            <button onclick="app.randomizeNickname()" title="Randomize Name" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition p-1">
+              <i data-lucide="shuffle" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Action Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full">
+        <!-- Quick Play -->
+        <div class="clean-card-interactive p-5 flex flex-col justify-between cursor-pointer" onclick="app.quickMatch()">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
+              <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+            </div>
+            <div class="font-bold text-white text-base mb-1">Quick Play</div>
+            <div class="text-xs text-slate-400 leading-relaxed">Jump into matchmaking or play against a bot right away.</div>
+          </div>
+          <button class="mt-4 w-full py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider">
+            Play Now
+          </button>
+        </div>
+
+        <!-- Custom Room -->
+        <div class="clean-card-interactive p-5 flex flex-col justify-between cursor-pointer" onclick="app.openCreateModal()">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-slate-300 flex items-center justify-center mb-3">
+              <i data-lucide="plus" class="w-5 h-5"></i>
+            </div>
+            <div class="font-bold text-white text-base mb-1">Create Room</div>
+            <div class="text-xs text-slate-400 leading-relaxed">Customize range (1-100), timer, rounds, and share an invite link.</div>
+          </div>
+          <button class="mt-4 w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider">
+            New Room
+          </button>
+        </div>
+
+        <!-- Join Room -->
+        <div class="clean-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-slate-300 flex items-center justify-center mb-3">
+              <i data-lucide="key" class="w-5 h-5"></i>
+            </div>
+            <div class="font-bold text-white text-base mb-1">Join with Code</div>
+            <input type="text" id="join-room-code-input" placeholder="Room Code (e.g. 7XQ9Y)" maxlength="6" 
+                   class="clean-input w-full px-3 py-2 text-center uppercase tracking-widest font-mono text-xs mt-2">
+          </div>
+          <button onclick="app.joinRoomWithCode()" class="mt-4 w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider">
+            Join
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 2: ROOM LOBBY / WAITING ROOM -->
+    <!-- ============================================== -->
+    <section id="screen-lobby" class="w-full max-w-4xl hidden flex-col py-4">
+      <!-- Lobby Header -->
+      <div class="clean-card p-5 mb-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <div class="text-xs text-slate-400 font-medium mb-1">Room Code</div>
+          <div class="flex items-center gap-3">
+            <span id="lobby-room-code" class="font-mono text-3xl font-extrabold text-white tracking-wider">ABC12</span>
+            <button onclick="app.copyRoomLink()" class="btn-secondary px-3 py-1.5 text-xs flex items-center gap-1.5">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Link
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          <button id="lobby-ready-btn" onclick="app.toggleReady()" class="btn-secondary px-5 py-2.5 text-xs">
+            Ready
+          </button>
+          <button id="lobby-start-btn" onclick="app.startGame()" class="btn-solid-primary px-6 py-2.5 text-xs uppercase tracking-wider hidden flex items-center gap-1.5">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Start Match
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Players Column -->
+        <div class="lg:col-span-2 clean-card p-5">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+            <div class="flex items-center gap-2 font-bold text-sm text-white">
+              <span>Players in Lobby</span>
+              <span id="lobby-player-count" class="text-xs font-mono text-slate-400 px-2 py-0.5 rounded-full bg-white/5">1 / 10</span>
+            </div>
+
+            <div id="lobby-bot-controls">
+              <button onclick="app.addBot('medium')" class="btn-secondary px-3 py-1 text-xs flex items-center gap-1.5">
+                <i data-lucide="bot" class="w-3.5 h-3.5"></i> + Add Bot
+              </button>
+            </div>
+          </div>
+
+          <div id="lobby-players-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Rules Column -->
+        <div class="clean-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="font-bold text-sm text-white mb-4 pb-3 border-b border-white/5 flex items-center justify-between">
+              <span>Match Settings</span>
+              <span id="lobby-settings-notice" class="text-[11px] text-slate-400 font-normal">Host controls</span>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+              <div>
+                <label class="block text-slate-400 font-medium mb-1">Game Mode</label>
+                <select id="setting-mode" onchange="app.updateSettings()" class="clean-input w-full px-3 py-2 text-xs font-medium">
+                  <option value="turn_based" selected>Turn-Based (Strategic turns)</option>
+                  <option value="blitz">Rapid Blitz (Speed race)</option>
+                  <option value="codebreaker">Codebreaker (4-Digit Deduction)</option>
+                </select>
+              </div>
+
+              <div id="setting-range-container">
+                <label class="block text-slate-400 font-medium mb-1">Number Range</label>
+                <select id="setting-range" onchange="app.updateSettings()" class="clean-input w-full px-3 py-2 text-xs font-medium">
+                  <option value="50">1 to 50</option>
+                  <option value="100" selected>1 to 100 (Classic)</option>
+                  <option value="500">1 to 500</option>
+                  <option value="1000">1 to 1,000</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-slate-400 font-medium mb-1">Round Timer</label>
+                <select id="setting-time" onchange="app.updateSettings()" class="clean-input w-full px-3 py-2 text-xs font-medium">
+                  <option value="15">15 Seconds</option>
+                  <option value="30" selected>30 Seconds</option>
+                  <option value="60">60 Seconds</option>
+                  <option value="0">Unlimited</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-slate-400 font-medium mb-1">Total Rounds</label>
+                <select id="setting-rounds" onchange="app.updateSettings()" class="clean-input w-full px-3 py-2 text-xs font-medium">
+                  <option value="3">3 Rounds</option>
+                  <option value="5" selected>5 Rounds</option>
+                  <option value="10">10 Rounds</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="app.leaveRoom()" class="mt-6 w-full py-2.5 rounded-xl btn-secondary text-xs text-rose-400 hover:text-rose-300 transition">
+            Leave Room
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 3: LIVE GAME ARENA (CLEAN MINIMALIST) -->
+    <!-- ============================================== -->
+    <section id="screen-game" class="w-full max-w-3xl hidden flex-col py-2">
+      <!-- Arena Status Top Bar -->
+      <div class="clean-card px-5 py-3 mb-4 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-3">
+          <span class="font-mono font-semibold text-slate-400">Round <strong id="game-round-current" class="text-white">1</strong>/<span id="game-round-total">5</span></span>
+          <span class="text-slate-600">•</span>
+          <span id="game-mode-tag" class="text-slate-400 font-medium">Turn-Based</span>
+        </div>
+
+        <div class="flex items-center gap-2 font-mono">
+          <span class="text-slate-400">Range:</span>
+          <span id="game-range-label" class="font-bold text-white">1 - 100</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 font-mono">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span id="game-timer" class="font-bold text-white">30s</span>
+        </div>
+      </div>
+
+      <!-- Main Play Card -->
+      <div class="clean-card p-6 sm:p-10 mb-4 text-center">
+        <!-- Turn Status Indicator -->
+        <div class="mb-6 flex justify-center">
+          <div id="game-turn-banner" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 transition">
+            <span id="game-turn-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="game-turn-text">Your turn to guess</span>
+          </div>
+        </div>
+
+        <!-- Secret Mystery Box -->
+        <div class="flex flex-col items-center mb-6">
+          <div id="game-mystery-box" class="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center font-mono font-bold text-3xl text-slate-300 shadow-inner mb-4 transition">
+            ?
+          </div>
+
+          <!-- Hero Feedback Banner -->
+          <div id="hero-feedback-box" class="min-h-[44px] flex flex-col items-center justify-center">
+            <div id="hero-feedback-text" class="text-sm sm:text-base font-medium text-slate-400">
+              Guess the number between <span id="hero-range-text" class="text-white font-mono font-bold">1 and 100</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Numeric Guess Input Form -->
+        <div id="numeric-input-section" class="max-w-md mx-auto w-full">
+          <form onsubmit="event.preventDefault(); app.submitGuess();" class="flex flex-col sm:flex-row gap-2.5">
+            <input type="text" 
+                   inputmode="numeric" 
+                   pattern="[0-9]*" 
+                   maxlength="4" 
+                   id="game-guess-input" 
+                   placeholder="Enter number (1-100)..." 
+                   autocomplete="off"
+                   class="clean-input flex-1 px-4 py-3.5 text-center text-xl font-bold tracking-wider placeholder-slate-600 focus:outline-none">
+            
+            <button type="submit" id="game-submit-btn" class="btn-solid-primary sm:w-auto px-7 py-3.5 text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+              <span>Guess</span>
+              <kbd class="text-[10px] opacity-70 bg-black/20 px-1 py-0.5 rounded font-mono">↵</kbd>
+            </button>
+          </form>
+          <div class="text-[11px] text-slate-500 mt-2">Press <kbd class="px-1 py-0.2 rounded bg-white/5 border border-white/10 font-mono text-[10px]">Enter ↵</kbd> to submit</div>
+        </div>
+
+        <!-- Codebreaker Section -->
+        <div id="codebreaker-input-section" class="hidden flex-col items-center max-w-sm mx-auto">
+          <span class="text-xs font-medium text-slate-400 mb-3">Enter 4 unique digits</span>
+          <div class="flex gap-2 mb-4">
+            <input type="text" maxlength="1" inputmode="numeric" class="code-slot clean-input w-12 h-14 text-center font-mono font-bold text-xl" id="slot-0" oninput="app.handleSlotInput(0, event)">
+            <input type="text" maxlength="1" inputmode="numeric" class="code-slot clean-input w-12 h-14 text-center font-mono font-bold text-xl" id="slot-1" oninput="app.handleSlotInput(1, event)">
+            <input type="text" maxlength="1" inputmode="numeric" class="code-slot clean-input w-12 h-14 text-center font-mono font-bold text-xl" id="slot-2" oninput="app.handleSlotInput(2, event)">
+            <input type="text" maxlength="1" inputmode="numeric" class="code-slot clean-input w-12 h-14 text-center font-mono font-bold text-xl" id="slot-3" oninput="app.handleSlotInput(3, event)">
+          </div>
+          <button onclick="app.submitCodebreakerGuess()" class="w-full py-3 rounded-xl btn-solid-primary text-xs uppercase tracking-wider">
+            Test Combination
+          </button>
+        </div>
+
+        <!-- Recent Attempts Ribbon -->
+        <div class="mt-8 pt-5 border-t border-white/5 text-left">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-medium mb-2.5">
+            <span>Recent Attempts</span>
+            <span id="recent-guesses-count" class="font-mono text-slate-500">0 guesses</span>
+          </div>
+          <div id="recent-guesses-chips" class="flex flex-wrap gap-2 min-h-[32px] items-center">
+            <span class="text-xs text-slate-500 italic">No guesses made yet in this round.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lower Split: Scoreboard & Activity -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Standings -->
+        <div class="clean-card p-4">
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
+            <span>Scoreboard</span>
+            <span class="text-[10px] text-slate-500">Match Rank</span>
+          </div>
+          <div id="game-scoreboard-list" class="space-y-2 max-h-44 overflow-y-auto pr-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Activity Feed & Chat -->
+        <div class="clean-card p-4 flex flex-col justify-between min-h-[180px]">
+          <div>
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+              <span>Activity & Chat</span>
+              <span id="game-feed-count" class="text-[10px] font-mono text-slate-500">0</span>
+            </div>
+            <div id="game-guess-feed" class="overflow-y-auto space-y-1.5 max-h-28 pr-1 text-xs">
+              <div class="text-center py-4 text-xs text-slate-500">Guesses and chat will appear here.</div>
+            </div>
+          </div>
+
+          <div class="pt-2.5 border-t border-white/5 mt-2 flex gap-2">
+            <input type="text" id="game-chat-input" maxlength="60" placeholder="Send a message..." 
+                   class="clean-input flex-1 px-3 py-1.5 text-xs focus:outline-none">
+            <button onclick="app.sendChat()" class="btn-secondary px-3 py-1.5 text-xs font-semibold">
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- MODAL: ROUND RESULT -->
+    <!-- ============================================== -->
+    <div id="modal-round-end" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-white/10 shadow-2xl">
+        <div id="round-winner-avatar" class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+          ✓
+        </div>
+        <h3 id="round-end-title" class="text-xl font-bold text-white mb-1">Round Complete</h3>
+        <p id="round-end-reason" class="text-xs text-slate-400 mb-4">Player guessed the secret number!</p>
+
+        <!-- Secret Number Reveal -->
+        <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-4">
+          <span class="text-[10px] font-semibold uppercase text-slate-400 tracking-wider block mb-1">Secret Number</span>
+          <span id="round-revealed-number" class="font-mono font-extrabold text-3xl text-indigo-400">
+            42
+          </span>
+        </div>
+
+        <div id="round-end-scores" class="space-y-1.5 mb-4 max-h-36 overflow-y-auto text-xs">
+          <!-- Rendered by JS -->
+        </div>
+
+        <div class="text-xs text-slate-400 flex items-center justify-center gap-1.5 mb-5">
+          <span>Auto-starting next game in</span>
+          <strong id="round-countdown-timer" class="text-indigo-400 font-mono text-sm font-bold">5</strong>s...
+        </div>
+
+        <div class="flex gap-2.5">
+          <button id="round-continue-btn" onclick="app.continueGame()" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5">
+            <span>Continue</span>
+            <kbd class="text-[10px] opacity-70 bg-black/20 px-1 py-0.5 rounded font-mono">↵</kbd>
+          </button>
+          <button id="round-leave-btn" onclick="app.leaveGameToLobby()" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300">
+            Leave Game
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: GAME OVER PODIUM -->
+    <!-- ============================================== -->
+    <div id="modal-game-over" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-lg hidden items-center justify-center p-4">
+      <div class="clean-card max-w-md w-full p-6 text-center border border-white/10">
+        <div class="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">Match Finished</div>
+        <h3 class="text-2xl font-bold text-white mb-6">Final Standings</h3>
+
+        <!-- 3-Player Podium Stand -->
+        <div id="podium-container" class="flex items-end justify-center gap-3 mb-6 px-4">
+          <!-- 2nd -->
+          <div class="flex-1 flex flex-col items-center">
+            <div id="podium-2-avatar" class="avatar-badge mb-1">2</div>
+            <div id="podium-2-name" class="text-xs font-semibold text-slate-300 truncate max-w-[80px]">Player 2</div>
+            <div id="podium-2-score" class="font-mono text-xs text-slate-400 mb-1">0 pts</div>
+            <div class="podium-2 w-full rounded-t-xl flex items-center justify-center font-mono font-bold text-sm text-slate-300">2nd</div>
+          </div>
+
+          <!-- 1st -->
+          <div class="flex-1 flex flex-col items-center">
+            <div id="podium-1-avatar" class="avatar-badge bg-indigo-600/30 border-indigo-400 text-indigo-300 mb-1">1</div>
+            <div id="podium-1-name" class="text-xs font-bold text-white truncate max-w-[90px]">Winner</div>
+            <div id="podium-1-score" class="font-mono text-xs text-indigo-400 font-bold mb-1">0 pts</div>
+            <div class="podium-1 w-full rounded-t-xl flex items-center justify-center font-mono font-bold text-base text-amber-300">1st</div>
+          </div>
+
+          <!-- 3rd -->
+          <div class="flex-1 flex flex-col items-center">
+            <div id="podium-3-avatar" class="avatar-badge mb-1">3</div>
+            <div id="podium-3-name" class="text-xs font-semibold text-slate-300 truncate max-w-[80px]">Player 3</div>
+            <div id="podium-3-score" class="font-mono text-xs text-slate-400 mb-1">0 pts</div>
+            <div class="podium-3 w-full rounded-t-xl flex items-center justify-center font-mono font-bold text-xs text-amber-500">3rd</div>
+          </div>
+        </div>
+
+        <div id="game-over-full-list" class="space-y-1.5 mb-4 max-h-32 overflow-y-auto text-xs">
+          <!-- Rendered by JS -->
+        </div>
+
+        <div class="text-xs text-slate-400 flex items-center justify-center gap-1.5 mb-5">
+          <span>Auto-restarting in</span>
+          <strong id="gameover-countdown-timer" class="text-indigo-400 font-mono text-sm font-bold">5</strong>s...
+        </div>
+
+        <div class="flex gap-2.5">
+          <button id="game-over-continue-btn" onclick="app.continueGame()" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-semibold">
+            Continue Game
+          </button>
+          <button onclick="app.leaveGameToLobby()" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300">
+            Leave Game
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: HOW TO PLAY -->
+    <!-- ============================================== -->
+    <div id="modal-rules" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-md w-full p-6 relative">
+        <button onclick="app.toggleHowToPlay()" class="absolute right-4 top-4 text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="help-circle" class="w-4 h-4 text-indigo-400"></i> Rules & Game Modes
+        </h3>
+
+        <div class="space-y-3 text-xs text-slate-300">
+          <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+            <div class="font-semibold text-white mb-1">Turn-Based Mode</div>
+            <p class="text-slate-400 leading-relaxed">Players take turns making one guess. Feedback informs everyone whether the guess was Too High or Too Low. Deduce the exact number to win the round!</p>
+          </div>
+          <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+            <div class="font-semibold text-white mb-1">Codebreaker (4 Digits)</div>
+            <p class="text-slate-400 leading-relaxed">Guess a 4-digit code. Bulls (🐂) indicate a correct digit in the exact spot. Cows (🐄) indicate a correct digit in the wrong spot.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: CREATE ROOM CONFIG -->
+    <!-- ============================================== -->
+    <div id="modal-create-room" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-md w-full p-6 relative">
+        <button onclick="app.closeCreateModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <h3 class="text-base font-bold text-white mb-4">Create Custom Room</h3>
+
+        <div class="space-y-3.5 text-xs">
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Game Mode</label>
+            <select id="create-mode" class="clean-input w-full px-3 py-2 text-xs font-medium">
+              <option value="turn_based" selected>Turn-Based (Strategic turns)</option>
+              <option value="blitz">Rapid Blitz (Speed race)</option>
+              <option value="codebreaker">Codebreaker (4-Digit Deduction)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Number Range</label>
+            <select id="create-range" class="clean-input w-full px-3 py-2 text-xs font-medium">
+              <option value="50">1 to 50</option>
+              <option value="100" selected>1 to 100</option>
+              <option value="500">1 to 500</option>
+              <option value="1000">1 to 1,000</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Time Limit Per Round</label>
+            <select id="create-time" class="clean-input w-full px-3 py-2 text-xs font-medium">
+              <option value="15">15 Seconds</option>
+              <option value="30" selected>30 Seconds</option>
+              <option value="60">60 Seconds</option>
+              <option value="0">Unlimited</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Total Rounds</label>
+            <select id="create-rounds" class="clean-input w-full px-3 py-2 text-xs font-medium">
+              <option value="3">3 Rounds</option>
+              <option value="5" selected>5 Rounds</option>
+              <option value="10">10 Rounds</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="create-public" checked class="w-4 h-4 rounded bg-slate-900 border-white/20 text-indigo-600 focus:ring-0">
+            <label for="create-public" class="text-xs text-slate-300">Allow public players to join</label>
+          </div>
+        </div>
+
+        <button onclick="app.submitCreateRoom()" class="mt-5 w-full py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider">
+          Create Room
+        </button>
+      </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/5 bg-[#0a0d14]/60 py-3 text-center text-xs text-slate-500">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between text-[11px]">
+      <div>NumberVerse • Realtime Multiplayer Deduction</div>
+      <div class="flex gap-4">
+        <span>Turn-Based</span>
+        <span>Low-latency WebSockets</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/sound.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
