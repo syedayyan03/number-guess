@@ -48,6 +48,7 @@ class NumberVerseApp {
 
     this.socket.on('connect', () => {
       this.myId = this.socket.id;
+      if (this.roomState) this.renderLobby();
     });
 
     this.socket.on('disconnect', () => {
@@ -441,11 +442,13 @@ class NumberVerseApp {
   }
 
   isHost() {
-    return this.roomState && this.roomState.hostId === this.myId;
+    const currentId = this.myId || (this.socket && this.socket.id);
+    return !!(this.roomState && currentId && this.roomState.hostId === currentId);
   }
 
   renderLobby() {
     if (!this.roomState) return;
+    const currentId = this.myId || (this.socket && this.socket.id);
 
     document.getElementById('lobby-room-code').innerText = this.roomState.id;
     document.getElementById('lobby-player-count').innerText = `${this.roomState.players.length} / 10`;
@@ -474,7 +477,7 @@ class NumberVerseApp {
       startBtn.classList.remove('flex');
     }
 
-    const me = this.roomState.players.find(p => p.id === this.myId);
+    const me = this.roomState.players.find(p => p.id === currentId);
     if (me && readyBtn) {
       readyBtn.className = `px-5 py-2.5 rounded-xl font-medium text-xs transition border flex items-center gap-1.5 ${
         me.isReady 
@@ -488,10 +491,12 @@ class NumberVerseApp {
     const playersListEl = document.getElementById('lobby-players-list');
     playersListEl.innerHTML = '';
 
+    const hostIsMe = this.isHost();
+
     this.roomState.players.forEach(p => {
-      const isMe = p.id === this.myId;
+      const isMe = p.id === currentId;
       const isRoomHost = p.id === this.roomState.hostId;
-      const canKick = this.isHost() && !isMe;
+      const canKick = hostIsMe && !isMe;
 
       const card = document.createElement('div');
       card.className = `p-3 rounded-xl flex items-center justify-between border transition ${
