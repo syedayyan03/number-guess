@@ -632,6 +632,11 @@ io.on('connection', (socket) => {
       return;
     }
 
+    if (room.deleteTimeout) {
+      clearTimeout(room.deleteTimeout);
+      room.deleteTimeout = null;
+    }
+
     currentRoomId = targetRoomId;
     socket.join(targetRoomId);
 
@@ -956,9 +961,16 @@ io.on('connection', (socket) => {
         room.hostId = remainingHumans[0].id;
         io.to(room.id).emit('host_changed', { hostId: room.hostId });
       } else {
-        clearAllBotTimeouts(room);
-        if (room.timer) clearInterval(room.timer);
-        delete rooms[currentRoomId];
+        // Give 60 seconds grace period in case the host's phone locked screen, switched apps, or reconnected!
+        if (room.deleteTimeout) clearTimeout(room.deleteTimeout);
+        room.deleteTimeout = setTimeout(() => {
+          const activeHumans = Object.values(room.players).filter(p => !p.isBot && p.connected);
+          if (activeHumans.length === 0) {
+            clearAllBotTimeouts(room);
+            if (room.timer) clearInterval(room.timer);
+            delete rooms[currentRoomId];
+          }
+        }, 60000);
       }
     }
   });
