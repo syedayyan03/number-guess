@@ -180,6 +180,13 @@ class NumberVerseApp {
       this.handleNewChatMessage(chatMsg);
     });
 
+    this.socket.on('kicked_from_room', ({ message }) => {
+      this.roomState = null;
+      this.clearCountdownIntervals();
+      this.showScreen('welcome');
+      this.showToast(message || 'You were removed from the room by the host.', 'error');
+    });
+
     this.socket.on('error_message', (msg) => {
       this.showToast(msg, 'error');
     });
@@ -398,9 +405,10 @@ class NumberVerseApp {
     this.socket.emit('add_bot', { level });
   }
 
-  removeBot(botId) {
+  kickPlayer(playerId) {
+    if (!this.isHost()) return;
     window.soundFx.playClick();
-    this.socket.emit('remove_bot', { botId });
+    this.socket.emit('kick_player', { playerId });
   }
 
   updateSettings() {
@@ -420,6 +428,14 @@ class NumberVerseApp {
 
   startGame() {
     if (!this.isHost()) return;
+    // Check if everyone is ready
+    const unreadyCount = this.roomState.players.filter(p => !p.isReady).length;
+    if (unreadyCount > 0) {
+      window.soundFx.playClick();
+      this.showToast('All players must be Ready before starting!', 'error');
+      return;
+    }
+
     window.soundFx.playClick();
     this.socket.emit('start_game');
   }
@@ -438,9 +454,21 @@ class NumberVerseApp {
     const startBtn = document.getElementById('lobby-start-btn');
     const readyBtn = document.getElementById('lobby-ready-btn');
 
+    // Check if all players are ready
+    const allReady = this.roomState.players.every(p => p.isReady);
+
     if (this.isHost()) {
       startBtn.classList.remove('hidden');
       startBtn.classList.add('flex');
+      if (allReady) {
+        startBtn.disabled = false;
+        startBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+        startBtn.title = 'Start the match';
+      } else {
+        startBtn.disabled = true;
+        startBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        startBtn.title = 'Waiting for all players to be Ready';
+      }
     } else {
       startBtn.classList.add('hidden');
       startBtn.classList.remove('flex');
@@ -463,6 +491,7 @@ class NumberVerseApp {
     this.roomState.players.forEach(p => {
       const isMe = p.id === this.myId;
       const isRoomHost = p.id === this.roomState.hostId;
+      const canKick = this.isHost() && !isMe;
 
       const card = document.createElement('div');
       card.className = `p-3 rounded-xl flex items-center justify-between border transition ${
@@ -487,12 +516,12 @@ class NumberVerseApp {
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-2">
           <span class="text-[11px] font-mono ${p.isReady ? 'text-emerald-400' : 'text-slate-500'}">
             ${p.isReady ? 'Ready' : 'Waiting'}
           </span>
-          ${(this.isHost() && p.isBot) ? `
-            <button onclick="app.removeBot('${p.id}')" title="Remove Bot" class="text-slate-500 hover:text-rose-400 p-1 transition">
+          ${canKick ? `
+            <button onclick="app.kickPlayer('${p.id}')" title="Remove Player" class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition border border-transparent hover:border-rose-500/20">
               <i data-lucide="x" class="w-3.5 h-3.5"></i>
             </button>
           ` : ''}

@@ -764,22 +764,45 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Remove bot player
-  socket.on('remove_bot', ({ botId }) => {
+  // Kick player (host only)
+  socket.on('kick_player', ({ playerId }) => {
     if (!currentRoomId || !rooms[currentRoomId]) return;
     const room = rooms[currentRoomId];
     if (room.hostId !== socket.id) return;
-    if (room.players[botId] && room.players[botId].isBot) {
-      if (room.players[botId].actionTimeout) {
-        clearTimeout(room.players[botId].actionTimeout);
+    if (playerId === socket.id) return; // Host cannot kick themselves
+
+    const playerToKick = room.players[playerId];
+    if (!playerToKick) return;
+
+    if (playerToKick.isBot) {
+      if (playerToKick.actionTimeout) {
+        clearTimeout(playerToKick.actionTimeout);
       }
-      delete room.players[botId];
-      room.turnOrder = room.turnOrder.filter(id => id !== botId);
+      delete room.players[playerId];
+      room.turnOrder = room.turnOrder.filter(id => id !== playerId);
       io.to(room.id).emit('player_left', {
-        playerId: botId,
+        playerId,
         roomState: sanitizeRoomState(room)
       });
+      return;
     }
+
+    // Human player kicked
+    const targetSocket = io.sockets.sockets.get(playerId);
+    if (targetSocket) {
+      targetSocket.leave(currentRoomId);
+      targetSocket.emit('kicked_from_room', {
+        message: 'You were removed from the room by the host.'
+      });
+    }
+
+    delete room.players[playerId];
+    room.turnOrder = room.turnOrder.filter(id => id !== playerId);
+
+    io.to(room.id).emit('player_left', {
+      playerId,
+      roomState: sanitizeRoomState(room)
+    });
   });
 
   // Update game settings (host only)
@@ -820,6 +843,14 @@ io.on('connection', (socket) => {
     if (!currentRoomId || !rooms[currentRoomId]) return;
     const room = rooms[currentRoomId];
     if (room.hostId !== socket.id) return;
+
+    // Check if all connected players and bots are ready
+    const activePlayers = Object.values(room.players).filter(p => p.isBot || p.connected);
+    const unreadyPlayers = activePlayers.filter(p => !p.isReady);
+    if (unreadyPlayers.length > 0) {
+      socket.emit('error_message', `Cannot start game. Waiting for all players to be ready!`);
+      return;
+    }
 
     room.currentRound = 1;
     Object.values(room.players).forEach(p => {
