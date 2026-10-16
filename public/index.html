@@ -17,7 +17,7 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=13.0">
+  <link rel="stylesheet" href="/style.css?v=14.0">
 </head>
 <body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
 
@@ -548,9 +548,14 @@
           <span id="matrix-clear-time-left" class="font-bold text-emerald-400 text-sm">8.4s</span>
         </div>
 
-        <button onclick="app.matrixGame.nextLevel()" class="w-full py-3 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-indigo-500/25">
-          Proceed to Next Level →
-        </button>
+        <div class="flex gap-2.5">
+          <button onclick="app.exitMatrixToMenu(); app.closeModal('modal-matrix-level-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Exit
+          </button>
+          <button onclick="app.matrixGame.nextLevel()" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Continue →
+          </button>
+        </div>
       </div>
     </div>
 
@@ -800,7 +805,7 @@
 
   <!-- Scripts -->
   <script src="/js/sound.js"></script>
-  <script src="/js/matrix.js?v=13.0"></script>
-  <script src="/js/app.js?v=13.0"></script>
+  <script src="/js/matrix.js?v=14.0"></script>
+  <script src="/js/app.js?v=14.0"></script>
 </body>
 </html>

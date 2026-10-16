@@ -795,6 +795,21 @@ class NumberVerseApp {
 
   setupKeyboardListeners() {
     window.addEventListener('keydown', (e) => {
+      // Matrix level clear modal keyboard shortcuts
+      const clearModal = document.getElementById('modal-matrix-level-clear');
+      if (clearModal && !clearModal.classList.contains('hidden')) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (this.matrixGame) this.matrixGame.nextLevel();
+          return;
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          this.exitMatrixToMenu();
+          this.closeModal('modal-matrix-level-clear');
+          return;
+        }
+      }
+
       if (this.currentScreen !== 'game') return;
       if (document.activeElement && document.activeElement.id === 'game-chat-input') return;
 
