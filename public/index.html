@@ -17,7 +17,7 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=14.0">
+  <link rel="stylesheet" href="/style.css?v=15.0">
 </head>
 <body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
 
@@ -124,9 +124,12 @@
             </div>
           </div>
 
-          <button class="mt-8 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
-            <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play Game
-          </button>
+          <div class="mt-8 flex flex-col items-center w-full">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play Game
+            </button>
+            <div class="h-5 mt-2"></div>
+          </div>
         </div>
 
         <!-- Game Module 2: Speed Matrix (Electric Blue Identity) -->
@@ -148,9 +151,16 @@
             </div>
           </div>
 
-          <button class="mt-8 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
-            <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="matrix-card-btn-text">Play Matrix</span>
-          </button>
+          <div class="mt-8 flex flex-col items-center w-full">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="matrix-card-btn-text">Play Matrix</span>
+            </button>
+            <div class="h-5 mt-2 flex items-center justify-center">
+              <button id="matrix-card-reset-btn" onclick="event.stopPropagation(); app.resetMatrixProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+                Reset to Level 1
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -805,7 +815,7 @@
 
   <!-- Scripts -->
   <script src="/js/sound.js"></script>
-  <script src="/js/matrix.js?v=14.0"></script>
-  <script src="/js/app.js?v=14.0"></script>
+  <script src="/js/matrix.js?v=15.0"></script>
+  <script src="/js/app.js?v=15.0"></script>
 </body>
 </html>
