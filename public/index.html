@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NumberVerse • Multiplayer Number Deduction</title>
+  <title>NumberVerse • Cinematic Cognitive Arcade</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -13,129 +13,162 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=9.0">
+  <link rel="stylesheet" href="/style.css?v=10.0">
 </head>
-<body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+<body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
 
   <!-- Header -->
-  <header class="w-full border-b border-white/5 bg-[#0a0d14]/80 backdrop-blur-md sticky top-0 z-40">
-    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+  <header class="w-full border-b border-[#34364A] bg-[#0C0D19]/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <!-- Brand -->
       <div class="flex items-center gap-3 cursor-pointer" onclick="app.showScreen('menu')">
-        <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-mono font-bold text-sm shadow-md shadow-indigo-600/30">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#4169FF] to-[#287BFF] flex items-center justify-center font-mono font-black text-sm text-white shadow-lg shadow-[#4169FF]/20">
           #
         </div>
         <div>
-          <div class="font-bold text-base tracking-tight text-white flex items-center gap-2">
+          <div class="font-bold text-base tracking-tight text-[#F5F5FF] flex items-center gap-2">
             NumberVerse
-            <span class="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400">Multiplayer</span>
+            <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#B8BCD0]">Arcade</span>
           </div>
         </div>
       </div>
 
       <!-- Current Room Pill -->
-      <div id="nav-room-badge" class="hidden items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono">
-        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span class="text-slate-400">Room:</span>
-        <span id="nav-room-id" class="font-bold text-indigo-400">ABC12</span>
-        <button id="nav-copy-btn" onclick="app.copyRoomLink()" title="Copy Invite Link" class="text-slate-400 hover:text-white ml-1 transition">
+      <div id="nav-room-badge" class="hidden items-center gap-2 px-3 py-1.5 rounded-full bg-[#191B2D] border border-[#34364A] text-xs font-mono">
+        <span class="w-2 h-2 rounded-full bg-[#48D6A0] animate-pulse"></span>
+        <span class="text-[#858AA5]">Room:</span>
+        <span id="nav-room-id" class="font-bold text-[#4169FF]">ABC12</span>
+        <button id="nav-copy-btn" onclick="app.copyRoomLink()" title="Copy Invite Link" class="text-[#858AA5] hover:text-[#F5F5FF] ml-1 transition">
           <i data-lucide="copy" class="w-3.5 h-3.5"></i>
         </button>
       </div>
 
       <!-- Header Actions -->
-      <div class="flex items-center gap-2">
-        <button onclick="app.toggleHowToPlay()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition">
-          <i data-lucide="help-circle" class="w-3.5 h-3.5 text-slate-400"></i>
+      <div class="flex items-center gap-2.5">
+        <button onclick="app.toggleHowToPlay()" class="px-3.5 py-1.5 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] text-[#B8BCD0] hover:text-[#F5F5FF] text-xs font-medium flex items-center gap-1.5 transition">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 text-[#858AA5]"></i>
           <span>Rules</span>
         </button>
-        <button id="sound-toggle-btn" onclick="app.toggleSound()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition" title="Toggle Sound">
-          <i data-lucide="volume-2" id="sound-icon" class="w-4 h-4 text-emerald-400"></i>
+        <button id="sound-toggle-btn" onclick="app.toggleSound()" class="p-2 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] text-[#B8BCD0] hover:text-[#F5F5FF] transition" title="Toggle Sound">
+          <i data-lucide="volume-2" id="sound-icon" class="w-4 h-4 text-[#48D6A0]"></i>
         </button>
       </div>
     </div>
   </header>
 
   <!-- Main Container -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-center">
+  <main class="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center justify-center">
 
     <!-- ============================================== -->
-    <!-- SCREEN 0: MAIN MENU / GAME PORTAL HUB -->
+    <!-- SCREEN 0: MAIN MENU / CINEMATIC COGNITIVE ARCADE -->
     <!-- ============================================== -->
-    <section id="screen-menu" class="w-full max-w-3xl flex flex-col items-center py-6">
-      <!-- Hero Banner -->
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-3 tracking-wide">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Arcade Hub Online
+    <section id="screen-menu" class="w-full flex flex-col items-center">
+      <!-- Cinematic Hero Section -->
+      <div class="w-full text-center max-w-3xl mb-10 sm:mb-14">
+        <!-- Eyebrow -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#777BFF] text-xs font-semibold uppercase tracking-[0.2em] mb-5">
+          <span class="w-2 h-2 rounded-full bg-[#4169FF] shadow-[0_0_8px_#4169FF]"></span>
+          The Cognitive Arcade
         </div>
-        <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-white mb-3">
-          Select Your Game
+        
+        <!-- Headline -->
+        <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-[#F5F5FF] leading-[1.1] mb-5">
+          TRAIN YOUR MIND.<br>
+          <span class="bg-gradient-to-r from-[#4169FF] via-[#777BFF] to-[#287BFF] bg-clip-text text-transparent">CHALLENGE YOUR LIMITS.</span>
         </h1>
-        <p class="text-slate-400 text-sm max-w-md mx-auto leading-relaxed">
-          Welcome to NumberVerse. Pick a multiplayer challenge to play solo against smart bots or invite your friends.
+        
+        <!-- Supporting text -->
+        <p class="text-[#B8BCD0] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          Sharpen your focus, strengthen your memory, and test your reflexes through intelligent games and competitive challenges.
         </p>
+
+        <!-- Cognitive Pillars Pill Ribbon -->
+        <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-6">
+          <span class="px-3 py-1 rounded-full bg-[#111322] border border-[#34364A] text-[11px] font-mono text-[#858AA5] flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#4169FF]"></span> Focus
+          </span>
+          <span class="px-3 py-1 rounded-full bg-[#111322] border border-[#34364A] text-[11px] font-mono text-[#858AA5] flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#777BFF]"></span> Memory
+          </span>
+          <span class="px-3 py-1 rounded-full bg-[#111322] border border-[#34364A] text-[11px] font-mono text-[#858AA5] flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#287BFF]"></span> Logic
+          </span>
+          <span class="px-3 py-1 rounded-full bg-[#111322] border border-[#34364A] text-[11px] font-mono text-[#858AA5] flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#48D6A0]"></span> Reaction Speed
+          </span>
+        </div>
       </div>
 
-      <!-- Games Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-        <!-- Game 1: Number Guessing (Active) -->
-        <div class="clean-card-interactive p-6 flex flex-col justify-between cursor-pointer border border-indigo-500/30 hover:border-indigo-500/60 bg-gradient-to-br from-indigo-950/30 via-[#121826] to-[#0c1017] group"
+      <!-- Cognitive Lab Modules / Game Selection Cards Grid (2-columns on Desktop) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+        
+        <!-- Game Module 1: Number Guessing (Indigo Identity) -->
+        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group"
              onclick="app.selectGame('number_guess')">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-mono text-xl font-black group-hover:scale-105 transition">
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-2xl bg-[#191B2D] border border-[#777BFF]/30 text-[#777BFF] flex items-center justify-center font-mono text-xl font-black group-hover:scale-105 transition">
                 #
               </div>
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-semibold">
-                Online • Active
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider bg-[#191B2D] border border-[#48D6A0]/30 text-[#48D6A0] font-semibold flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#48D6A0] animate-pulse"></span>
+                Multiplayer Active
               </span>
             </div>
-            <h3 class="text-xl font-bold text-white mb-1.5 group-hover:text-indigo-300 transition">
+            
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-2 group-hover:text-[#777BFF] transition">
               Number Guessing
             </h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Fast-paced realtime number deduction. Deduce the target number using dynamic range shrinkage, hot/cold hints, and turn timers.
+            
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6">
+              Realtime cognitive number deduction. Isolate the target through binary search intuition, dynamic range shrinkage, and smart turn timers.
             </p>
-            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono text-slate-400">
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">1-10 Players</span>
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">Turn-Based</span>
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">AI Bots</span>
+            
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5]">
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">1–10 Players</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Turn-Based & Blitz</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">AI Bot Match</span>
             </div>
           </div>
-          <button class="mt-6 w-full py-3 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-indigo-500/25 transition">
+
+          <button class="mt-8 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
             <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play Game
           </button>
         </div>
 
-        <!-- Game 2: Speed Grid (1 to N Sequential Matrix) -->
-        <div class="clean-card-interactive p-6 flex flex-col justify-between cursor-pointer border border-cyan-500/30 hover:border-cyan-500/60 bg-gradient-to-br from-cyan-950/30 via-[#121826] to-[#0c1017] group"
+        <!-- Game Module 2: Speed Matrix (Electric Blue Identity) -->
+        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#287BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group"
              onclick="app.selectGame('speed_grid')">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-2xl bg-cyan-600/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-mono text-xl font-black group-hover:scale-105 transition">
+            <div class="flex items-center justify-between mb-5">
+              <div class="w-12 h-12 rounded-2xl bg-[#191B2D] border border-[#287BFF]/30 text-[#287BFF] flex items-center justify-center font-mono text-xl font-black group-hover:scale-105 transition">
                 <i data-lucide="grid" class="w-6 h-6"></i>
               </div>
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-semibold">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider bg-[#191B2D] border border-[#287BFF]/30 text-[#287BFF] font-semibold">
                 Singleplayer • 10 Levels
               </span>
             </div>
-            <h3 class="text-xl font-bold text-white mb-1.5 group-hover:text-cyan-300 transition">
-              Speed Matrix (1 to N)
+            
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-2 group-hover:text-[#287BFF] transition">
+              Speed Matrix
             </h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Find and tap random numbers sequentially from 1 to N under time pressure. Lose a level, and the entire matrix freshly reshuffles to prevent memorization!
+            
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6">
+              Test visual attention, peripheral scanning, and motor reaction speed. Tap 1 to N sequentially under time pressure with anti-mugup shuffle protection.
             </p>
-            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono text-slate-400">
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">10 Levels</span>
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">Anti-Mugup Shuffle</span>
-              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">Timer Reflexes</span>
+            
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5]">
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">10 Levels</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Anti-Mugup Reshuffle</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Timer Reflexes</span>
             </div>
           </div>
-          <button class="mt-6 w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition">
+
+          <button class="mt-8 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
             <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play Matrix
           </button>
         </div>
+
       </div>
     </section>
 
@@ -472,17 +505,17 @@
     <section id="screen-matrix" class="w-full max-w-xl hidden flex-col items-center py-2">
       <!-- Matrix Top Bar -->
       <div class="w-full clean-card px-5 py-3 mb-4 flex items-center justify-between text-xs">
-        <button onclick="app.showScreen('menu'); if (app.matrixGame) app.matrixGame.stopTimer();" class="px-2.5 py-1.5 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-slate-400 hover:text-white transition">
+        <button onclick="app.showScreen('menu'); if (app.matrixGame) app.matrixGame.stopTimer();" class="px-3 py-1.5 rounded-xl btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
         </button>
 
         <div class="flex items-center gap-2 font-mono">
-          <span class="text-slate-400">Level:</span>
-          <span id="matrix-level-badge" class="font-bold text-cyan-400 text-sm">1 / 10</span>
+          <span class="text-[#858AA5]">Level:</span>
+          <span id="matrix-level-badge" class="font-bold text-[#287BFF] text-sm">1 / 10</span>
         </div>
 
         <div class="flex items-center gap-1.5 font-mono">
-          <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-[#858AA5]"></i>
           <span id="matrix-timer-badge" class="font-bold text-white text-sm">20.0s</span>
         </div>
       </div>
@@ -490,29 +523,29 @@
       <!-- Target Banner & Progress Bar -->
       <div class="w-full clean-card p-4 mb-4 text-center">
         <div class="flex items-center justify-between mb-2">
-          <div class="text-xs text-slate-400 font-medium">
-            Find Next: <strong id="matrix-target-num" class="text-2xl font-black text-cyan-400 font-mono ml-1">1</strong>
+          <div class="text-xs text-[#B8BCD0] font-medium">
+            Find Next: <strong id="matrix-target-num" class="text-2xl font-black text-[#287BFF] font-mono ml-1.5">1</strong>
           </div>
-          <div class="text-xs text-slate-400 font-mono">
-            Sequence: <span id="matrix-progress-text" class="text-white font-bold">0 / 9</span>
+          <div class="text-xs text-[#858AA5] font-mono">
+            Sequence: <span id="matrix-progress-text" class="text-[#F5F5FF] font-bold">0 / 9</span>
           </div>
         </div>
         <!-- Time Bar -->
-        <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-          <div id="matrix-time-bar" class="h-full bg-cyan-400 transition-all duration-100 ease-linear rounded-full" style="width: 100%;"></div>
+        <div class="w-full h-2 rounded-full bg-[#191B2D] border border-[#34364A] overflow-hidden">
+          <div id="matrix-time-bar" class="h-full bg-gradient-to-r from-[#4169FF] to-[#287BFF] transition-all duration-100 ease-linear rounded-full" style="width: 100%;"></div>
         </div>
       </div>
 
-      <!-- The Matrix Grid Board (Styled to match the reference arcade image) -->
-      <div class="w-full clean-card p-5 sm:p-7 mb-4 flex items-center justify-center bg-[#fef3c7]/[0.04] border-2 border-amber-400/30 shadow-[0_0_35px_rgba(251,191,36,0.1)] rounded-2xl relative overflow-hidden">
-        <!-- Subtle Retro Grid Pattern on board background -->
-        <div class="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
+      <!-- The Matrix Grid Board (Styled to match cinematic cognitive arcade) -->
+      <div class="w-full clean-card p-5 sm:p-7 mb-4 flex items-center justify-center bg-[#111322] border border-[#34364A] shadow-[0_20px_50px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden">
+        <!-- Subtle Grid Pattern on board background -->
+        <div class="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
         <div id="matrix-board" class="matrix-grid w-full relative z-10">
           <!-- Dynamically populated tiles -->
         </div>
       </div>
 
-      <div class="text-center text-[11px] text-slate-500 font-mono">
+      <div class="text-center text-[11px] text-[#858AA5] font-mono">
         Tap numbers sequentially from 1 to N • Wrong tap = -2s penalty
       </div>
     </section>
@@ -772,11 +805,12 @@
   </main>
 
   <!-- Footer -->
-  <footer class="w-full border-t border-white/5 bg-[#0a0d14]/60 py-3 text-center text-xs text-slate-500">
-    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between text-[11px]">
-      <div>NumberVerse • Realtime Multiplayer Deduction</div>
-      <div class="flex gap-4">
-        <span>Turn-Based</span>
+  <footer class="w-full border-t border-[#34364A] bg-[#0C0D19]/80 py-4 text-center text-xs text-[#858AA5]">
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
+      <div>NumberVerse • Cognitive Arcade & Mental Performance</div>
+      <div class="flex gap-4 font-mono text-[#858AA5]">
+        <span>Cognitive Focus</span>
+        <span>Anti-Mugup Shuffle</span>
         <span>Low-latency WebSockets</span>
       </div>
     </div>
@@ -784,7 +818,7 @@
 
   <!-- Scripts -->
   <script src="/js/sound.js"></script>
-  <script src="/js/matrix.js?v=9.0"></script>
-  <script src="/js/app.js?v=9.0"></script>
+  <script src="/js/matrix.js?v=10.0"></script>
+  <script src="/js/app.js?v=10.0"></script>
 </body>
 </html>

@@ -1,19 +1,34 @@
-/* Premium Minimalist Dark Theme for NumberVerse (Linear/Wordle Inspired) */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+/* ==========================================================================
+   NumberVerse — Premium Cinematic Cognitive Arcade Design System
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap');
 
 :root {
-  --bg-primary: #0a0d14;
-  --bg-card: rgba(18, 24, 38, 0.85);
-  --bg-card-hover: rgba(26, 34, 52, 0.95);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-focus: #6366f1;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --color-accent: #6366f1;
-  --color-success: #10b981;
-  --color-high: #f43f5e;
-  --color-low: #0ea5e9;
+  /* Specification Color System */
+  --bg-space: #080914;
+  --bg-header: #0C0D19;
+  --bg-panel: #111322;
+  --bg-surface-secondary: #191B2D;
+  --bg-surface-elevated: #202238;
+
+  --color-blue-primary: #4169FF;
+  --color-blue-highlight: #287BFF;
+  --color-indigo-soft: #777BFF;
+
+  --text-main: #F5F5FF;
+  --text-secondary: #B8BCD0;
+  --text-muted: #858AA5;
+
+  --border-subtle: #34364A;
+  --border-active: #4169FF;
+
+  --status-success: #48D6A0;
+  --status-warning: #F4C66A;
+  --status-error: #FF7185;
+
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
 }
 
 * {
@@ -21,17 +36,18 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #07090e;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-space);
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.22), transparent 45%),
-    radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.12), transparent 35%),
-    radial-gradient(circle at 85% 50%, rgba(236, 72, 153, 0.12), transparent 35%),
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(65, 105, 255, 0.18), transparent 60%),
+    radial-gradient(ellipse 70% 40% at 85% 60%, rgba(119, 123, 255, 0.08), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 15% 75%, rgba(40, 123, 255, 0.09), transparent 50%),
+    radial-gradient(1px 1px at 20px 30px, rgba(245, 245, 255, 0.25), transparent),
+    radial-gradient(1px 1px at 75px 120px, rgba(184, 188, 208, 0.2), transparent),
+    radial-gradient(1.5px 1.5px at 160px 85px, rgba(245, 245, 255, 0.35), transparent);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 250px 250px, 320px 320px, 400px 400px;
   min-height: 100vh;
-  color: var(--text-primary);
+  color: var(--text-main);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -40,46 +56,47 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Precision Cards */
+/* Premium Precision Panels */
 .clean-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .clean-card-interactive {
-  background: var(--bg-card);
-  backdrop-filter: blur(20px);
+  background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: var(--radius-lg);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .clean-card-interactive:hover {
-  background: var(--bg-card-hover);
-  border-color: rgba(255, 255, 255, 0.16);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6);
+  background: var(--bg-surface-secondary);
+  border-color: rgba(65, 105, 255, 0.45);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 25px -5px rgba(65, 105, 255, 0.12);
 }
 
-/* Primary Button */
+/* Primary Electric Blue Button */
 .btn-solid-primary {
-  background: #6366f1;
-  color: #ffffff;
+  background: var(--color-blue-primary);
+  color: #FFFFFF;
   font-weight: 600;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.35);
-  transition: all 0.18s ease;
+  border-radius: 12px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 16px 0 rgba(65, 105, 255, 0.38);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-solid-primary:hover:not(:disabled) {
-  background: #4f46e5;
-  box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.5);
+  background: var(--color-blue-highlight);
+  box-shadow: 0 6px 24px 0 rgba(40, 123, 255, 0.52);
   transform: translateY(-1px);
 }
 
@@ -88,40 +105,46 @@ body {
 }
 
 .btn-solid-primary:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-/* Elegant Secondary Button */
+/* Elevated Secondary Button */
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
+  background: var(--bg-surface-secondary);
+  color: var(--text-main);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.15s ease;
+  height: 44px;
+  font-weight: 500;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--bg-surface-elevated);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
 }
 
 /* Text Input: Clean, No Spinners, No Wheel Scroll Bugs */
 .clean-input {
-  background: rgba(10, 14, 23, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
-  color: #ffffff;
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  color: var(--text-main);
   font-family: 'JetBrains Mono', monospace;
   transition: all 0.2s ease;
 }
 
 .clean-input:focus {
-  border-color: #6366f1;
+  border-color: var(--color-blue-primary);
+  background: var(--bg-surface-elevated);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgba(65, 105, 255, 0.25);
 }
 
 /* Disable ugly browser number spinners if number input is ever used */
@@ -136,22 +159,22 @@ input[type=number] {
 
 /* Feedback Cards */
 .feedback-card-low {
-  background: rgba(14, 165, 233, 0.08);
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  color: #38bdf8;
+  background: rgba(40, 123, 255, 0.1);
+  border: 1px solid rgba(40, 123, 255, 0.35);
+  color: var(--color-blue-highlight);
 }
 
 .feedback-card-high {
-  background: rgba(244, 63, 94, 0.08);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: #fb7185;
+  background: rgba(255, 113, 133, 0.1);
+  border: 1px solid rgba(255, 113, 133, 0.35);
+  color: var(--status-error);
 }
 
 .feedback-card-correct {
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #34d399;
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+  background: rgba(72, 214, 160, 0.12);
+  border: 1px solid rgba(72, 214, 160, 0.4);
+  color: var(--status-success);
+  box-shadow: 0 0 25px rgba(72, 214, 160, 0.2);
 }
 
 /* Clean Chips */
@@ -167,21 +190,41 @@ input[type=number] {
 }
 
 .tag-chip-low {
-  background: rgba(14, 165, 233, 0.12);
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  color: #38bdf8;
+  background: rgba(40, 123, 255, 0.15);
+  border: 1px solid rgba(40, 123, 255, 0.4);
+  color: var(--color-blue-highlight);
 }
 
 .tag-chip-high {
-  background: rgba(244, 63, 94, 0.12);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: #fb7185;
+  background: rgba(255, 113, 133, 0.15);
+  border: 1px solid rgba(255, 113, 133, 0.4);
+  color: var(--status-error);
 }
 
 .tag-chip-correct {
-  background: rgba(16, 185, 129, 0.16);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #34d399;
+  background: rgba(72, 214, 160, 0.16);
+  border: 1px solid rgba(72, 214, 160, 0.4);
+  color: var(--status-success);
+}
+
+/* Podium Stand */
+.podium-1 {
+  height: 96px;
+  background: linear-gradient(180deg, rgba(65, 105, 255, 0.35) 0%, rgba(20, 25, 45, 0.9) 100%);
+  border: 1px solid rgba(65, 105, 255, 0.45);
+  box-shadow: 0 0 20px rgba(65, 105, 255, 0.2);
+}
+
+.podium-2 {
+  height: 70px;
+  background: linear-gradient(180deg, rgba(119, 123, 255, 0.25) 0%, rgba(20, 25, 45, 0.9) 100%);
+  border: 1px solid rgba(119, 123, 255, 0.3);
+}
+
+.podium-3 {
+  height: 48px;
+  background: linear-gradient(180deg, rgba(244, 198, 106, 0.2) 0%, rgba(20, 25, 45, 0.9) 100%);
+  border: 1px solid rgba(244, 198, 106, 0.3);
 }
 
 @keyframes popIn {
