@@ -24,6 +24,11 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
+// Direct route for favicon.ico
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
+
 // In-memory Game Rooms
 const rooms = {};
 
