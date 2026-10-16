@@ -33,6 +33,7 @@ class NumberVerseApp {
     this.setupAvatarPicker();
     this.setupKeyboardListeners();
     this.setupInputSanitizer();
+    this.showScreen(this.currentScreen);
     this.checkUrlParams();
     this.renderIcons();
   }
