@@ -78,13 +78,45 @@ class SpeedMatrixGame {
       [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
     }
 
+    // Vibrant arcade colors palette matching the reference image
+    const palette = [
+      '#c084fc', // purple
+      '#38bdf8', // sky blue
+      '#818cf8', // indigo
+      '#2dd4bf', // teal
+      '#06b6d4', // cyan
+      '#f472b6', // pink
+      '#a3e635', // lime
+      '#3b82f6', // blue
+      '#1d4ed8', // dark blue
+      '#10b981', // emerald
+      '#22d3ee', // bright cyan
+      '#facc15', // yellow
+      '#ef4444', // coral red
+      '#fb923c', // orange
+      '#059669', // green
+      '#4ade80', // light green
+      '#fde047', // light yellow
+      '#6366f1', // violet
+      '#4338ca', // deep indigo
+      '#84cc16', // lime green
+      '#fb7185', // rose
+      '#d97706', // amber
+      '#2dd4bf', // aqua
+      '#f87171'  // red orange
+    ];
+
     // Tile font size adapts if grid is 6x6
     const fontSize = this.cols >= 6 ? 'text-base sm:text-lg' : this.cols === 5 ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl';
 
-    numbers.forEach(num => {
+    this.lastActiveTile = null;
+
+    numbers.forEach((num, idx) => {
       const tile = document.createElement('button');
       tile.type = 'button';
-      tile.className = `matrix-tile w-full aspect-square min-h-[50px] sm:min-h-[64px] rounded-xl flex items-center justify-center font-mono font-extrabold text-white bg-[#151c2c] hover:bg-[#1e283e] active:scale-95 border-2 border-white/10 hover:border-cyan-500/40 shadow-md shadow-black/40 transition duration-150 cursor-pointer ${fontSize}`;
+      const tileBg = palette[idx % palette.length];
+      tile.className = `matrix-tile w-full aspect-square min-h-[50px] sm:min-h-[64px] rounded-xl flex items-center justify-center font-mono font-black text-slate-900 border-2 border-black shadow-md transition duration-150 cursor-pointer ${fontSize}`;
+      tile.style.backgroundColor = tileBg;
       tile.innerText = num;
       tile.dataset.value = num;
 
@@ -100,9 +132,14 @@ class SpeedMatrixGame {
       // Correct sequential tap!
       window.soundFx.playTileTap(this.targetNumber);
 
-      // Keep uniform dark color and mark cleared with subtle dimming
-      tile.classList.add('matrix-tile-cleared');
-      tile.innerText = '✓';
+      // Remove highlight from previously clicked tile
+      if (this.lastActiveTile) {
+        this.lastActiveTile.classList.remove('matrix-tile-last-active');
+      }
+
+      // Highlight this newly tapped number (number stays visible, NO tick mark!)
+      tile.classList.add('matrix-tile-last-active');
+      this.lastActiveTile = tile;
 
       this.targetNumber++;
 

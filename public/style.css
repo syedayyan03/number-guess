@@ -22,10 +22,14 @@
 
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-primary);
+  background-color: #07090e;
   background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
-    radial-gradient(ellipse 60% 40% at 50% 120%, rgba(14, 165, 233, 0.08), transparent);
+    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.22), transparent 45%),
+    radial-gradient(circle at 15% 50%, rgba(14, 165, 233, 0.12), transparent 35%),
+    radial-gradient(circle at 85% 50%, rgba(236, 72, 153, 0.12), transparent 35%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
   min-height: 100vh;
   color: var(--text-primary);
   overflow-x: hidden;
@@ -206,66 +210,72 @@ input[type=number] {
   color: #f1f5f9;
 }
 
-/* Matrix Speed Grid Tiles */
+/* Matrix Speed Grid Board */
 .matrix-grid {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   max-width: 440px;
-  min-height: 280px;
   margin: 0 auto;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
 }
 
+/* Individual Tiles Styled with Vibrant Arcade Aesthetic */
 .matrix-tile {
   aspect-ratio: 1 / 1;
   min-height: 52px;
-  border-radius: 14px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
-  font-size: 1.35rem;
-  color: #ffffff;
-  background-color: #171e2e;
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  font-family: 'JetBrains Mono', 'Impact', sans-serif;
+  font-weight: 900;
+  font-size: 1.45rem;
+  color: #0b0f19;
+  border: 2px solid #000000;
+  box-shadow: 0 4px 0 #000000, inset 0 1px 2px rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
 }
 
-.matrix-tile:hover:not(.matrix-tile-cleared):not(.matrix-tile-wrong) {
-  background: #232c42;
-  border-color: rgba(99, 102, 241, 0.4);
-  transform: scale(1.03);
+.matrix-tile:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 0 #000000;
 }
 
-.matrix-tile:active:not(.matrix-tile-cleared) {
-  transform: scale(0.95);
+.matrix-tile:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #000000;
 }
 
-.matrix-tile-cleared {
-  opacity: 0.18;
-  filter: grayscale(1);
-  transform: scale(0.92);
-  pointer-events: none;
-  border-color: transparent !important;
-  box-shadow: none !important;
+/* Active Highlight: Keeps the number visible and highlights the LAST tapped number */
+.matrix-tile-last-active {
+  border: 3.5px solid #ffffff !important;
+  box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.8), 0 4px 0 #000000 !important;
+  transform: scale(1.06);
+  z-index: 10;
+  animation: pulseActive 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseActive {
+  0%, 100% { transform: scale(1.06); box-shadow: 0 0 18px rgba(255, 255, 255, 0.9), 0 4px 0 #000000; }
+  50% { transform: scale(1.02); box-shadow: 0 0 8px rgba(255, 255, 255, 0.5), 0 4px 0 #000000; }
 }
 
 .matrix-tile-wrong {
   animation: shakeTile 0.35s ease;
-  background-color: rgba(239, 68, 68, 0.4) !important;
-  border-color: rgba(239, 68, 68, 0.8) !important;
+  filter: brightness(0.7) !important;
+  border-color: #ef4444 !important;
 }
 
 @keyframes shakeTile {
   0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-5px); }
-  40%, 80% { transform: translateX(5px); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
 }
 
 /* Subtle Scrollbar */

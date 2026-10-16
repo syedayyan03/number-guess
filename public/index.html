@@ -13,7 +13,7 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=7.0">
+  <link rel="stylesheet" href="/style.css?v=9.0">
 </head>
 <body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
 
@@ -503,9 +503,11 @@
         </div>
       </div>
 
-      <!-- The Matrix Grid Board -->
-      <div class="w-full clean-card p-5 sm:p-7 mb-4 flex items-center justify-center bg-gradient-to-b from-[#111726] to-[#0b0f19] border border-cyan-500/20 shadow-2xl">
-        <div id="matrix-board" class="matrix-grid w-full">
+      <!-- The Matrix Grid Board (Styled to match the reference arcade image) -->
+      <div class="w-full clean-card p-5 sm:p-7 mb-4 flex items-center justify-center bg-[#fef3c7]/[0.04] border-2 border-amber-400/30 shadow-[0_0_35px_rgba(251,191,36,0.1)] rounded-2xl relative overflow-hidden">
+        <!-- Subtle Retro Grid Pattern on board background -->
+        <div class="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
+        <div id="matrix-board" class="matrix-grid w-full relative z-10">
           <!-- Dynamically populated tiles -->
         </div>
       </div>
@@ -782,7 +784,7 @@
 
   <!-- Scripts -->
   <script src="/js/sound.js"></script>
-  <script src="/js/matrix.js?v=8.0"></script>
-  <script src="/js/app.js?v=8.0"></script>
+  <script src="/js/matrix.js?v=9.0"></script>
+  <script src="/js/app.js?v=9.0"></script>
 </body>
 </html>
