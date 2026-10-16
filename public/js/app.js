@@ -2,7 +2,7 @@
 class NumberVerseApp {
   constructor() {
     this.socket = null;
-    this.currentScreen = 'welcome';
+    this.currentScreen = 'menu';
     this.player = {
       name: 'Player 1',
       avatar: 'NV'
@@ -193,17 +193,24 @@ class NumberVerseApp {
     });
   }
 
-  // --- Screens ---
+  // --- Screens & Navigation ---
+  selectGame(gameId) {
+    window.soundFx.playClick();
+    if (gameId === 'number_guess') {
+      this.showScreen('welcome');
+    }
+  }
+
   showScreen(screenId) {
     this.currentScreen = screenId;
-    ['welcome', 'lobby', 'game'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
-      navBadge.classList.toggle('hidden', screenId === 'welcome' || !this.roomState);
+      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || !this.roomState);
       if (this.roomState) {
         document.getElementById('nav-room-id').innerText = this.roomState.id;
       }
@@ -313,6 +320,8 @@ class NumberVerseApp {
     if (roomParam) {
       const codeInput = document.getElementById('join-room-code-input');
       if (codeInput) codeInput.value = roomParam.toUpperCase();
+      // If invited via link, directly open the number guessing screen
+      this.showScreen('welcome');
     }
   }
 
