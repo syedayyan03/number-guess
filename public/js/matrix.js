@@ -78,15 +78,15 @@ class SpeedMatrixGame {
       [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
     }
 
-    // Tile font size adapts smoothly based on grid density
-    const fontSize = this.cols >= 6 ? 'text-lg sm:text-xl' : this.cols === 5 ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl';
+    // Tile font size adapts smoothly based on grid density (compact proportions)
+    const fontSize = this.cols >= 6 ? 'text-base sm:text-lg' : this.cols === 5 ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl';
 
     this.lastActiveTile = null;
 
     numbers.forEach((num) => {
       const tile = document.createElement('button');
       tile.type = 'button';
-      tile.className = `matrix-tile w-full aspect-square min-h-[54px] sm:min-h-[68px] ${fontSize}`;
+      tile.className = `matrix-tile w-full aspect-square min-h-[42px] sm:min-h-[48px] ${fontSize}`;
       tile.innerText = num;
       tile.dataset.value = num;
 

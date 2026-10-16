@@ -253,78 +253,80 @@ input[type=number] {
   color: #f1f5f9;
 }
 
-/* Matrix Speed Grid Board */
+/* Matrix Speed Grid Board: Compact Solid Grid */
 .matrix-grid {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
-  max-width: 440px;
+  max-width: 310px;
   margin: 0 auto;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
 }
 
-/* Individual Tiles: Calm, Eye-Friendly Cognitive Surfaces */
+/* Individual Tiles: Solid Opaque High-Visibility Grid Keycaps */
 .matrix-tile {
   aspect-ratio: 1 / 1;
-  min-height: 54px;
-  border-radius: 16px;
+  min-height: 42px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 800;
-  color: var(--text-main);
-  background: var(--bg-surface-secondary);
-  border: 1.5px solid var(--border-subtle);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: #0F172A;
+  background-color: #E2E8F0;
+  border: 1.5px solid #CBD5E1;
+  box-shadow: 0 3px 0 #94A3B8, 0 4px 8px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.12s ease;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .matrix-tile:hover {
-  background: var(--bg-surface-elevated);
-  border-color: rgba(65, 105, 255, 0.6);
+  background-color: #F8FAFC;
+  border-color: #94A3B8;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px -4px rgba(65, 105, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
+  box-shadow: 0 5px 0 #94A3B8, 0 6px 14px rgba(0, 0, 0, 0.35);
+  color: #020617;
 }
 
 .matrix-tile:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #94A3B8, 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
-/* Active Highlight: Keeps the number visible & illuminates the LAST tapped number in signature electric blue */
+/* Active Highlight: Keeps the number visible & illuminates the LAST tapped number in solid electric blue */
 .matrix-tile-last-active {
-  background: linear-gradient(135deg, var(--color-blue-highlight) 0%, var(--color-blue-primary) 100%) !important;
+  background-color: #2563EB !important;
   color: #FFFFFF !important;
   border: 2px solid #FFFFFF !important;
-  box-shadow: 0 0 24px rgba(40, 123, 255, 0.7), 0 4px 14px rgba(0, 0, 0, 0.5) !important;
-  transform: scale(1.04);
+  box-shadow: 0 0 18px rgba(37, 99, 235, 0.8), 0 3px 0 #1D4ED8 !important;
+  transform: scale(1.05);
   z-index: 10;
   animation: pulseActive 1.4s infinite ease-in-out;
 }
 
 @keyframes pulseActive {
   0%, 100% {
-    transform: scale(1.04);
-    box-shadow: 0 0 22px rgba(40, 123, 255, 0.7), 0 4px 14px rgba(0, 0, 0, 0.5);
+    transform: scale(1.05);
+    box-shadow: 0 0 18px rgba(37, 99, 235, 0.85), 0 3px 0 #1D4ED8;
   }
   50% {
     transform: scale(1.01);
-    box-shadow: 0 0 12px rgba(40, 123, 255, 0.4), 0 4px 14px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.5), 0 2px 0 #1D4ED8;
   }
 }
 
 .matrix-tile-wrong {
   animation: shakeTile 0.35s ease;
-  background: rgba(255, 113, 133, 0.18) !important;
-  border-color: var(--status-error) !important;
-  color: var(--status-error) !important;
-  box-shadow: 0 0 16px rgba(255, 113, 133, 0.35) !important;
+  background-color: #EF4444 !important;
+  border-color: #DC2626 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.7), 0 2px 0 #B91C1C !important;
 }
 
 @keyframes shakeTile {

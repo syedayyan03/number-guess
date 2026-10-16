@@ -13,7 +13,7 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=11.0">
+  <link rel="stylesheet" href="/style.css?v=12.0">
 </head>
 <body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
 
@@ -502,10 +502,10 @@
     <!-- ============================================== -->
     <!-- SCREEN 4: SPEED MATRIX (1 TO N SEQUENTIAL GAME) -->
     <!-- ============================================== -->
-    <section id="screen-matrix" class="w-full max-w-xl hidden flex-col items-center py-2">
+    <section id="screen-matrix" class="w-full max-w-sm hidden flex-col items-center py-2">
       <!-- Matrix Top Bar -->
-      <div class="w-full clean-card px-5 py-3 mb-4 flex items-center justify-between text-xs">
-        <button onclick="app.showScreen('menu'); if (app.matrixGame) app.matrixGame.stopTimer();" class="px-3 py-1.5 rounded-xl btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+      <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
+        <button onclick="app.showScreen('menu'); if (app.matrixGame) app.matrixGame.stopTimer();" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
         </button>
 
@@ -521,8 +521,8 @@
       </div>
 
       <!-- Target Banner & Progress Bar -->
-      <div class="w-full clean-card p-4 mb-4 text-center">
-        <div class="flex items-center justify-between mb-2">
+      <div class="w-full clean-card p-3.5 mb-3 text-center">
+        <div class="flex items-center justify-between mb-1.5">
           <div class="text-xs text-[#B8BCD0] font-medium">
             Find Next: <strong id="matrix-target-num" class="text-2xl font-black text-[#287BFF] font-mono ml-1.5">1</strong>
           </div>
@@ -531,15 +531,13 @@
           </div>
         </div>
         <!-- Time Bar -->
-        <div class="w-full h-2 rounded-full bg-[#191B2D] border border-[#34364A] overflow-hidden">
+        <div class="w-full h-1.5 rounded-full bg-[#191B2D] border border-[#34364A] overflow-hidden">
           <div id="matrix-time-bar" class="h-full bg-gradient-to-r from-[#4169FF] to-[#287BFF] transition-all duration-100 ease-linear rounded-full" style="width: 100%;"></div>
         </div>
       </div>
 
-      <!-- The Matrix Grid Board (Styled to match cinematic cognitive arcade) -->
-      <div class="w-full clean-card p-5 sm:p-7 mb-4 flex items-center justify-center bg-[#111322] border border-[#34364A] shadow-[0_20px_50px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden">
-        <!-- Subtle Grid Pattern on board background -->
-        <div class="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
+      <!-- The Matrix Grid Board (Compact Solid Arcade Keycaps) -->
+      <div class="w-full clean-card p-4 sm:p-5 mb-3.5 flex items-center justify-center bg-[#111322] border border-[#34364A] shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden">
         <div id="matrix-board" class="matrix-grid w-full relative z-10">
           <!-- Dynamically populated tiles -->
         </div>
@@ -818,7 +816,7 @@
 
   <!-- Scripts -->
   <script src="/js/sound.js"></script>
-  <script src="/js/matrix.js?v=11.0"></script>
-  <script src="/js/app.js?v=11.0"></script>
+  <script src="/js/matrix.js?v=12.0"></script>
+  <script src="/js/app.js?v=12.0"></script>
 </body>
 </html>
