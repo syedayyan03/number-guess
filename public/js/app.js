@@ -33,6 +33,10 @@ class NumberVerseApp {
     this.setupAvatarPicker();
     this.setupKeyboardListeners();
     this.setupInputSanitizer();
+    if (window.SpeedMatrixGame) {
+      this.matrixGame = new window.SpeedMatrixGame(this);
+    }
+    this.updateMatrixMenuCard();
     this.showScreen(this.currentScreen);
     this.checkUrlParams();
     this.renderIcons();
@@ -205,9 +209,46 @@ class NumberVerseApp {
       }
       this.showScreen('matrix');
       if (this.matrixGame) {
-        this.matrixGame.startLevel(1);
+        // Starts freshly from the saved level with timer refreshed and target at 1
+        this.matrixGame.startLevel();
       }
     }
+  }
+
+  exitMatrixToMenu() {
+    if (this.matrixGame) {
+      this.matrixGame.exitToMenu();
+    } else {
+      this.showScreen('menu');
+    }
+  }
+
+  updateMatrixMenuCard() {
+    const savedLevel = this.matrixGame ? this.matrixGame.getSavedLevel() : parseInt(localStorage.getItem('numberverse_matrix_level') || '1', 10);
+    const badge = document.getElementById('matrix-card-badge');
+    const btnText = document.getElementById('matrix-card-btn-text');
+    const resetBtn = document.getElementById('matrix-card-reset-btn');
+
+    if (savedLevel > 1) {
+      if (badge) badge.innerText = `Level ${savedLevel} / 10 • In Progress`;
+      if (btnText) btnText.innerText = `Resume Level ${savedLevel}`;
+      if (resetBtn) resetBtn.classList.remove('hidden');
+    } else {
+      if (badge) badge.innerText = `Singleplayer • 10 Levels`;
+      if (btnText) btnText.innerText = `Play Matrix`;
+      if (resetBtn) resetBtn.classList.add('hidden');
+    }
+    this.renderIcons();
+  }
+
+  resetMatrixProgress() {
+    if (this.matrixGame) {
+      this.matrixGame.resetProgress();
+    } else {
+      localStorage.removeItem('numberverse_matrix_level');
+    }
+    this.updateMatrixMenuCard();
+    this.showToast('Speed Matrix progress reset to Level 1', 'info');
   }
 
   showScreen(screenId) {

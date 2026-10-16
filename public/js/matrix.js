@@ -2,7 +2,8 @@
 class SpeedMatrixGame {
   constructor(app) {
     this.app = app;
-    this.currentLevel = 1;
+    this.storageKey = 'numberverse_matrix_level';
+    this.currentLevel = this.getSavedLevel();
     this.maxLevel = 10;
     this.targetNumber = 1;
     this.totalNumbers = 9;
@@ -20,27 +21,95 @@ class SpeedMatrixGame {
       { level: 4,  cols: 4, total: 16, time: 26 },  // 4x4, 1-16
       { level: 5,  cols: 4, total: 16, time: 20 },  // 4x4, faster
       { level: 6,  cols: 5, total: 20, time: 28 },  // 5x4, 1-20
-      { level: 7,  cols: 5, total: 25, time: 35 },  // 5x5, 1-25 (like photo!)
+      { level: 7,  cols: 5, total: 25, time: 35 },  // 5x5, 1-25
       { level: 8,  cols: 5, total: 25, time: 27 },  // 5x5, faster
       { level: 9,  cols: 6, total: 30, time: 38 },  // 6x5, 1-30
       { level: 10, cols: 6, total: 36, time: 42 }   // 6x6, 1-36 Supreme master
     ];
+
+    // Save level on browser exit/close
+    window.addEventListener('beforeunload', () => {
+      if (this.currentLevel) {
+        this.saveProgress(this.currentLevel);
+      }
+    });
   }
 
-  startLevel(lvl = 1) {
+  // --- Browser Cache Memory Persistence (localStorage) ---
+  getSavedLevel() {
+    try {
+      const saved = localStorage.getItem(this.storageKey);
+      if (saved !== null) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 10) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('localStorage read error:', e);
+    }
+    return 1;
+  }
+
+  saveProgress(lvl = this.currentLevel) {
+    try {
+      const val = Math.min(Math.max(1, lvl), this.maxLevel);
+      this.currentLevel = val;
+      localStorage.setItem(this.storageKey, val.toString());
+      if (this.app && typeof this.app.updateMatrixMenuCard === 'function') {
+        this.app.updateMatrixMenuCard();
+      }
+    } catch (e) {
+      console.warn('localStorage save error:', e);
+    }
+  }
+
+  resetProgress() {
+    try {
+      localStorage.removeItem(this.storageKey);
+      this.currentLevel = 1;
+      if (this.app && typeof this.app.updateMatrixMenuCard === 'function') {
+        this.app.updateMatrixMenuCard();
+      }
+    } catch (e) {
+      console.warn('localStorage reset error:', e);
+    }
+  }
+
+  exitToMenu() {
+    this.stopTimer();
+    this.saveProgress(this.currentLevel);
+    if (this.app) {
+      this.app.showScreen('menu');
+      this.app.updateMatrixMenuCard();
+    }
+  }
+
+  restartFromBeginning() {
+    this.resetProgress();
+    this.startLevel(1);
+  }
+
+  // Starts freshly from the specified or cached level with timer refreshed and sequence at 1
+  startLevel(lvl = null) {
+    if (lvl === null || lvl === undefined) {
+      lvl = this.getSavedLevel();
+    }
     this.currentLevel = Math.min(Math.max(1, lvl), this.maxLevel);
+    this.saveProgress(this.currentLevel);
+
     const config = this.levelConfigs[this.currentLevel - 1];
 
     this.cols = config.cols;
     this.totalNumbers = config.total;
     this.totalTime = config.time;
-    this.timeLeft = config.time;
-    this.targetNumber = 1;
+    this.timeLeft = config.time; // Refreshed full timer
+    this.targetNumber = 1;       // Player starts from beginning: 1
     this.isGameOver = false;
 
     this.stopTimer();
     this.renderHeader();
-    this.renderGrid();
+    this.renderGrid();           // Freshly randomized anti-mugup shuffle
     this.startTimer();
   }
 
@@ -195,13 +264,17 @@ class SpeedMatrixGame {
       // Conquered all 10 levels!
       window.soundFx.playVictory();
       this.app.triggerConfetti();
+      this.resetProgress();
       const modal = document.getElementById('modal-matrix-victory');
       if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
       }
     } else {
-      // Level cleared
+      // Level cleared: save progress immediately to browser cache
+      const nextLvl = this.currentLevel + 1;
+      this.saveProgress(nextLvl);
+
       const clearTimeEl = document.getElementById('matrix-clear-time-left');
       if (clearTimeEl) clearTimeEl.innerText = `${this.timeLeft.toFixed(1)}s`;
 
@@ -215,7 +288,8 @@ class SpeedMatrixGame {
 
   nextLevel() {
     this.app.closeModal('modal-matrix-level-clear');
-    this.startLevel(this.currentLevel + 1);
+    const nextLvl = Math.min(this.currentLevel + 1, this.maxLevel);
+    this.startLevel(nextLvl);
   }
 
   levelFailed() {
