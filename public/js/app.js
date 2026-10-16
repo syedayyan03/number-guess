@@ -227,18 +227,14 @@ class NumberVerseApp {
     const savedLevel = this.matrixGame ? this.matrixGame.getSavedLevel() : parseInt(localStorage.getItem('numberverse_matrix_level') || '1', 10);
     const badge = document.getElementById('matrix-card-badge');
     const btnText = document.getElementById('matrix-card-btn-text');
-    const resetBtn = document.getElementById('matrix-card-reset-btn');
 
     if (savedLevel > 1) {
-      if (badge) badge.innerText = `Level ${savedLevel} / 10 • In Progress`;
+      if (badge) badge.innerText = `Level ${savedLevel} / 10`;
       if (btnText) btnText.innerText = `Resume Level ${savedLevel}`;
-      if (resetBtn) resetBtn.classList.remove('hidden');
     } else {
-      if (badge) badge.innerText = `Singleplayer • 10 Levels`;
+      if (badge) badge.innerText = `10 Levels`;
       if (btnText) btnText.innerText = `Play Matrix`;
-      if (resetBtn) resetBtn.classList.add('hidden');
     }
-    this.renderIcons();
   }
 
   resetMatrixProgress() {

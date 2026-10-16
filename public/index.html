@@ -102,31 +102,22 @@
       </div>
 
       <!-- Cognitive Lab Modules / Game Selection Cards Grid (2-columns on Desktop) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+      <!-- Cognitive Lab Modules / Game Selection Cards Grid (2-columns on Desktop) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl items-stretch">
         
         <!-- Game Module 1: Number Guessing (Indigo Identity) -->
-        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group"
+        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('number_guess')">
           <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-2xl bg-[#191B2D] border border-[#777BFF]/30 text-[#777BFF] flex items-center justify-center font-mono text-xl font-black group-hover:scale-105 transition">
-                #
-              </div>
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider bg-[#191B2D] border border-[#48D6A0]/30 text-[#48D6A0] font-semibold flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#48D6A0] animate-pulse"></span>
-                Multiplayer Active
-              </span>
-            </div>
-            
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-2 group-hover:text-[#777BFF] transition">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#777BFF] transition">
               Number Guessing
             </h3>
             
-            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6">
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
               Realtime cognitive number deduction. Isolate the target through binary search intuition, dynamic range shrinkage, and smart turn timers.
             </p>
             
-            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5]">
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
               <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">1–10 Players</span>
               <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Turn-Based & Blitz</span>
               <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">AI Bot Match</span>
@@ -139,41 +130,27 @@
         </div>
 
         <!-- Game Module 2: Speed Matrix (Electric Blue Identity) -->
-        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#287BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group"
+        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#287BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('speed_grid')">
           <div>
-            <div class="flex items-center justify-between mb-5">
-              <div class="w-12 h-12 rounded-2xl bg-[#191B2D] border border-[#287BFF]/30 text-[#287BFF] flex items-center justify-center font-mono text-xl font-black group-hover:scale-105 transition">
-                <i data-lucide="grid" class="w-6 h-6"></i>
-              </div>
-              <span id="matrix-card-badge" class="px-2.5 py-1 rounded-full text-[11px] font-mono uppercase tracking-wider bg-[#191B2D] border border-[#287BFF]/30 text-[#287BFF] font-semibold">
-                Singleplayer • 10 Levels
-              </span>
-            </div>
-            
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-2 group-hover:text-[#287BFF] transition">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#287BFF] transition">
               Speed Matrix
             </h3>
             
-            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6">
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
               Test visual attention, peripheral scanning, and motor reaction speed. Tap 1 to N sequentially under time pressure with anti-mugup shuffle protection.
             </p>
             
-            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5]">
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">10 Levels</span>
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
+              <span id="matrix-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">10 Levels</span>
               <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Anti-Mugup Reshuffle</span>
               <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Timer Reflexes</span>
             </div>
           </div>
 
-          <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
-              <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="matrix-card-btn-text">Play Matrix</span>
-            </button>
-            <button id="matrix-card-reset-btn" onclick="event.stopPropagation(); app.resetMatrixProgress();" class="hidden mt-2 text-[11px] font-mono text-[#858AA5] hover:text-[#FF7185] transition">
-              Reset to Level 1
-            </button>
-          </div>
+          <button class="mt-8 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="matrix-card-btn-text">Play Matrix</span>
+          </button>
         </div>
 
       </div>
