@@ -256,7 +256,7 @@ input[type=number] {
 /* Matrix Speed Grid Board */
 .matrix-grid {
   display: grid;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
   max-width: 440px;
   margin: 0 auto;
@@ -265,60 +265,72 @@ input[type=number] {
   touch-action: manipulation;
 }
 
-/* Individual Tiles Styled with Vibrant Arcade Aesthetic */
+/* Individual Tiles: Calm, Eye-Friendly Cognitive Surfaces */
 .matrix-tile {
   aspect-ratio: 1 / 1;
-  min-height: 52px;
-  border-radius: 8px;
+  min-height: 54px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'JetBrains Mono', 'Impact', sans-serif;
-  font-weight: 900;
-  font-size: 1.45rem;
-  color: #0b0f19;
-  border: 2px solid #000000;
-  box-shadow: 0 4px 0 #000000, inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  color: var(--text-main);
+  background: var(--bg-surface-secondary);
+  border: 1.5px solid var(--border-subtle);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   cursor: pointer;
-  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .matrix-tile:hover {
+  background: var(--bg-surface-elevated);
+  border-color: rgba(65, 105, 255, 0.6);
   transform: translateY(-2px);
-  filter: brightness(1.1);
-  box-shadow: 0 6px 0 #000000;
+  box-shadow: 0 8px 24px -4px rgba(65, 105, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
 }
 
 .matrix-tile:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #000000;
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-/* Active Highlight: Keeps the number visible and highlights the LAST tapped number */
+/* Active Highlight: Keeps the number visible & illuminates the LAST tapped number in signature electric blue */
 .matrix-tile-last-active {
-  border: 3.5px solid #ffffff !important;
-  box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.8), 0 4px 0 #000000 !important;
-  transform: scale(1.06);
+  background: linear-gradient(135deg, var(--color-blue-highlight) 0%, var(--color-blue-primary) 100%) !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFFFF !important;
+  box-shadow: 0 0 24px rgba(40, 123, 255, 0.7), 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+  transform: scale(1.04);
   z-index: 10;
-  animation: pulseActive 1.2s infinite ease-in-out;
+  animation: pulseActive 1.4s infinite ease-in-out;
 }
 
 @keyframes pulseActive {
-  0%, 100% { transform: scale(1.06); box-shadow: 0 0 18px rgba(255, 255, 255, 0.9), 0 4px 0 #000000; }
-  50% { transform: scale(1.02); box-shadow: 0 0 8px rgba(255, 255, 255, 0.5), 0 4px 0 #000000; }
+  0%, 100% {
+    transform: scale(1.04);
+    box-shadow: 0 0 22px rgba(40, 123, 255, 0.7), 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 0 12px rgba(40, 123, 255, 0.4), 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .matrix-tile-wrong {
   animation: shakeTile 0.35s ease;
-  filter: brightness(0.7) !important;
-  border-color: #ef4444 !important;
+  background: rgba(255, 113, 133, 0.18) !important;
+  border-color: var(--status-error) !important;
+  color: var(--status-error) !important;
+  box-shadow: 0 0 16px rgba(255, 113, 133, 0.35) !important;
 }
 
 @keyframes shakeTile {
   0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
 }
 
 /* Subtle Scrollbar */
