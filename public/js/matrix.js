@@ -84,7 +84,7 @@ class SpeedMatrixGame {
     numbers.forEach(num => {
       const tile = document.createElement('button');
       tile.type = 'button';
-      tile.className = `matrix-tile ${fontSize}`;
+      tile.className = `matrix-tile w-full aspect-square min-h-[50px] sm:min-h-[64px] rounded-xl flex items-center justify-center font-mono font-extrabold text-white bg-[#151c2c] hover:bg-[#1e283e] active:scale-95 border-2 border-white/10 hover:border-cyan-500/40 shadow-md shadow-black/40 transition duration-150 cursor-pointer ${fontSize}`;
       tile.innerText = num;
       tile.dataset.value = num;
 
@@ -229,3 +229,7 @@ class SpeedMatrixGame {
     this.startLevel(this.currentLevel);
   }
 }
+
+// Ensure global attachment
+window.SpeedMatrixGame = SpeedMatrixGame;
+
