@@ -199,19 +199,27 @@ class NumberVerseApp {
     window.soundFx.playClick();
     if (gameId === 'number_guess') {
       this.showScreen('welcome');
+    } else if (gameId === 'speed_grid') {
+      if (!this.matrixGame && window.SpeedMatrixGame) {
+        this.matrixGame = new window.SpeedMatrixGame(this);
+      }
+      this.showScreen('matrix');
+      if (this.matrixGame) {
+        this.matrixGame.startLevel(1);
+      }
     }
   }
 
   showScreen(screenId) {
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game', 'matrix'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
-      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || !this.roomState);
+      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || !this.roomState);
       if (this.roomState) {
         document.getElementById('nav-room-id').innerText = this.roomState.id;
       }

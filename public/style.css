@@ -206,6 +206,66 @@ input[type=number] {
   color: #f1f5f9;
 }
 
+/* Matrix Speed Grid Tiles */
+.matrix-grid {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.matrix-tile {
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #ffffff;
+  background: #171e2e;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.matrix-tile:hover:not(.matrix-tile-cleared):not(.matrix-tile-wrong) {
+  background: #232c42;
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: scale(1.03);
+}
+
+.matrix-tile:active:not(.matrix-tile-cleared) {
+  transform: scale(0.95);
+}
+
+.matrix-tile-cleared {
+  opacity: 0.18;
+  filter: grayscale(1);
+  transform: scale(0.92);
+  pointer-events: none;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.matrix-tile-wrong {
+  animation: shakeTile 0.35s ease;
+  background-color: rgba(239, 68, 68, 0.4) !important;
+  border-color: rgba(239, 68, 68, 0.8) !important;
+}
+
+@keyframes shakeTile {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
 /* Subtle Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;

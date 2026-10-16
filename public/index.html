@@ -108,30 +108,32 @@
           </button>
         </div>
 
-        <!-- Game 2: Mystery Codebreaker / Coming Soon Card -->
-        <div class="clean-card p-6 flex flex-col justify-between opacity-80 border-dashed border-white/10 bg-[#0e131d]/60">
+        <!-- Game 2: Speed Grid (1 to N Sequential Matrix) -->
+        <div class="clean-card-interactive p-6 flex flex-col justify-between cursor-pointer border border-cyan-500/30 hover:border-cyan-500/60 bg-gradient-to-br from-cyan-950/30 via-[#121826] to-[#0c1017] group"
+             onclick="app.selectGame('speed_grid')">
           <div>
             <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-slate-500 flex items-center justify-center font-mono text-lg font-bold">
-                <i data-lucide="sparkles" class="w-5 h-5"></i>
+              <div class="w-12 h-12 rounded-2xl bg-cyan-600/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-mono text-xl font-black group-hover:scale-105 transition">
+                <i data-lucide="grid" class="w-6 h-6"></i>
               </div>
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-white/5 border border-white/10 text-slate-400">
-                In Development
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-semibold">
+                Singleplayer • 10 Levels
               </span>
             </div>
-            <h3 class="text-xl font-bold text-slate-300 mb-1.5">
-              Codebreaker Arena
+            <h3 class="text-xl font-bold text-white mb-1.5 group-hover:text-cyan-300 transition">
+              Speed Matrix (1 to N)
             </h3>
             <p class="text-xs text-slate-400 leading-relaxed mb-4">
-              Classic Bulls & Cows deductive battle. Decrypt your opponent's 4-digit secret combination before your turns expire.
+              Find and tap random numbers sequentially from 1 to N under time pressure. Lose a level, and the entire matrix freshly reshuffles to prevent memorization!
             </p>
-            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono text-slate-500">
-              <span class="px-2 py-0.5 rounded bg-white/[0.02] border border-white/5">4-Digit Logic</span>
-              <span class="px-2 py-0.5 rounded bg-white/[0.02] border border-white/5">PVP Match</span>
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono text-slate-400">
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">10 Levels</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">Anti-Mugup Shuffle</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5">Timer Reflexes</span>
             </div>
           </div>
-          <button disabled class="mt-6 w-full py-3 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold opacity-50 cursor-not-allowed">
-            Coming Soon
+          <button class="mt-6 w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition">
+            <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play Matrix
           </button>
         </div>
       </div>
@@ -462,7 +464,120 @@
           </div>
         </div>
       </div>
+    <!-- ============================================== -->
+    <!-- SCREEN 4: SPEED MATRIX (1 TO N SEQUENTIAL GAME) -->
+    <!-- ============================================== -->
+    <section id="screen-matrix" class="w-full max-w-xl hidden flex-col items-center py-2">
+      <!-- Matrix Top Bar -->
+      <div class="w-full clean-card px-5 py-3 mb-4 flex items-center justify-between text-xs">
+        <button onclick="app.showScreen('menu'); if (app.matrixGame) app.matrixGame.stopTimer();" class="px-2.5 py-1.5 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-slate-400 hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        </button>
+
+        <div class="flex items-center gap-2 font-mono">
+          <span class="text-slate-400">Level:</span>
+          <span id="matrix-level-badge" class="font-bold text-cyan-400 text-sm">1 / 10</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 font-mono">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span id="matrix-timer-badge" class="font-bold text-white text-sm">20.0s</span>
+        </div>
+      </div>
+
+      <!-- Target Banner & Progress Bar -->
+      <div class="w-full clean-card p-4 mb-4 text-center">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-xs text-slate-400 font-medium">
+            Find Next: <strong id="matrix-target-num" class="text-2xl font-black text-cyan-400 font-mono ml-1">1</strong>
+          </div>
+          <div class="text-xs text-slate-400 font-mono">
+            Sequence: <span id="matrix-progress-text" class="text-white font-bold">0 / 9</span>
+          </div>
+        </div>
+        <!-- Time Bar -->
+        <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+          <div id="matrix-time-bar" class="h-full bg-cyan-400 transition-all duration-100 ease-linear rounded-full" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- The Matrix Grid Board -->
+      <div class="w-full clean-card p-4 sm:p-6 mb-4 flex items-center justify-center">
+        <div id="matrix-board" class="matrix-grid">
+          <!-- Dynamically populated tiles -->
+        </div>
+      </div>
+
+      <div class="text-center text-[11px] text-slate-500 font-mono">
+        Tap numbers sequentially from 1 to N • Wrong tap = -2s penalty
+      </div>
     </section>
+
+    <!-- ============================================== -->
+    <!-- MODAL: MATRIX LEVEL COMPLETE -->
+    <!-- ============================================== -->
+    <div id="modal-matrix-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-emerald-500/30 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-emerald-500/20">
+          ✓
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Level Cleared!</h3>
+        <p id="matrix-clear-message" class="text-xs text-slate-400 mb-5">Speed deduction complete. Next level matrix is ready.</p>
+        
+        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs flex justify-between items-center font-mono">
+          <span class="text-slate-400">Time Remaining:</span>
+          <span id="matrix-clear-time-left" class="font-bold text-emerald-400 text-sm">8.4s</span>
+        </div>
+
+        <button onclick="app.matrixGame.nextLevel()" class="w-full py-3 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-indigo-500/25">
+          Proceed to Next Level →
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: MATRIX LEVEL FAILED / RETRY (ANTI-MUGUP) -->
+    <!-- ============================================== -->
+    <div id="modal-matrix-fail" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-rose-500/30 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-rose-500/20">
+          ✕
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Time's Up!</h3>
+        <p class="text-xs text-rose-300/80 mb-4 font-medium">Level failed. Anti-mugup shuffle activated!</p>
+        
+        <div class="p-3.5 rounded-xl bg-rose-950/20 border border-rose-500/20 mb-5 text-xs text-slate-400 text-left leading-relaxed">
+          <span class="text-white font-semibold block mb-0.5">⚠️ Numbers reshuffled:</span>
+          All tile positions have been completely randomized to prevent position memorization.
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="app.showScreen('menu'); app.closeModal('modal-matrix-fail');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs font-semibold">
+            Exit to Menu
+          </button>
+          <button onclick="app.matrixGame.retryLevel()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs uppercase tracking-wider font-bold shadow-md shadow-rose-600/30">
+            Retry Level
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: MATRIX ALL 10 LEVELS COMPLETED (VICTORY) -->
+    <!-- ============================================== -->
+    <div id="modal-matrix-victory" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-cyan-500/30 shadow-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 flex items-center justify-center mx-auto mb-3 font-bold text-3xl shadow-lg shadow-cyan-500/30 animate-bounce">
+          👑
+        </div>
+        <h3 class="text-2xl font-black text-white mb-1">Matrix Master!</h3>
+        <p class="text-xs text-slate-300 mb-5">Incredible! You conquered all 10 Speed Matrix levels with supreme reflexes.</p>
+        
+        <button onclick="app.showScreen('menu'); app.closeModal('modal-matrix-victory');" class="w-full py-3 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold">
+          Back to Game Arcade Hub
+        </button>
+      </div>
+    </div>
 
     <!-- ============================================== -->
     <!-- MODAL: ROUND RESULT -->
@@ -665,6 +780,7 @@
 
   <!-- Scripts -->
   <script src="/js/sound.js"></script>
-  <script src="/js/app.js?v=5.0"></script>
+  <script src="/js/matrix.js"></script>
+  <script src="/js/app.js?v=6.0"></script>
 </body>
 </html>
