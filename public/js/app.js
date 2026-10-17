@@ -358,7 +358,7 @@ class NumberVerseApp {
     const resetBtn = document.getElementById('shellshuffle-card-reset-btn');
 
     if (badge) {
-      badge.innerText = highScore > 0 ? `Best: ${highScore.toLocaleString()}` : `Real 3D Physics`;
+      badge.innerText = highScore > 0 ? `Best: ${highScore.toLocaleString()}` : `Best: 0`;
     }
     if (resetBtn) {
       resetBtn.classList.toggle('hidden', highScore <= 0);

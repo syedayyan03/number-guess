@@ -17,7 +17,7 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=16.0">
+  <link rel="stylesheet" href="/style.css?v=17.0">
 </head>
 <body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
 
@@ -105,7 +105,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
         
         <!-- Game Module 1: Number Guessing (Indigo Identity) -->
-        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <div class="clean-card-interactive card-number-guess p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('number_guess')">
           <div>
             <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#777BFF] transition">
@@ -132,7 +132,7 @@
         </div>
 
         <!-- Game Module 2: Speed Matrix (Electric Blue Identity) -->
-        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#287BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <div class="clean-card-interactive card-speed-matrix p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#287BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('speed_grid')">
           <div>
             <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#287BFF] transition">
@@ -163,7 +163,7 @@
         </div>
 
         <!-- Game Module 3: Don't Tap! (Cognitive Inhibitory Reflex Identity) -->
-        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#48D6A0]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <div class="clean-card-interactive card-dont-tap p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#48D6A0]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('dont_tap')">
           <div>
             <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#48D6A0] transition">
@@ -194,7 +194,7 @@
         </div>
 
         <!-- Game Module 4: Countdown Calculation (Mental Math Identity) -->
-        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#F4C66A]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <div class="clean-card-interactive card-countdown p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#F4C66A]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('countdown')">
           <div>
             <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#F4C66A] transition">
@@ -224,13 +224,13 @@
           </div>
         </div>
 
-        <!-- Game Module 5: Shell Shuffle (3D Visual Tracking Identity) -->
-        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#4169FF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <!-- Game Module 5: Shell Shuffle (3D Visual Tracking - Electric Cyan Identity) -->
+        <div class="clean-card-interactive card-shell-shuffle p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#00E5FF]/60 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('shell_shuffle')">
           <div>
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#4169FF] transition flex items-center gap-2">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#00E5FF] transition flex items-center gap-2">
               Shell Shuffle
-              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#777BFF]">3D</span>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#777BFF] group-hover:text-[#00E5FF] group-hover:border-[#00E5FF]/40 group-hover:bg-[#00E5FF]/10 transition">3D</span>
             </h3>
             
             <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
@@ -245,7 +245,7 @@
           </div>
 
           <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <button class="w-full py-3.5 rounded-xl btn-shellshuffle-action text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 transition">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="shellshuffle-card-btn-text">Play Shell Shuffle</span>
             </button>
             <div class="h-5 mt-2 flex items-center justify-center">
@@ -1541,7 +1541,7 @@
   <script src="/js/matrix.js?v=15.0"></script>
   <script src="/js/donttap.js?v=1.0"></script>
   <script src="/js/countdown.js?v=1.0"></script>
-  <script src="/js/shellshuffle.js?v=1.0"></script>
-  <script src="/js/app.js?v=17.0"></script>
+  <script src="/js/shellshuffle.js?v=1.1"></script>
+  <script src="/js/app.js?v=18.0"></script>
 </body>
 </html>
