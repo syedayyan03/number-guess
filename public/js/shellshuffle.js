@@ -1,4 +1,4 @@
-// Shell Shuffle 3D - Cognitive Visual Tracking Game with real Three.js geometry and physics-inspired motion
+// Shell Shuffle 3D - Cognitive Visual Tracking Game with real Three.js geometry, high-contrast visibility, and dynamic speed scaling
 class ShellShuffleGame {
   constructor(app) {
     this.app = app;
@@ -13,15 +13,17 @@ class ShellShuffleGame {
     this.resizeObserver = null;
 
     // 3D Objects
-    this.cups = []; // Array of { id, group, mesh, rim, currentSlot }
+    this.cups = []; // Array of { id, group, mesh, rim, badge, currentSlot }
     this.ball = null; // { mesh, targetCupId }
     this.tableMesh = null;
     this.cupGeom = null;
     this.rimGeom = null;
+    this.midRingGeom = null;
     this.cupMat = null;
     this.rimMat = null;
     this.ballGeom = null;
     this.ballMat = null;
+    this.tableTexture = null;
 
     // Raycaster for Picking
     this.raycaster = new THREE.Raycaster();
@@ -52,6 +54,48 @@ class ShellShuffleGame {
     // Bound listeners for clean removal
     this.onPointerMove = this.handlePointerMove.bind(this);
     this.onPointerDown = this.handlePointerDown.bind(this);
+  }
+
+  // --- Dynamic Difficulty & Speed Progression ---
+  getShuffleConfigForLevel(lvl) {
+    // Swaps count scales progressively:
+    // Level 1: 3 swaps
+    // Level 2: 4 swaps
+    // Level 3: 5 swaps
+    // Level 4: 6 swaps
+    // Level 5: 7 swaps
+    // Level 6: 8 swaps
+    // Level 7: 10 swaps
+    // Level 8: 12 swaps
+    // Level 9+: 14 swaps
+    const swapCount = Math.min(15, Math.max(3, 3 + Math.floor((lvl - 1) * 1.25)));
+
+    // Duration in ms per swap (starts at 820ms, drops aggressively each level):
+    // Level 1: 820ms (1.0x)
+    // Level 2: 660ms (1.2x)
+    // Level 3: 530ms (1.5x)
+    // Level 4: 420ms (2.0x)
+    // Level 5: 330ms (2.5x)
+    // Level 6: 260ms (3.2x)
+    // Level 7: 210ms (3.9x)
+    // Level 8: 170ms (4.8x)
+    // Level 9: 140ms (5.9x)
+    // Level 10+: 115ms (7.1x)
+    const duration = Math.max(115, Math.round(820 * Math.pow(0.80, lvl - 1)));
+
+    // Inter-swap delay shrinks from 50ms at lvl 1 down to 10ms at high levels
+    const gapDelay = Math.max(10, Math.round(50 - (lvl - 1) * 5));
+
+    // Multiplier for display
+    const speedMultiplier = (820 / duration).toFixed(1);
+
+    return { swapCount, duration, gapDelay, speedMultiplier };
+  }
+
+  getCupCountForLevel(lvl) {
+    if (lvl >= 8) return 5;
+    if (lvl >= 5) return 4;
+    return 3;
   }
 
   // --- Initialization & Setup ---
@@ -85,19 +129,18 @@ class ShellShuffleGame {
   }
 
   setupScene() {
-    // If renderer already exists, cleanly dispose first
     this.cleanupScene();
 
     const width = this.container.clientWidth || 640;
     const height = this.container.clientHeight || 380;
 
-    // Scene
+    // Scene with transparent background so the CSS radial aura shines through
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0C0D19); // Match NumberVerse atmospheric dark background
+    this.scene.background = null;
 
-    // Camera
-    this.camera = new THREE.PerspectiveCamera(44, width / height, 0.1, 100);
-    this.camera.position.set(0, 3.8, 6.2);
+    // Camera with enhanced wide-angle framing
+    this.camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+    this.camera.position.set(0, 4.2, 6.8);
     this.camera.lookAt(0, 0.5, 0);
 
     // Renderer
@@ -107,19 +150,21 @@ class ShellShuffleGame {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = 1.15;
 
     this.canvas = this.renderer.domElement;
     this.canvas.className = 'w-full h-full block cursor-default select-none outline-none';
     this.container.innerHTML = '';
     this.container.appendChild(this.canvas);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xA0B0D8, 0.65);
+    // High-Visibility Multi-Light Setup
+    // 1. Ambient Fill Light (Soft bright bluish illumination)
+    const ambientLight = new THREE.AmbientLight(0xD0DEFF, 0.95);
     this.scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xFFFFFF, 1.1);
-    dirLight.position.set(4, 8, 5);
+    // 2. Primary Key Light (Directional from front-top)
+    const dirLight = new THREE.DirectionalLight(0xFFFFFF, 1.4);
+    dirLight.position.set(3, 9, 6);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 1024;
     dirLight.shadow.mapSize.height = 1024;
@@ -128,12 +173,17 @@ class ShellShuffleGame {
     dirLight.shadow.bias = -0.001;
     this.scene.add(dirLight);
 
-    // Subtle blue/indigo atmospheric rim light
-    const rimLight = new THREE.DirectionalLight(0x4169FF, 0.8);
-    rimLight.position.set(-5, 4, -4);
+    // 3. Electric Cyan Rim Light (Backlight separating cups from background)
+    const rimLight = new THREE.DirectionalLight(0x38BDF8, 1.2);
+    rimLight.position.set(-4, 6, -5);
     this.scene.add(rimLight);
 
-    // Table / Pedestal Surface
+    // 4. Overhead Table Spotlight (Creates focused glow on the arena platform)
+    const centerSpot = new THREE.PointLight(0x818CF8, 1.0, 14);
+    centerSpot.position.set(0, 5, 0.5);
+    this.scene.add(centerSpot);
+
+    // Build Table Surface
     this.buildTable();
 
     // Build Cups & Ball
@@ -145,31 +195,121 @@ class ShellShuffleGame {
     this.animFrameId = requestAnimationFrame(this.animate);
   }
 
+  // Create High-Contrast Table Texture with Concentric Energy Rings
+  createTableTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // High-contrast frosted slate base
+    ctx.fillStyle = '#161F36';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Subtle radial gradient center
+    const grad = ctx.createRadialGradient(256, 256, 10, 256, 256, 250);
+    grad.addColorStop(0, 'rgba(40, 75, 170, 0.45)');
+    grad.addColorStop(0.6, 'rgba(25, 40, 90, 0.2)');
+    grad.addColorStop(1, 'rgba(16, 22, 42, 0.0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Concentric guideline rings
+    const rings = [65, 130, 195, 235];
+    rings.forEach((r, idx) => {
+      ctx.beginPath();
+      ctx.arc(256, 256, r, 0, Math.PI * 2);
+      ctx.strokeStyle = idx === rings.length - 1 ? 'rgba(65, 105, 255, 0.85)' : 'rgba(70, 100, 180, 0.45)';
+      ctx.lineWidth = idx === rings.length - 1 ? 3 : 1.5;
+      ctx.stroke();
+    });
+
+    // Radial guideline crosshairs
+    for (let i = 0; i < 16; i++) {
+      const angle = (i * Math.PI * 2) / 16;
+      ctx.beginPath();
+      ctx.moveTo(256 + Math.cos(angle) * 160, 256 + Math.sin(angle) * 160);
+      ctx.lineTo(256 + Math.cos(angle) * 235, 256 + Math.sin(angle) * 235);
+      ctx.strokeStyle = 'rgba(65, 105, 255, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+  }
+
   buildTable() {
-    // Pedestal surface
-    const tableGeom = new THREE.CylinderGeometry(4.6, 4.8, 0.1, 48);
+    this.tableTexture = this.createTableTexture();
+
+    // Pedestal cylinder
+    const tableGeom = new THREE.CylinderGeometry(5.2, 5.4, 0.12, 64);
     const tableMat = new THREE.MeshStandardMaterial({
-      color: 0x111322,
-      metalness: 0.55,
-      roughness: 0.4
+      map: this.tableTexture,
+      color: 0x1A2542,
+      metalness: 0.45,
+      roughness: 0.35
     });
     this.tableMesh = new THREE.Mesh(tableGeom, tableMat);
-    this.tableMesh.position.y = -0.05;
+    this.tableMesh.position.y = -0.06;
     this.tableMesh.receiveShadow = true;
     this.scene.add(this.tableMesh);
 
-    // Glowing cyan/indigo arena boundary ring
-    const ringGeom = new THREE.RingGeometry(3.6, 3.65, 48);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x287BFF,
+    // Glowing Cobalt Outer Edge Ring
+    const edgeTorusGeom = new THREE.TorusGeometry(5.2, 0.035, 16, 64);
+    const edgeTorusMat = new THREE.MeshBasicMaterial({ color: 0x4169FF });
+    const edgeTorus = new THREE.Mesh(edgeTorusGeom, edgeTorusMat);
+    edgeTorus.rotation.x = Math.PI / 2;
+    edgeTorus.position.y = 0.005;
+    this.scene.add(edgeTorus);
+
+    // Inner Luminous Cyan Boundary Ring
+    const innerRingGeom = new THREE.RingGeometry(3.8, 3.84, 64);
+    const innerRingMat = new THREE.MeshBasicMaterial({
+      color: 0x00E5FF,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.45
+      opacity: 0.65
     });
-    const ringMesh = new THREE.Mesh(ringGeom, ringMat);
-    ringMesh.rotation.x = -Math.PI / 2;
-    ringMesh.position.y = 0.005;
-    this.scene.add(ringMesh);
+    const innerRingMesh = new THREE.Mesh(innerRingGeom, innerRingMat);
+    innerRingMesh.rotation.x = -Math.PI / 2;
+    innerRingMesh.position.y = 0.01;
+    this.scene.add(innerRingMesh);
+  }
+
+  // Create High-Contrast Cup Letter Badge ("A", "B", "C", "D", "E")
+  createCupBadge(letter) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    // Outer glow disc
+    ctx.beginPath();
+    ctx.arc(64, 64, 56, 0, Math.PI * 2);
+    ctx.fillStyle = '#1A2952';
+    ctx.fill();
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = '#4169FF';
+    ctx.stroke();
+
+    // Crisp white bold letter
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(letter, 64, 67);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const badgeMat = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      opacity: 0.95
+    });
+    const badgeGeom = new THREE.CircleGeometry(0.18, 24);
+    const badgeMesh = new THREE.Mesh(badgeGeom, badgeMat);
+    badgeMesh.position.set(0, 0.65, 0.388); // Flush on front of cup
+    return badgeMesh;
   }
 
   // Lathed Hollow Cup Geometry
@@ -201,12 +341,11 @@ class ShellShuffleGame {
   }
 
   buildGameObjects() {
-    // Determine cup count based on level (3 cups for lvl 1-6, 4 cups for lvl 7-8, 5 cups for lvl 9+)
     const cupCount = this.getCupCountForLevel(this.level);
 
-    // Calculate slot positions evenly spaced across the table
+    // Calculate slot positions with comfortable spacing
     this.slots = [];
-    const spacing = cupCount === 3 ? 1.9 : cupCount === 4 ? 1.55 : 1.3;
+    const spacing = cupCount === 3 ? 1.9 : cupCount === 4 ? 1.5 : 1.35;
     const startX = -((cupCount - 1) * spacing) / 2;
     for (let i = 0; i < cupCount; i++) {
       this.slots.push(startX + i * spacing);
@@ -214,39 +353,44 @@ class ShellShuffleGame {
 
     // Shared Geometries & Materials
     this.cupGeom = this.createHollowCupGeometry();
-    this.rimGeom = new THREE.TorusGeometry(0.47, 0.022, 16, 36);
+    this.rimGeom = new THREE.TorusGeometry(0.47, 0.024, 16, 36);
     this.midRingGeom = new THREE.CylinderGeometry(0.385, 0.385, 0.03, 36);
+    this.topCapGeom = new THREE.CylinderGeometry(0.28, 0.28, 0.02, 36);
+    this.topGemGeom = new THREE.SphereGeometry(0.08, 16, 16);
 
-    // Metallic-blue cup body
+    // Vibrant Royal Cobalt Titanium Cup Body
     this.cupMat = new THREE.MeshStandardMaterial({
-      color: 0x1E3364,
-      metalness: 0.82,
-      roughness: 0.24,
-      emissive: 0x0C1838,
-      emissiveIntensity: 0.2
+      color: 0x3460B8,
+      metalness: 0.72,
+      roughness: 0.18,
+      emissive: 0x162A58,
+      emissiveIntensity: 0.35
     });
 
-    // Silver-blue refined rim
+    // High-Contrast Polished Chrome Silver Trim
     this.rimMat = new THREE.MeshStandardMaterial({
-      color: 0x88B4FF,
-      metalness: 0.92,
-      roughness: 0.16
+      color: 0xF1F5F9,
+      metalness: 0.95,
+      roughness: 0.10
     });
 
-    // Ball
-    this.ballGeom = new THREE.SphereGeometry(0.18, 32, 24);
+    // Top Gem Beacon Material (Cyan)
+    const gemMat = new THREE.MeshBasicMaterial({ color: 0x38BDF8 });
+
+    // Radiant 24K Gold Ball
+    this.ballGeom = new THREE.SphereGeometry(0.20, 32, 24);
     this.ballMat = new THREE.MeshStandardMaterial({
-      color: 0xF4C66A,
-      metalness: 0.88,
-      roughness: 0.22,
-      emissive: 0x55380A,
-      emissiveIntensity: 0.2
+      color: 0xFFD700,
+      metalness: 0.95,
+      roughness: 0.12,
+      emissive: 0x885500,
+      emissiveIntensity: 0.4
     });
 
     this.ball = new THREE.Mesh(this.ballGeom, this.ballMat);
     this.ball.castShadow = true;
     this.ball.receiveShadow = true;
-    this.ball.position.set(0, 0.18, 0);
+    this.ball.position.set(0, 0.20, 0);
     this.ball.visible = false;
     this.scene.add(this.ball);
 
@@ -258,8 +402,9 @@ class ShellShuffleGame {
 
     for (let i = 0; i < cupCount; i++) {
       const cupId = `cup-${i}`;
+      const letter = cupLetters[i];
       const group = new THREE.Group();
-      group.userData = { cupId, slotIndex: i, letter: cupLetters[i] };
+      group.userData = { cupId, slotIndex: i, letter };
 
       // Main hollow body
       const cupMesh = new THREE.Mesh(this.cupGeom, this.cupMat.clone());
@@ -267,17 +412,31 @@ class ShellShuffleGame {
       cupMesh.receiveShadow = true;
       group.add(cupMesh);
 
-      // Bottom metallic rim
+      // Bottom chrome lip
       const rimMesh = new THREE.Mesh(this.rimGeom, this.rimMat);
       rimMesh.rotation.x = Math.PI / 2;
       rimMesh.position.y = 0.025;
       rimMesh.castShadow = true;
       group.add(rimMesh);
 
-      // Mid-height accent band
+      // Mid-height chrome accent band
       const midRingMesh = new THREE.Mesh(this.midRingGeom, this.rimMat);
       midRingMesh.position.y = 0.65;
       group.add(midRingMesh);
+
+      // Top chrome cap
+      const topCapMesh = new THREE.Mesh(this.topCapGeom, this.rimMat);
+      topCapMesh.position.y = 1.30;
+      group.add(topCapMesh);
+
+      // Top illuminated cyan gem beacon
+      const gemMesh = new THREE.Mesh(this.topGemGeom, gemMat);
+      gemMesh.position.y = 1.33;
+      group.add(gemMesh);
+
+      // Illuminated Cup Letter Badge
+      const badgeMesh = this.createCupBadge(letter);
+      group.add(badgeMesh);
 
       // Position group at slot
       group.position.set(this.slots[i], 0, 0);
@@ -288,18 +447,13 @@ class ShellShuffleGame {
         group,
         mesh: cupMesh,
         rim: rimMesh,
+        badge: badgeMesh,
         currentSlot: i,
         baseY: 0
       });
 
       this.cupPositionMap[i] = cupId;
     }
-  }
-
-  getCupCountForLevel(lvl) {
-    if (lvl >= 9) return 5;
-    if (lvl >= 7) return 4;
-    return 3;
   }
 
   setupEventListeners() {
@@ -380,15 +534,15 @@ class ShellShuffleGame {
     this.clearHover();
     this.hoveredCup = cupObj;
     if (cupObj.mesh && cupObj.mesh.material) {
-      cupObj.mesh.material.emissive.setHex(0x1A407A);
-      cupObj.mesh.material.emissiveIntensity = 0.5;
+      cupObj.mesh.material.emissive.setHex(0x2856B8);
+      cupObj.mesh.material.emissiveIntensity = 0.65;
     }
   }
 
   clearHover() {
     if (this.hoveredCup && this.hoveredCup.mesh && this.hoveredCup.mesh.material) {
-      this.hoveredCup.mesh.material.emissive.setHex(0x0C1838);
-      this.hoveredCup.mesh.material.emissiveIntensity = 0.2;
+      this.hoveredCup.mesh.material.emissive.setHex(0x162A58);
+      this.hoveredCup.mesh.material.emissiveIntensity = 0.35;
     }
     this.hoveredCup = null;
   }
@@ -408,7 +562,7 @@ class ShellShuffleGame {
     this.targetCupId = this.cups[targetIndex].id;
 
     const targetCup = this.cups.find(c => c.id === this.targetCupId);
-    this.ball.position.set(targetCup.group.position.x, 0.18, targetCup.group.position.z);
+    this.ball.position.set(targetCup.group.position.x, 0.20, targetCup.group.position.z);
     this.ball.visible = true;
 
     this.setPhase('revealing');
@@ -429,14 +583,13 @@ class ShellShuffleGame {
           setTimeout(() => {
             this.generateShufflePlan();
             this.startShuffling();
-          }, 350);
+          }, 300);
         });
       }, 1500);
     });
   }
 
   rebuildSceneForLevel() {
-    // Remove old cups and ball
     this.cups.forEach(c => {
       this.scene.remove(c.group);
       c.group.traverse(child => {
@@ -454,23 +607,14 @@ class ShellShuffleGame {
   }
 
   generateShufflePlan() {
-    // Difficulty curve tuning
-    // Swaps count
-    let swapCount = 3 + Math.floor((this.level - 1) * 0.8);
-    swapCount = Math.min(10, Math.max(3, swapCount));
-
-    // Swap speed (duration in ms per swap)
-    let speed = 1100 - (this.level - 1) * 75;
-    speed = Math.max(480, speed);
-
+    const config = this.getShuffleConfigForLevel(this.level);
     this.swapQueue = [];
     const numSlots = this.slots.length;
 
     let lastA = -1;
     let lastB = -1;
 
-    for (let s = 0; s < swapCount; s++) {
-      // Pick two distinct slots to swap
+    for (let s = 0; s < config.swapCount; s++) {
       let slotA = Math.floor(Math.random() * numSlots);
       let slotB = Math.floor(Math.random() * numSlots);
       while (slotB === slotA || (slotA === lastA && slotB === lastB) || (slotA === lastB && slotB === lastA)) {
@@ -479,7 +623,7 @@ class ShellShuffleGame {
       lastA = slotA;
       lastB = slotB;
 
-      this.swapQueue.push({ slotA, slotB, duration: speed });
+      this.swapQueue.push({ slotA, slotB, duration: config.duration, gapDelay: config.gapDelay });
     }
   }
 
@@ -504,7 +648,9 @@ class ShellShuffleGame {
 
     if (!cupA || !cupB) return;
 
-    if (window.soundFx) window.soundFx.playShuffle();
+    if (window.soundFx) {
+      window.soundFx.playShuffle(swap.duration);
+    }
 
     const startXA = this.slots[swap.slotA];
     const startXB = this.slots[swap.slotB];
@@ -522,6 +668,7 @@ class ShellShuffleGame {
       startXB,
       zArc,
       duration: swap.duration,
+      gapDelay: swap.gapDelay,
       startTime: performance.now()
     };
   }
@@ -535,7 +682,7 @@ class ShellShuffleGame {
     const targetCup = this.cups.find(c => c.id === this.targetCupId);
 
     // Sync ball position to target cup's current world position
-    this.ball.position.set(targetCup.group.position.x, 0.18, targetCup.group.position.z);
+    this.ball.position.set(targetCup.group.position.x, 0.20, targetCup.group.position.z);
 
     const isCorrect = selectedCupId === this.targetCupId;
     this.accuracy.total++;
@@ -560,7 +707,7 @@ class ShellShuffleGame {
       // Lift selected cup revealing the ball
       if (window.soundFx) window.soundFx.playCorrect();
       this.ball.visible = true;
-      this.animateLift(selectedCup, 1.8, -0.15, 550, () => {
+      this.animateLift(selectedCup, 1.8, -0.15, 500, () => {
         if (this.app && typeof this.app.triggerConfetti === 'function') {
           this.app.triggerConfetti();
         }
@@ -574,16 +721,16 @@ class ShellShuffleGame {
 
       // Wrong selection: lift selected cup showing empty, then lift the target cup
       if (window.soundFx) window.soundFx.playError();
-      this.animateLift(selectedCup, 1.8, -0.15, 550, () => {
+      this.animateLift(selectedCup, 1.8, -0.15, 500, () => {
         setTimeout(() => {
           if (window.soundFx) window.soundFx.playLift();
           this.ball.visible = true;
-          this.animateLift(targetCup, 1.8, -0.15, 550, () => {
+          this.animateLift(targetCup, 1.8, -0.15, 500, () => {
             setTimeout(() => {
               this.showGameOverModal();
             }, 800);
           });
-        }, 400);
+        }, 350);
       });
     }
   }
@@ -616,7 +763,6 @@ class ShellShuffleGame {
     if (this.activeLift) {
       const elapsed = now - this.activeLift.startTime;
       const t = Math.min(1, elapsed / this.activeLift.duration);
-      // Smooth cubic ease out
       const ease = 1 - Math.pow(1 - t, 3);
 
       this.activeLift.cup.group.position.y = this.activeLift.startY + (this.activeLift.targetY - this.activeLift.startY) * ease;
@@ -636,7 +782,7 @@ class ShellShuffleGame {
       const elapsed = now - this.activeSwap.startTime;
       const t = Math.min(1, elapsed / this.activeSwap.duration);
 
-      // Smooth step easing: 3t^2 - 2t^3
+      // Smooth step easing
       const ease = t * t * (3 - 2 * t);
 
       const cupA = this.activeSwap.cupA;
@@ -674,12 +820,13 @@ class ShellShuffleGame {
         cupA.currentSlot = this.activeSwap.slotB;
         cupB.currentSlot = this.activeSwap.slotA;
 
+        const gap = this.activeSwap.gapDelay;
         this.activeSwap = null;
 
-        // Gap between swaps
+        // Dynamic inter-swap gap scaled with level
         setTimeout(() => {
           this.processNextSwap();
-        }, 70);
+        }, gap);
       }
     }
 
@@ -728,12 +875,15 @@ class ShellShuffleGame {
   }
 
   updateHUD() {
+    const config = this.getShuffleConfigForLevel(this.level);
     const lvlEl = document.getElementById('shellshuffle-hud-level');
+    const speedEl = document.getElementById('shellshuffle-hud-speed');
     const scoreEl = document.getElementById('shellshuffle-hud-score');
     const streakEl = document.getElementById('shellshuffle-hud-streak');
     const cupsCountEl = document.getElementById('shellshuffle-hud-cups');
 
     if (lvlEl) lvlEl.innerText = this.level.toString();
+    if (speedEl) speedEl.innerText = `${config.speedMultiplier}x`;
     if (scoreEl) scoreEl.innerText = this.score.toLocaleString();
     if (streakEl) streakEl.innerText = `x${this.streak}`;
     if (cupsCountEl) cupsCountEl.innerText = `${this.getCupCountForLevel(this.level)} Cups`;
@@ -812,12 +962,12 @@ class ShellShuffleGame {
   }
 
   resetCupsToRestPosition() {
-    this.cups.forEach((c, idx) => {
+    this.cups.forEach((c) => {
       c.group.position.set(this.slots[c.currentSlot], 0, 0);
       c.group.rotation.set(0, 0, 0);
       if (c.mesh && c.mesh.material) {
-        c.mesh.material.emissive.setHex(0x0C1838);
-        c.mesh.material.emissiveIntensity = 0.2;
+        c.mesh.material.emissive.setHex(0x162A58);
+        c.mesh.material.emissiveIntensity = 0.35;
       }
     });
     this.activeSwap = null;

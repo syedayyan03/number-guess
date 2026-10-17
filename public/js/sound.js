@@ -220,22 +220,27 @@ class SoundEffects {
     osc.stop(this.ctx.currentTime + 0.2);
   }
 
-  playShuffle() {
+  playShuffle(durationMs = 500) {
     if (this.muted) return;
     this.init();
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(260, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(140, this.ctx.currentTime + 0.12);
 
-    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+    const normalizedSpeed = Math.min(1, Math.max(0, (800 - durationMs) / 680));
+    const baseFreq = 220 + normalizedSpeed * 320;
+    const soundDuration = Math.max(0.05, Math.min(0.12, (durationMs / 1000) * 0.3));
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(baseFreq, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.65, this.ctx.currentTime + soundDuration);
+
+    gain.gain.setValueAtTime(0.09, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + soundDuration);
 
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start();
-    osc.stop(this.ctx.currentTime + 0.12);
+    osc.stop(this.ctx.currentTime + soundDuration);
   }
 
   playLift() {
