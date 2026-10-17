@@ -1,5 +1,5 @@
 // Number Path (Cognitive Sequential Path Puzzle inspired by LinkedIn Zip)
-// Connect numbers 1 to N in sequence, forming a single continuous path visiting every cell without skipping any row or column.
+// Connect numbers 1 to N in sequence on a 7x7 grid (49 squares), visiting every single cell with zero gaps.
 class NumberPathGame {
   constructor(app) {
     this.app = app;
@@ -8,170 +8,2153 @@ class NumberPathGame {
     this.maxLevel = 10;
     this.level = this.getSavedLevel();
 
-    // Board & Path State
-    this.rows = 4;
-    this.cols = 4;
+    // Board & Path State (Strictly 7x7 grid = 49 cells across all levels)
+    this.rows = 7;
+    this.cols = 7;
     this.checkpoints = []; // Array of { number: 1..K, r, c, stepIndex }
     this.visitedPath = []; // Array of { r, c }
     this.isDragging = false;
     this.isCompleted = false;
+    this.errorTimeout = null;
 
-    // Timer
+    // Stopwatch Timer
     this.timerInterval = null;
     this.secondsElapsed = 0;
 
-    // 10 Handcrafted, 100% Verified Hamiltonian Levels
+    // 10 Mathematically Verified 7x7 Hamiltonian Levels
     this.levelConfigs = [
-      // Level 1: 4x4 (16 cells) - Intro
-      {
-        level: 1,
-        rows: 4,
-        cols: 4,
-        path: [
-          [0,0], [0,1], [0,2], [0,3],
-          [1,3], [1,2], [1,1], [1,0],
-          [2,0], [2,1], [2,2], [2,3],
-          [3,3], [3,2], [3,1], [3,0]
-        ],
-        checkpointSteps: [0, 3, 7, 11, 15] // 1, 2, 3, 4, 5
-      },
-      // Level 2: 4x4 - Spiral
-      {
-        level: 2,
-        rows: 4,
-        cols: 4,
-        path: [
-          [0,0], [1,0], [2,0], [3,0],
-          [3,1], [3,2], [3,3], [2,3],
-          [1,3], [0,3], [0,2], [0,1],
-          [1,1], [2,1], [2,2], [1,2]
-        ],
-        checkpointSteps: [0, 3, 7, 11, 15]
-      },
-      // Level 3: 4x4 - Serpentine Columns
-      {
-        level: 3,
-        rows: 4,
-        cols: 4,
-        path: [
-          [0,0], [1,0], [2,0], [3,0],
-          [3,1], [2,1], [1,1], [0,1],
-          [0,2], [1,2], [2,2], [3,2],
-          [3,3], [2,3], [1,3], [0,3]
-        ],
-        checkpointSteps: [0, 4, 8, 12, 15]
-      },
-      // Level 4: 5x5 (25 cells) - Snaking
-      {
-        level: 4,
-        rows: 5,
-        cols: 5,
-        path: [
-          [0,0], [0,1], [0,2], [0,3], [0,4],
-          [1,4], [1,3], [1,2], [1,1], [1,0],
-          [2,0], [2,1], [2,2], [2,3], [2,4],
-          [3,4], [3,3], [3,2], [3,1], [3,0],
-          [4,0], [4,1], [4,2], [4,3], [4,4]
-        ],
-        checkpointSteps: [0, 5, 10, 15, 20, 24]
-      },
-      // Level 5: 5x5 - Outer to Center
-      {
-        level: 5,
-        rows: 5,
-        cols: 5,
-        path: [
-          [0,0], [0,1], [0,2], [0,3], [0,4],
-          [1,4], [2,4], [3,4], [4,4],
-          [4,3], [4,2], [4,1], [4,0],
-          [3,0], [2,0], [1,0],
-          [1,1], [1,2], [1,3],
-          [2,3], [3,3],
-          [3,2], [3,1],
-          [2,1], [2,2]
-        ],
-        checkpointSteps: [0, 4, 8, 12, 16, 20, 24]
-      },
-      // Level 6: 5x5 - Vertical Combs
-      {
-        level: 6,
-        rows: 5,
-        cols: 5,
-        path: [
-          [0,0], [1,0], [2,0], [3,0], [4,0],
-          [4,1], [3,1], [2,1], [1,1], [0,1],
-          [0,2], [1,2], [2,2], [3,2], [4,2],
-          [4,3], [3,3], [2,3], [1,3], [0,3],
-          [0,4], [1,4], [2,4], [3,4], [4,4]
-        ],
-        checkpointSteps: [0, 4, 9, 14, 19, 24]
-      },
-      // Level 7: 5x5 - Mixed Weave
-      {
-        level: 7,
-        rows: 5,
-        cols: 5,
-        path: [
-          [0,0], [1,0], [1,1], [0,1], [0,2],
-          [1,2], [2,2], [2,1], [2,0], [3,0],
-          [4,0], [4,1], [3,1], [3,2], [4,2],
-          [4,3], [3,3], [2,3], [1,3], [0,3],
-          [0,4], [1,4], [2,4], [3,4], [4,4]
-        ],
-        checkpointSteps: [0, 4, 9, 14, 19, 24]
-      },
-      // Level 8: 6x6 (36 cells) - Grand Snake
-      {
-        level: 8,
-        rows: 6,
-        cols: 6,
-        path: [
-          [0,0], [0,1], [0,2], [0,3], [0,4], [0,5],
-          [1,5], [1,4], [1,3], [1,2], [1,1], [1,0],
-          [2,0], [2,1], [2,2], [2,3], [2,4], [2,5],
-          [3,5], [3,4], [3,3], [3,2], [3,1], [3,0],
-          [4,0], [4,1], [4,2], [4,3], [4,4], [4,5],
-          [5,5], [5,4], [5,3], [5,2], [5,1], [5,0]
-        ],
-        checkpointSteps: [0, 6, 12, 18, 24, 30, 35]
-      },
-      // Level 9: 6x6 - Spiral Labyrinth
-      {
-        level: 9,
-        rows: 6,
-        cols: 6,
-        path: [
-          [0,0], [0,1], [0,2], [0,3], [0,4], [0,5],
-          [1,5], [2,5], [3,5], [4,5], [5,5],
-          [5,4], [5,3], [5,2], [5,1], [5,0],
-          [4,0], [3,0], [2,0], [1,0],
-          [1,1], [1,2], [1,3], [1,4],
-          [2,4], [3,4], [4,4],
-          [4,3], [4,2], [4,1],
-          [3,1], [2,1],
-          [2,2], [2,3],
-          [3,3], [3,2]
-        ],
-        checkpointSteps: [0, 5, 10, 15, 20, 25, 30, 35]
-      },
-      // Level 10: 6x6 - Master Labyrinth
-      {
-        level: 10,
-        rows: 6,
-        cols: 6,
-        path: [
-          [0,0], [0,1], [0,2], [0,3], [0,4], [0,5],
-          [1,5], [1,4], [1,3], [1,2], [1,1], [1,0],
-          [2,0], [3,0], [4,0], [5,0],
-          [5,1], [4,1], [3,1], [2,1],
-          [2,2], [3,2], [4,2], [5,2],
-          [5,3], [4,3], [3,3], [2,3],
-          [2,4], [3,4], [4,4], [5,4],
-          [5,5], [4,5], [3,5], [2,5]
-        ],
-        checkpointSteps: [0, 5, 11, 15, 19, 23, 27, 31, 35]
-      }
-    ];
+  {
+    "level": 1,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      4,
+      7,
+      11,
+      15,
+      18,
+      22,
+      26,
+      30,
+      33,
+      37,
+      41,
+      44,
+      48
+    ]
+  },
+  {
+    "level": 2,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        6,
+        0
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        4,
+        0
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      4,
+      9,
+      13,
+      17,
+      22,
+      26,
+      31,
+      35,
+      39,
+      44,
+      48
+    ]
+  },
+  {
+    "level": 3,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        2
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      4,
+      12,
+      18,
+      24,
+      30,
+      36,
+      44,
+      48
+    ]
+  },
+  {
+    "level": 4,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        0,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      6,
+      12,
+      18,
+      24,
+      30,
+      36,
+      42,
+      48
+    ]
+  },
+  {
+    "level": 5,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        6,
+        6
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        4,
+        6
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      7,
+      14,
+      21,
+      27,
+      34,
+      41,
+      48
+    ]
+  },
+  {
+    "level": 6,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        5,
+        5
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      8,
+      16,
+      24,
+      32,
+      40,
+      48
+    ]
+  },
+  {
+    "level": 7,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        4,
+        2
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        1
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      10,
+      19,
+      29,
+      38,
+      48
+    ]
+  },
+  {
+    "level": 8,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      10,
+      19,
+      29,
+      38,
+      48
+    ]
+  },
+  {
+    "level": 9,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        6,
+        6
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      12,
+      24,
+      36,
+      48
+    ]
+  },
+  {
+    "level": 10,
+    "rows": 7,
+    "cols": 7,
+    "path": [
+      [
+        4,
+        4
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "checkpointSteps": [
+      0,
+      12,
+      24,
+      36,
+      48
+    ]
+  }
+];
 
     // Global drag release handler
     window.addEventListener('pointerup', () => {
@@ -226,10 +2209,11 @@ class NumberPathGame {
     this.saveProgress(this.level);
 
     const config = this.levelConfigs[this.level - 1];
-    this.rows = config.rows;
-    this.cols = config.cols;
+    this.rows = 7;
+    this.cols = 7;
     this.isCompleted = false;
     this.isDragging = false;
+    this.clearError();
 
     // Build checkpoints: number starts from 1..K
     this.checkpoints = config.checkpointSteps.map((stepIdx, idx) => {
@@ -251,7 +2235,7 @@ class NumberPathGame {
     this.updateHUD();
   }
 
-  // --- Timer ---
+  // --- Stopwatch Timer ---
   startTimer() {
     this.stopTimer();
     this.secondsElapsed = 0;
@@ -279,29 +2263,53 @@ class NumberPathGame {
     el.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
+  // --- Error Display ---
+  showError(msg) {
+    const banner = document.getElementById('numberpath-error-banner');
+    if (banner) {
+      banner.innerText = msg;
+      banner.classList.remove('hidden');
+      if (this.errorTimeout) clearTimeout(this.errorTimeout);
+      this.errorTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 3000);
+    }
+  }
+
+  clearError() {
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+      this.errorTimeout = null;
+    }
+    const banner = document.getElementById('numberpath-error-banner');
+    if (banner && !banner.classList.contains('hidden')) {
+      banner.classList.add('hidden');
+    }
+  }
+
   // --- Board Rendering ---
   renderBoard() {
     const boardEl = document.getElementById('numberpath-grid');
     if (!boardEl) return;
 
     boardEl.innerHTML = '';
-    boardEl.style.gridTemplateColumns = `repeat(${this.cols}, minmax(0, 1fr))`;
-    boardEl.style.gridTemplateRows = `repeat(${this.rows}, minmax(0, 1fr))`;
+    boardEl.style.gridTemplateColumns = 'repeat(7, minmax(0, 1fr))';
+    boardEl.style.gridTemplateRows = 'repeat(7, minmax(0, 1fr))';
 
-    // Render cells
-    for (let r = 0; r < this.rows; r++) {
-      for (let c = 0; c < this.cols; c++) {
+    // Render 49 cells
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
         const cell = document.createElement('div');
         cell.id = `np-cell-${r}-${c}`;
-        cell.className = 'np-cell relative flex items-center justify-center rounded-xl font-bold cursor-pointer select-none transition-all duration-150';
+        cell.className = 'np-cell relative flex items-center justify-center font-bold cursor-pointer select-none transition-colors duration-150';
         cell.dataset.row = r;
         cell.dataset.col = c;
 
-        // Checkpoint badge
+        // Checkpoint badge: Solid black circle with white text (matching LinkedIn Zip)
         const cp = this.checkpoints.find(p => p.r === r && p.c === c);
         if (cp) {
           const badge = document.createElement('div');
-          badge.className = 'np-checkpoint-badge w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-sm sm:text-base font-black shadow-lg z-10 transition-transform';
+          badge.className = 'np-checkpoint-badge w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-black shadow z-10 select-none';
           badge.innerText = cp.number;
           cell.appendChild(badge);
         }
@@ -337,6 +2345,19 @@ class NumberPathGame {
       return;
     }
 
+    // Check if cell is an unvisited checkpoint tapped out of sequence
+    const cp = this.checkpoints.find(p => p.r === r && p.c === c);
+    if (cp) {
+      const collectedCount = this.getCollectedCheckpointCount();
+      const expectedNumber = collectedCount + 1;
+      if (cp.number !== expectedNumber) {
+        if (window.soundFx) window.soundFx.playTick();
+        this.flashCellInvalid(r, c);
+        this.showError(`⚠️ Wrong join! You must connect to ${expectedNumber} next, not ${cp.number}.`);
+        return;
+      }
+    }
+
     // Attempt to step onto cell
     this.attemptStep(r, c);
   }
@@ -367,18 +2388,14 @@ class NumberPathGame {
     if (this.visitedPath.length === 0) return false;
     const currentTip = this.visitedPath[this.visitedPath.length - 1];
 
-    // Must be adjacent (up, down, left, right)
-    const dr = Math.abs(r - currentTip.r);
-    const dc = Math.abs(c - currentTip.c);
-    if (dr + dc !== 1) return false;
-
     // Must not already be visited
-    if (this.visitedPath.some(p => p.r === r && p.c === c)) return false;
+    if (this.visitedPath.some(p => p.r === r && p.c === c)) {
+      return false;
+    }
 
-    // Check if cell is a checkpoint
+    // Check if cell is a checkpoint out of sequence (checked first so wrong join error is clear)
     const cp = this.checkpoints.find(p => p.r === r && p.c === c);
     if (cp) {
-      // Find the last checkpoint collected
       const collectedCount = this.getCollectedCheckpointCount();
       const expectedNumber = collectedCount + 1;
 
@@ -386,11 +2403,21 @@ class NumberPathGame {
       if (cp.number !== expectedNumber) {
         if (window.soundFx) window.soundFx.playTick();
         this.flashCellInvalid(r, c);
+        this.showError(`⚠️ Wrong join! You must connect to ${expectedNumber} next, not ${cp.number}.`);
         return false;
       }
     }
 
+    // Must be adjacent (up, down, left, right)
+    const dr = Math.abs(r - currentTip.r);
+    const dc = Math.abs(c - currentTip.c);
+    if (dr + dc !== 1) {
+      this.showError('⚠️ Step must connect to an adjacent square (up, down, left, right).');
+      return false;
+    }
+
     // Valid step!
+    this.clearError();
     this.visitedPath.push({ r, c });
     if (window.soundFx) window.soundFx.playTick();
 
@@ -412,11 +2439,11 @@ class NumberPathGame {
 
   rewindTo(index) {
     if (index < 0 || index >= this.visitedPath.length) return;
-    // Don't rewind past start
     const targetLength = Math.max(1, index + 1);
     if (this.visitedPath.length === targetLength) return;
 
     this.visitedPath = this.visitedPath.slice(0, targetLength);
+    this.clearError();
     if (window.soundFx) window.soundFx.playClick();
     this.renderPath();
     this.updateHUD();
@@ -425,6 +2452,7 @@ class NumberPathGame {
   undo() {
     if (this.visitedPath.length <= 1 || this.isCompleted) return;
     this.visitedPath.pop();
+    this.clearError();
     if (window.soundFx) window.soundFx.playClick();
     this.renderPath();
     this.updateHUD();
@@ -438,6 +2466,7 @@ class NumberPathGame {
     if (this.isCompleted) return;
     const startCp = this.checkpoints[0];
     this.visitedPath = [{ r: startCp.r, c: startCp.c }];
+    this.clearError();
     if (window.soundFx) window.soundFx.playClick();
     this.renderPath();
     this.updateHUD();
@@ -449,7 +2478,7 @@ class NumberPathGame {
     el.classList.add('np-invalid-pulse');
     setTimeout(() => {
       el.classList.remove('np-invalid-pulse');
-    }, 300);
+    }, 400);
   }
 
   // --- SVG Path Rendering ---
@@ -458,11 +2487,9 @@ class NumberPathGame {
     const svgEl = document.getElementById('numberpath-svg-lines');
     if (!boardEl || !svgEl) return;
 
-    const totalCells = this.rows * this.cols;
-
-    // Highlight visited cells
-    for (let r = 0; r < this.rows; r++) {
-      for (let c = 0; c < this.cols; c++) {
+    // Highlight visited cells (peach/light orange fill) and head
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
         const cell = document.getElementById(`np-cell-${r}-${c}`);
         if (!cell) continue;
 
@@ -506,8 +2533,8 @@ class NumberPathGame {
         cx = cell.offsetLeft + cell.offsetWidth / 2;
         cy = cell.offsetTop + cell.offsetHeight / 2;
       } else {
-        const cellW = boardRect.width / this.cols;
-        const cellH = boardRect.height / this.rows;
+        const cellW = boardRect.width / 7;
+        const cellH = boardRect.height / 7;
         cx = pt.c * cellW + cellW / 2;
         cy = pt.r * cellH + cellH / 2;
       }
@@ -527,7 +2554,7 @@ class NumberPathGame {
     shadowPath.setAttribute('class', 'np-svg-shadow');
     svgEl.appendChild(shadowPath);
 
-    // Glowing main path line
+    // Glowing main path line (solid thick rounded orange)
     const mainPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     mainPath.setAttribute('d', d);
     mainPath.setAttribute('class', 'np-svg-path');
@@ -538,7 +2565,7 @@ class NumberPathGame {
       const headCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       headCircle.setAttribute('cx', lastCx);
       headCircle.setAttribute('cy', lastCy);
-      headCircle.setAttribute('r', '8');
+      headCircle.setAttribute('r', '6');
       headCircle.setAttribute('class', 'np-svg-head');
       svgEl.appendChild(headCircle);
     }
@@ -546,14 +2573,15 @@ class NumberPathGame {
 
   // --- Win Condition & Celebration ---
   checkWinCondition() {
-    const totalCells = this.rows * this.cols;
+    const totalCells = 49;
     const totalCheckpoints = this.checkpoints.length;
     const collectedCheckpoints = this.getCollectedCheckpointCount();
 
-    // Must have visited every single cell AND all checkpoints collected
+    // Must have visited all 49 cells AND collected all checkpoints
     if (this.visitedPath.length === totalCells && collectedCheckpoints === totalCheckpoints) {
       this.isCompleted = true;
       this.stopTimer();
+      this.clearError();
 
       if (window.soundFx) window.soundFx.playCorrect();
       if (this.app && typeof this.app.triggerConfetti === 'function') {
@@ -590,7 +2618,7 @@ class NumberPathGame {
     const secs = this.secondsElapsed % 60;
     if (timeEl) timeEl.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     if (lvlEl) lvlEl.innerText = `Level ${this.level}`;
-    if (cellsEl) cellsEl.innerText = `${this.rows * this.cols}/${this.rows * this.cols}`;
+    if (cellsEl) cellsEl.innerText = '49 / 49';
 
     if (this.app) this.app.openModal('modal-numberpath-clear');
   }
@@ -617,25 +2645,30 @@ class NumberPathGame {
     const progEl = document.getElementById('numberpath-hud-progress');
     const cpEl = document.getElementById('numberpath-hud-checkpoints');
 
-    const totalCells = this.rows * this.cols;
-    const collected = this.getCollectedCheckpointCount();
-    const totalCp = this.checkpoints.length;
+    if (lvlEl) lvlEl.innerText = `${this.level} / ${this.maxLevel}`;
+    if (progEl) progEl.innerText = `${this.visitedPath.length} / 49`;
 
-    if (lvlEl) lvlEl.innerText = `Level ${this.level} / ${this.maxLevel}`;
-    if (progEl) progEl.innerText = `${this.visitedPath.length} / ${totalCells}`;
-    if (cpEl) cpEl.innerText = `${collected} / ${totalCp}`;
+    if (cpEl) {
+      const collected = this.getCollectedCheckpointCount();
+      const nextExpected = collected + 1;
+      if (nextExpected <= this.checkpoints.length) {
+        cpEl.innerText = `Next target: ${nextExpected} (Total ${this.checkpoints.length})`;
+      } else {
+        cpEl.innerText = `All ${this.checkpoints.length} reached! Fill remaining squares`;
+      }
+    }
   }
 
-  // --- Exit to Menu ---
   exitToMenu() {
     this.stopTimer();
-    this.isCompleted = true;
+    this.clearError();
+    this.isDragging = false;
     if (this.app) {
-      this.app.closeModal('modal-numberpath-clear');
       this.app.showScreen('menu');
-      this.app.updateNumberPathMenuCard();
     }
   }
 }
 
-window.NumberPathGame = NumberPathGame;
+if (typeof window !== 'undefined') {
+  window.NumberPathGame = NumberPathGame;
+}

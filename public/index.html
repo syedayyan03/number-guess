@@ -17,7 +17,7 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=20.0">
+  <link rel="stylesheet" href="/style.css?v=21.0">
 </head>
 <body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
 
@@ -966,7 +966,7 @@
     <!-- ============================================== -->
     <section id="screen-numberpath" class="w-full max-w-md hidden flex-col items-center py-2">
       <!-- Number Path Top Bar -->
-      <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
+      <div class="w-full clean-card px-4 py-2.5 mb-2.5 flex items-center justify-between text-xs">
         <button onclick="app.exitNumberPathToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
         </button>
@@ -978,46 +978,52 @@
           </div>
           <div>
             <span class="text-[#858AA5]">Step:</span>
-            <span id="numberpath-hud-progress" class="font-bold text-[#F5F5FF] ml-1 text-sm">1 / 16</span>
+            <span id="numberpath-hud-progress" class="font-bold text-[#F5F5FF] ml-1 text-sm">1 / 49</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5 font-mono">
-          <i data-lucide="clock" class="w-3.5 h-3.5 text-[#858AA5]"></i>
+        <!-- Stopwatch -->
+        <div class="flex items-center gap-1.5 font-mono px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-[#FB923C]"></i>
           <span id="numberpath-timer" class="font-bold text-white text-sm">0:00</span>
         </div>
       </div>
 
-      <!-- Instruction / Target Banner -->
-      <div class="w-full clean-card p-3 mb-3 flex items-center justify-between">
+      <!-- Target Banner & Reset Pill Button (Matching LinkedIn Zip) -->
+      <div class="w-full clean-card px-3.5 py-2 mb-2.5 flex items-center justify-between">
         <div class="text-xs text-[#B8BCD0] font-medium flex items-center gap-2">
-          <span class="text-[#858AA5]">Checkpoints:</span>
-          <span id="numberpath-hud-checkpoints" class="font-mono text-[#FB923C] font-semibold text-xs">Connect in order: 1 → 2 → 3...</span>
+          <span class="text-[#858AA5]">Target:</span>
+          <span id="numberpath-hud-checkpoints" class="font-mono text-[#FB923C] font-semibold text-xs">Next target: 1</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="if (app.numberPathGame) app.numberPathGame.undoStep()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1 text-[#B8BCD0] hover:text-white transition" title="Undo Last Step">
-            <i data-lucide="undo-2" class="w-3.5 h-3.5"></i> Undo
-          </button>
-          <button onclick="if (app.numberPathGame) app.numberPathGame.resetCurrentLevel()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1 text-rose-400 hover:text-rose-300 transition" title="Reset Level">
-            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
-          </button>
-        </div>
+        <button onclick="if (app.numberPathGame) app.numberPathGame.resetCurrentLevel()" class="px-3.5 py-1 rounded-full border border-white/20 hover:border-white/50 text-[#F5F5FF] hover:bg-white/5 font-mono text-xs font-semibold flex items-center gap-1.5 transition" title="Reset Level">
+          <i data-lucide="rotate-ccw" class="w-3 h-3 text-rose-400"></i> Reset
+        </button>
       </div>
 
-      <!-- Number Path Grid Board & SVG overlay -->
-      <div class="w-full clean-card p-3 sm:p-4 mb-3 bg-[#0C0D19] border border-[#34364A] shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden flex flex-col items-center">
+      <!-- Number Path Grid Board & SVG overlay (Clean White Board matching LinkedIn Zip) -->
+      <div id="numberpath-board-card" class="w-full np-board-card p-3 sm:p-4 mb-2 rounded-3xl relative overflow-hidden flex flex-col items-center">
         <!-- Relative Grid Container for positioning SVG precisely over cells -->
-        <div class="relative w-full aspect-square max-w-[380px] select-none touch-none">
+        <div class="np-grid-wrapper relative w-full aspect-square max-w-[385px] select-none touch-none rounded-2xl overflow-hidden">
           <svg id="numberpath-svg-lines" class="absolute inset-0 w-full h-full pointer-events-none z-20"></svg>
-          <div id="numberpath-grid" class="w-full h-full grid gap-1.5 sm:gap-2 relative z-10">
-            <!-- Cell divs generated dynamically by NumberPathGame -->
+          <div id="numberpath-grid" class="w-full h-full grid relative z-10">
+            <!-- 49 Cell divs generated dynamically by NumberPathGame -->
           </div>
         </div>
       </div>
 
-      <!-- Controls & Hint Row -->
-      <div class="mt-1 text-center text-[11px] text-[#858AA5] font-mono leading-relaxed">
-        Drag or tap adjacent tiles to fill every square • Reach numbered checkpoints in numerical sequence
+      <!-- Error / Feedback Banner (Displayed when wrong number is joined) -->
+      <div id="numberpath-error-banner" class="hidden w-full py-2.5 px-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-rose-200 font-mono text-xs font-bold text-center mb-2 shadow-lg transition-all animate-pulse"></div>
+
+      <!-- Bottom Control: Undo Button (No Hint) -->
+      <div class="w-full flex items-center justify-between gap-3">
+        <button onclick="if (app.numberPathGame) app.numberPathGame.undoStep()" class="w-full py-2.5 rounded-xl bg-[#191B2D] border border-[#34364A] text-[#F5F5FF] hover:bg-[#252844] hover:text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow transition">
+          <i data-lucide="undo-2" class="w-4 h-4 text-[#FB923C]"></i> Undo Step
+        </button>
+      </div>
+
+      <!-- Controls & Rule Description -->
+      <div class="mt-2 text-center text-[11px] text-[#858AA5] font-mono leading-relaxed">
+        Connect numbers in strict sequence • Every square on the 7x7 grid must be visited
       </div>
     </section>
 
@@ -1445,7 +1451,7 @@
           </div>
           <div class="flex justify-between items-center">
             <span class="text-slate-400">Squares Traversed:</span>
-            <span id="numberpath-clear-cells" class="font-bold text-[#F5F5FF]">16 / 16</span>
+            <span id="numberpath-clear-cells" class="font-bold text-[#F5F5FF]">49 / 49</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-slate-400">Time Taken:</span>
@@ -1671,7 +1677,7 @@
   <script src="/js/donttap.js?v=1.0"></script>
   <script src="/js/countdown.js?v=1.0"></script>
   <script src="/js/shellshuffle.js?v=1.1"></script>
-  <script src="/js/numberpath.js?v=1.0"></script>
-  <script src="/js/app.js?v=19.0"></script>
+  <script src="/js/numberpath.js?v=2.0"></script>
+  <script src="/js/app.js?v=20.0"></script>
 </body>
 </html>
