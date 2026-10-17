@@ -207,7 +207,7 @@
             
             <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
               <span id="countdown-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Best: 0</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">5s Per Answer</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Custom Gap & Limit</span>
               <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">3 Mistakes Allowed</span>
             </div>
           </div>
@@ -694,10 +694,10 @@
           <div class="space-y-4 text-xs">
             <div>
               <label for="countdown-start-input" class="block font-medium text-[#B8BCD0] mb-1.5 flex items-center justify-between">
-                <span>Starting Number</span>
-                <span class="text-[10px] font-mono text-[#858AA5]">Default: 100</span>
+                <span>Upper Limit (Starting Number)</span>
+                <span class="text-[10px] font-mono text-[#858AA5]">Choose any limit</span>
               </label>
-              <input id="countdown-start-input" type="number" min="2" max="10000" value="100"
+              <input id="countdown-start-input" type="number" min="2" max="10000" placeholder="e.g. 100, 250, 500..." value=""
                      oninput="app.countdownGame.updatePreviewAndValidation()"
                      class="clean-input w-full px-3.5 py-2.5 text-sm font-bold font-mono">
             </div>
@@ -705,9 +705,9 @@
             <div>
               <label for="countdown-gap-input" class="block font-medium text-[#B8BCD0] mb-1.5 flex items-center justify-between">
                 <span>Subtraction Gap</span>
-                <span class="text-[10px] font-mono text-[#858AA5]">Default: 7</span>
+                <span class="text-[10px] font-mono text-[#858AA5]">Choose any step</span>
               </label>
-              <input id="countdown-gap-input" type="number" min="1" max="1000" value="7"
+              <input id="countdown-gap-input" type="number" min="1" max="1000" placeholder="e.g. 7, 13, 25..." value=""
                      oninput="app.countdownGame.updatePreviewAndValidation()"
                      class="clean-input w-full px-3.5 py-2.5 text-sm font-bold font-mono">
             </div>
@@ -716,10 +716,10 @@
             <div class="p-3.5 rounded-xl bg-[#191B2D] border border-[#34364A] text-xs">
               <div class="flex items-center justify-between text-[11px] text-[#858AA5] font-mono mb-1.5">
                 <span>Sequence Preview:</span>
-                <span id="countdown-steps-estimate" class="text-[#F4C66A] font-semibold">14 calculations to complete</span>
+                <span id="countdown-steps-estimate" class="text-[#F4C66A] font-semibold">—</span>
               </div>
               <div id="countdown-sequence-preview" class="font-mono text-xs font-bold text-[#F5F5FF] truncate">
-                100 → 93 → 86 → ... → 2
+                Enter your upper limit and gap above
               </div>
             </div>
 

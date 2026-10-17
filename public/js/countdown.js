@@ -5,13 +5,13 @@ class CountdownCalculationGame {
     this.app = app;
     this.storageKey = 'numberverse_countdown_best';
 
-    // Config defaults
-    this.startNumber = 100;
-    this.subtractionGap = 7;
+    // Config values chosen by user (no hardcoded defaults)
+    this.startNumber = null;
+    this.subtractionGap = null;
 
     // Game state
-    this.currentNumber = 100;
-    this.expectedAnswer = 93;
+    this.currentNumber = 0;
+    this.expectedAnswer = 0;
     this.score = 0;
     this.correctAnswers = 0;
     this.mistakes = 0;
@@ -108,11 +108,11 @@ class CountdownCalculationGame {
     if (setupView) setupView.classList.remove('hidden');
     if (playView) playView.classList.add('hidden');
 
-    // Populate inputs with current values
+    // Populate inputs with current values if already set by user
     const startInput = document.getElementById('countdown-start-input');
     const gapInput = document.getElementById('countdown-gap-input');
-    if (startInput) startInput.value = this.startNumber;
-    if (gapInput) gapInput.value = this.subtractionGap;
+    if (startInput) startInput.value = this.startNumber !== null ? this.startNumber : '';
+    if (gapInput) gapInput.value = this.subtractionGap !== null ? this.subtractionGap : '';
 
     this.updatePreviewAndValidation();
   }
@@ -125,21 +125,33 @@ class CountdownCalculationGame {
     const stepsEl = document.getElementById('countdown-steps-estimate');
     const startBtn = document.getElementById('countdown-start-btn');
 
-    if (!startInput || !gapInput) return;
+    if (!startInput || !gapInput) return false;
 
-    const startVal = parseInt(startInput.value, 10);
-    const gapVal = parseInt(gapInput.value, 10);
+    const rawStart = startInput.value.trim();
+    const rawGap = gapInput.value.trim();
+
+    // If either input is empty, cleanly prompt user without showing validation error
+    if (!rawStart || !rawGap) {
+      if (errorEl) errorEl.classList.add('hidden');
+      if (previewEl) previewEl.innerText = 'Enter your upper limit and gap above';
+      if (stepsEl) stepsEl.innerText = '—';
+      if (startBtn) startBtn.disabled = true;
+      return false;
+    }
+
+    const startVal = parseInt(rawStart, 10);
+    const gapVal = parseInt(rawGap, 10);
 
     let error = null;
 
     if (isNaN(startVal) || isNaN(gapVal)) {
       error = 'Please enter valid whole numbers.';
     } else if (startVal <= 0 || gapVal <= 0) {
-      error = 'Starting number and gap must be positive whole numbers.';
+      error = 'Upper limit and gap must be positive whole numbers.';
     } else if (startVal <= gapVal) {
-      error = 'Starting number must be greater than subtraction gap.';
+      error = 'Upper limit must be greater than subtraction gap.';
     } else if (startVal > 10000) {
-      error = 'Starting number must not exceed 10,000.';
+      error = 'Upper limit must not exceed 10,000.';
     } else if (gapVal > 1000) {
       error = 'Subtraction gap must not exceed 1,000.';
     }
