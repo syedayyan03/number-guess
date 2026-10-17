@@ -353,27 +353,45 @@ class NumberVerseApp {
   }
 
   updateShellShuffleMenuCard() {
+    const savedLevel = this.shellShuffleGame ? this.shellShuffleGame.level : parseInt(localStorage.getItem('numberverse_shellshuffle_saved_level') || '1', 10);
     const highScore = this.shellShuffleGame ? this.shellShuffleGame.highScore : parseInt(localStorage.getItem('numberverse_shellshuffle_highscore') || '0', 10);
     const badge = document.getElementById('shellshuffle-card-badge');
+    const btnText = document.getElementById('shellshuffle-card-btn-text');
     const resetBtn = document.getElementById('shellshuffle-card-reset-btn');
 
-    if (badge) {
-      badge.innerText = highScore > 0 ? `Best: ${highScore.toLocaleString()}` : `Best: 0`;
-    }
-    if (resetBtn) {
-      resetBtn.classList.toggle('hidden', highScore <= 0);
+    if (savedLevel > 1) {
+      if (badge) badge.innerText = `Level ${savedLevel}`;
+      if (btnText) btnText.innerText = `Resume Level ${savedLevel}`;
+      if (resetBtn) {
+        resetBtn.innerText = 'Reset to Level 1';
+        resetBtn.classList.remove('hidden');
+      }
+    } else if (highScore > 0) {
+      if (badge) badge.innerText = `Best: ${highScore.toLocaleString()}`;
+      if (btnText) btnText.innerText = `Play Shell Shuffle`;
+      if (resetBtn) {
+        resetBtn.innerText = 'Reset to Level 1';
+        resetBtn.classList.remove('hidden');
+      }
+    } else {
+      if (badge) badge.innerText = `3–5 Cups`;
+      if (btnText) btnText.innerText = `Play Shell Shuffle`;
+      if (resetBtn) {
+        resetBtn.classList.add('hidden');
+      }
     }
   }
 
   resetShellShuffleProgress() {
     if (this.shellShuffleGame) {
-      this.shellShuffleGame.resetHighScore();
+      this.shellShuffleGame.resetProgress();
     } else {
       localStorage.removeItem('numberverse_shellshuffle_highscore');
       localStorage.removeItem('numberverse_shellshuffle_best_level');
+      localStorage.removeItem('numberverse_shellshuffle_saved_level');
     }
     this.updateShellShuffleMenuCard();
-    this.showToast('Shell Shuffle high score reset', 'info');
+    this.showToast('Shell Shuffle progress reset to Level 1', 'info');
   }
 
   showScreen(screenId, updateHistory = true) {

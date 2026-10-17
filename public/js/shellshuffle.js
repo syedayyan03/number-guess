@@ -40,8 +40,10 @@ class ShellShuffleGame {
     this.isPaused = false;
     this.storageKey = 'numberverse_shellshuffle_highscore';
     this.bestLevelKey = 'numberverse_shellshuffle_best_level';
+    this.savedLevelKey = 'numberverse_shellshuffle_saved_level';
     this.highScore = parseInt(localStorage.getItem(this.storageKey) || '0', 10);
     this.highestLevel = parseInt(localStorage.getItem(this.bestLevelKey) || '1', 10);
+    this.level = parseInt(localStorage.getItem(this.savedLevelKey) || '1', 10);
 
     // Shuffle & Animation Queue
     this.slots = []; // Array of X coordinates for slots
@@ -107,6 +109,7 @@ class ShellShuffleGame {
       return;
     }
 
+    this.level = parseInt(localStorage.getItem(this.savedLevelKey) || '1', 10);
     this.setupScene();
     this.setupEventListeners();
     this.updateHUD();
@@ -271,39 +274,9 @@ class ShellShuffleGame {
     this.scene.add(innerRingMesh);
   }
 
-  // Create High-Contrast Cup Letter Badge ("A", "B", "C", "D", "E")
-  createCupBadge(letter) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-
-    // Outer glow disc
-    ctx.beginPath();
-    ctx.arc(64, 64, 56, 0, Math.PI * 2);
-    ctx.fillStyle = '#1A2952';
-    ctx.fill();
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = '#4169FF';
-    ctx.stroke();
-
-    // Crisp white bold letter
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(letter, 64, 67);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    const badgeMat = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      opacity: 0.95
-    });
-    const badgeGeom = new THREE.CircleGeometry(0.18, 24);
-    const badgeMesh = new THREE.Mesh(badgeGeom, badgeMat);
-    badgeMesh.position.set(0, 0.65, 0.388); // Flush on front of cup
-    return badgeMesh;
+  // Cup Letter Badge removed - all cups must be 100% identical for genuine shell visual tracking
+  createCupBadge() {
+    return null;
   }
 
   // Lathed Hollow Cup Geometry
@@ -392,13 +365,10 @@ class ShellShuffleGame {
     this.cups = [];
     this.cupPositionMap = {};
 
-    const cupLetters = ['A', 'B', 'C', 'D', 'E'];
-
     for (let i = 0; i < cupCount; i++) {
       const cupId = `cup-${i}`;
-      const letter = cupLetters[i];
       const group = new THREE.Group();
-      group.userData = { cupId, slotIndex: i, letter };
+      group.userData = { cupId, slotIndex: i };
 
       // Main hollow body
       const cupMesh = new THREE.Mesh(this.cupGeom, this.cupMat.clone());
@@ -428,10 +398,6 @@ class ShellShuffleGame {
       gemMesh.position.y = 1.33;
       group.add(gemMesh);
 
-      // Illuminated Cup Letter Badge
-      const badgeMesh = this.createCupBadge(letter);
-      group.add(badgeMesh);
-
       // Position group at slot
       group.position.set(this.slots[i], 0, 0);
       this.scene.add(group);
@@ -441,7 +407,6 @@ class ShellShuffleGame {
         group,
         mesh: cupMesh,
         rim: rimMesh,
-        badge: badgeMesh,
         currentSlot: i,
         baseY: 0
       });
@@ -904,7 +869,18 @@ class ShellShuffleGame {
   nextLevel() {
     if (this.app) this.app.closeModal('modal-shellshuffle-level-clear');
     this.level++;
+    try {
+      localStorage.setItem(this.savedLevelKey, this.level.toString());
+      if (this.level > this.highestLevel) {
+        this.highestLevel = this.level;
+        localStorage.setItem(this.bestLevelKey, this.highestLevel.toString());
+      }
+    } catch (e) {}
     this.updateHUD();
+
+    if (this.app && typeof this.app.updateShellShuffleMenuCard === 'function') {
+      this.app.updateShellShuffleMenuCard();
+    }
 
     // Reset cup positions to ground flush
     this.resetCupsToRestPosition();
@@ -941,10 +917,17 @@ class ShellShuffleGame {
     }
 
     this.level = 1;
+    try {
+      localStorage.setItem(this.savedLevelKey, '1');
+    } catch (e) {}
     this.score = 0;
     this.streak = 0;
     this.accuracy = { correct: 0, total: 0 };
     this.updateHUD();
+
+    if (this.app && typeof this.app.updateShellShuffleMenuCard === 'function') {
+      this.app.updateShellShuffleMenuCard();
+    }
 
     this.rebuildSceneForLevel();
     this.resetCupsToRestPosition();
@@ -969,14 +952,25 @@ class ShellShuffleGame {
     this.swapQueue = [];
   }
 
-  resetHighScore() {
+  resetProgress() {
     try {
       localStorage.removeItem(this.storageKey);
       localStorage.removeItem(this.bestLevelKey);
+      localStorage.removeItem(this.savedLevelKey);
       this.highScore = 0;
       this.highestLevel = 1;
+      this.level = 1;
+      this.score = 0;
+      this.streak = 0;
       this.updateHUD();
+      if (this.app && typeof this.app.updateShellShuffleMenuCard === 'function') {
+        this.app.updateShellShuffleMenuCard();
+      }
     } catch (e) {}
+  }
+
+  resetHighScore() {
+    this.resetProgress();
   }
 
   togglePause() {
