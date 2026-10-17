@@ -45,10 +45,14 @@ class NumberVerseApp {
     if (window.ShellShuffleGame) {
       this.shellShuffleGame = new window.ShellShuffleGame(this);
     }
+    if (window.NumberPathGame) {
+      this.numberPathGame = new window.NumberPathGame(this);
+    }
     this.updateMatrixMenuCard();
     this.updateDontTapMenuCard();
     this.updateCountdownMenuCard();
     this.updateShellShuffleMenuCard();
+    this.updateNumberPathMenuCard();
     this.setupRouter();
     this.routeFromUrl(false);
     this.renderIcons();
@@ -251,6 +255,22 @@ class NumberVerseApp {
       if (this.shellShuffleGame) {
         this.shellShuffleGame.init();
       }
+    } else if (gameId === 'number_path') {
+      if (!this.numberPathGame && window.NumberPathGame) {
+        this.numberPathGame = new window.NumberPathGame(this);
+      }
+      this.showScreen('numberpath', updateHistory);
+      if (this.numberPathGame) {
+        this.numberPathGame.startLevel();
+      }
+    }
+  }
+
+  exitNumberPathToMenu() {
+    if (this.numberPathGame) {
+      this.numberPathGame.exitToMenu();
+    } else {
+      this.showScreen('menu');
     }
   }
 
@@ -394,6 +414,33 @@ class NumberVerseApp {
     this.showToast('Shell Shuffle progress reset to Level 1', 'info');
   }
 
+  updateNumberPathMenuCard() {
+    const savedLevel = this.numberPathGame ? this.numberPathGame.getSavedLevel() : parseInt(localStorage.getItem('numberverse_numberpath_level') || '1', 10);
+    const badge = document.getElementById('numberpath-card-badge');
+    const btnText = document.getElementById('numberpath-card-btn-text');
+    const resetBtn = document.getElementById('numberpath-card-reset-btn');
+
+    if (savedLevel > 1) {
+      if (badge) badge.innerText = `Level ${savedLevel} / 10`;
+      if (btnText) btnText.innerText = `Resume Level ${savedLevel}`;
+      if (resetBtn) resetBtn.classList.remove('hidden');
+    } else {
+      if (badge) badge.innerText = `10 Levels`;
+      if (btnText) btnText.innerText = `Play Number Path`;
+      if (resetBtn) resetBtn.classList.add('hidden');
+    }
+  }
+
+  resetNumberPathProgress() {
+    if (this.numberPathGame) {
+      this.numberPathGame.resetProgress();
+    } else {
+      localStorage.removeItem('numberverse_numberpath_level');
+    }
+    this.updateNumberPathMenuCard();
+    this.showToast('Number Path progress reset to Level 1', 'info');
+  }
+
   showScreen(screenId, updateHistory = true) {
     if (this.currentScreen !== screenId) {
       if (this.currentScreen === 'matrix' && this.matrixGame) {
@@ -408,18 +455,20 @@ class NumberVerseApp {
         this.countdownGame.isPaused = false;
       } else if (this.currentScreen === 'shellshuffle' && this.shellShuffleGame) {
         this.shellShuffleGame.stopAnimations();
+      } else if (this.currentScreen === 'numberpath' && this.numberPathGame) {
+        this.numberPathGame.stopTimer();
       }
     }
 
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle', 'numberpath'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
-      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || screenId === 'countdown' || screenId === 'shellshuffle' || !this.roomState);
+      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || screenId === 'countdown' || screenId === 'shellshuffle' || screenId === 'numberpath' || !this.roomState);
       if (this.roomState) {
         document.getElementById('nav-room-id').innerText = this.roomState.id;
       }
@@ -556,6 +605,8 @@ class NumberVerseApp {
       this.selectGame('countdown', updateHistory);
     } else if (cleanPath === '/shell-shuffle' || cleanPath === '/shellshuffle') {
       this.selectGame('shell_shuffle', updateHistory);
+    } else if (cleanPath === '/number-path' || cleanPath === '/numberpath') {
+      this.selectGame('number_path', updateHistory);
     } else if (cleanPath === '/num-guess-game') {
       if (roomId) {
         const codeInput = document.getElementById('join-room-code-input');
@@ -602,6 +653,8 @@ class NumberVerseApp {
       targetPath = '/countdown-calc/';
     } else if (screenId === 'shellshuffle') {
       targetPath = '/shell-shuffle/';
+    } else if (screenId === 'numberpath') {
+      targetPath = '/number-path/';
     }
 
     const newUrl = targetPath + targetSearch;

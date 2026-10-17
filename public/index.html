@@ -17,7 +17,7 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=19.0">
+  <link rel="stylesheet" href="/style.css?v=20.0">
 </head>
 <body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
 
@@ -250,6 +250,38 @@
             </button>
             <div class="h-5 mt-2 flex items-center justify-center">
               <button id="shellshuffle-card-reset-btn" onclick="event.stopPropagation(); app.resetShellShuffleProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+                Reset to Level 1
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game Module 6: Number Path (Zip Sequential Grid Puzzle Identity) -->
+        <div class="clean-card-interactive card-number-path p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#FB923C]/60 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+             onclick="app.selectGame('number_path')">
+          <div>
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#FB923C] transition flex items-center gap-2">
+              Number Path
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#858AA5]">Zip</span>
+            </h3>
+            
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
+              Connect numbers 1 to N in sequence. Form a single continuous path through every square on the grid without skipping any row or column.
+            </p>
+            
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
+              <span id="numberpath-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">10 Levels</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Sequential Checkpoints</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Fill 100% Grid</span>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-col items-center w-full">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="numberpath-card-btn-text">Play Number Path</span>
+            </button>
+            <div class="h-5 mt-2 flex items-center justify-center">
+              <button id="numberpath-card-reset-btn" onclick="event.stopPropagation(); app.resetNumberPathProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
                 Reset to Level 1
               </button>
             </div>
@@ -930,6 +962,66 @@
     </section>
 
     <!-- ============================================== -->
+    <!-- SCREEN 7: NUMBER PATH (ZIP / SEQUENTIAL GRID PUZZLE) -->
+    <!-- ============================================== -->
+    <section id="screen-numberpath" class="w-full max-w-md hidden flex-col items-center py-2">
+      <!-- Number Path Top Bar -->
+      <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
+        <button onclick="app.exitNumberPathToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        </button>
+
+        <div class="flex items-center gap-3 font-mono">
+          <div>
+            <span class="text-[#858AA5]">Level:</span>
+            <span id="numberpath-hud-level" class="font-bold text-[#FB923C] ml-1 text-sm">1 / 10</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5]">Step:</span>
+            <span id="numberpath-hud-progress" class="font-bold text-[#F5F5FF] ml-1 text-sm">1 / 16</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 font-mono">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-[#858AA5]"></i>
+          <span id="numberpath-timer" class="font-bold text-white text-sm">0:00</span>
+        </div>
+      </div>
+
+      <!-- Instruction / Target Banner -->
+      <div class="w-full clean-card p-3 mb-3 flex items-center justify-between">
+        <div class="text-xs text-[#B8BCD0] font-medium flex items-center gap-2">
+          <span class="text-[#858AA5]">Checkpoints:</span>
+          <span id="numberpath-hud-checkpoints" class="font-mono text-[#FB923C] font-semibold text-xs">Connect in order: 1 → 2 → 3...</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="if (app.numberPathGame) app.numberPathGame.undoStep()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1 text-[#B8BCD0] hover:text-white transition" title="Undo Last Step">
+            <i data-lucide="undo-2" class="w-3.5 h-3.5"></i> Undo
+          </button>
+          <button onclick="if (app.numberPathGame) app.numberPathGame.resetCurrentLevel()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1 text-rose-400 hover:text-rose-300 transition" title="Reset Level">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Number Path Grid Board & SVG overlay -->
+      <div class="w-full clean-card p-3 sm:p-4 mb-3 bg-[#0C0D19] border border-[#34364A] shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden flex flex-col items-center">
+        <!-- Relative Grid Container for positioning SVG precisely over cells -->
+        <div class="relative w-full aspect-square max-w-[380px] select-none touch-none">
+          <svg id="numberpath-svg-lines" class="absolute inset-0 w-full h-full pointer-events-none z-20"></svg>
+          <div id="numberpath-grid" class="w-full h-full grid gap-1.5 sm:gap-2 relative z-10">
+            <!-- Cell divs generated dynamically by NumberPathGame -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Hint Row -->
+      <div class="mt-1 text-center text-[11px] text-[#858AA5] font-mono leading-relaxed">
+        Drag or tap adjacent tiles to fill every square • Reach numbered checkpoints in numerical sequence
+      </div>
+    </section>
+
+    <!-- ============================================== -->
     <!-- MODAL: MATRIX LEVEL COMPLETE -->
     <!-- ============================================== -->
     <div id="modal-matrix-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -1336,6 +1428,43 @@
     </div>
 
     <!-- ============================================== -->
+    <!-- MODAL: NUMBER PATH LEVEL COMPLETE -->
+    <!-- ============================================== -->
+    <div id="modal-numberpath-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#FB923C]/30 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#FB923C]/10 border border-[#FB923C]/30 text-[#FB923C] flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-[#FB923C]/20">
+          ✓
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Grid Solved!</h3>
+        <p class="text-xs text-slate-400 mb-5">Path connected with every single square traversed.</p>
+        
+        <div class="space-y-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Level Cleared:</span>
+            <span id="numberpath-clear-level" class="font-bold text-[#FB923C]">Level 1</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Squares Traversed:</span>
+            <span id="numberpath-clear-cells" class="font-bold text-[#F5F5FF]">16 / 16</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Time Taken:</span>
+            <span id="numberpath-clear-time" class="font-bold text-emerald-400">0:14</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="app.exitNumberPathToMenu(); app.closeModal('modal-numberpath-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Exit
+          </button>
+          <button onclick="app.numberPathGame.nextLevel()" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Next Level →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
     <!-- MODAL: ROUND RESULT -->
     <!-- ============================================== -->
     <div id="modal-round-end" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -1542,6 +1671,7 @@
   <script src="/js/donttap.js?v=1.0"></script>
   <script src="/js/countdown.js?v=1.0"></script>
   <script src="/js/shellshuffle.js?v=1.1"></script>
-  <script src="/js/app.js?v=18.0"></script>
+  <script src="/js/numberpath.js?v=1.0"></script>
+  <script src="/js/app.js?v=19.0"></script>
 </body>
 </html>

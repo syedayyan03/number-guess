@@ -105,6 +105,94 @@ body {
   box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(168, 85, 247, 0.25) !important;
 }
 
+/* Number Path: Cyber Tangerine Hover Identity */
+.card-number-path:hover {
+  border-color: rgba(251, 146, 60, 0.65) !important;
+  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(251, 146, 60, 0.25) !important;
+}
+
+/* Number Path Puzzle Arena Styles */
+.np-cell {
+  background: rgba(22, 25, 46, 0.85);
+  border: 1px solid rgba(52, 54, 74, 0.65);
+  aspect-ratio: 1 / 1;
+  position: relative;
+  transition: all 0.15s ease;
+  touch-action: none;
+}
+
+.np-cell:hover {
+  background: rgba(30, 35, 62, 0.95);
+  border-color: rgba(251, 146, 60, 0.4);
+}
+
+.np-cell-visited {
+  background: rgba(251, 146, 60, 0.12) !important;
+  border-color: rgba(251, 146, 60, 0.35) !important;
+}
+
+.np-cell-head {
+  background: rgba(251, 146, 60, 0.22) !important;
+  border-color: rgba(251, 146, 60, 0.75) !important;
+  box-shadow: 0 0 16px rgba(251, 146, 60, 0.3);
+}
+
+.np-checkpoint-badge {
+  background: #191B2D;
+  border: 2px solid #34364A;
+  color: #B8BCD0;
+  transition: all 0.2s ease;
+}
+
+.np-checkpoint-pending {
+  border-color: rgba(251, 146, 60, 0.6);
+  color: #FB923C;
+  background: rgba(25, 27, 45, 0.95);
+  box-shadow: 0 0 12px rgba(251, 146, 60, 0.2);
+}
+
+.np-checkpoint-reached {
+  background: linear-gradient(135deg, #FB923C 0%, #EA580C 100%);
+  border-color: #FED7AA;
+  color: #0A0A14;
+  box-shadow: 0 0 16px rgba(251, 146, 60, 0.5);
+  transform: scale(1.06);
+}
+
+.np-svg-shadow {
+  fill: none;
+  stroke: rgba(251, 146, 60, 0.22);
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.np-svg-path {
+  fill: none;
+  stroke: #FB923C;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.8));
+}
+
+.np-svg-head {
+  fill: #FFFFFF;
+  stroke: #FB923C;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px #FB923C);
+}
+
+@keyframes npPulseInvalid {
+  0% { transform: scale(1); background: rgba(244, 63, 94, 0.4); }
+  50% { transform: scale(0.95); background: rgba(244, 63, 94, 0.6); }
+  100% { transform: scale(1); }
+}
+
+.np-invalid-pulse {
+  animation: npPulseInvalid 0.3s ease-in-out;
+}
+
 /* Primary Electric Blue Button */
 .btn-solid-primary {
   background: var(--color-blue-primary);
