@@ -175,7 +175,7 @@ class DontTapGame {
 
     // Quota Progress Bar
     const barEl = document.getElementById('donttap-quota-bar');
-    if (barEl) {
+    if (barEl && barEl.style) {
       const pct = Math.min(100, Math.round((this.safeTapsCount / this.targetQuota) * 100));
       barEl.style.width = `${pct}%`;
     }
@@ -426,17 +426,38 @@ class DontTapGame {
     this.activeTargets.delete(cellIndex);
 
     if (target.type === 'safe') {
-      // Missed a safe target: breaks combo streak
-      if (this.combo > 0) {
-        this.combo = 0;
-        this.updateHUD();
+      // Failed to tap safe target before it disappeared: deduct 1 life and reset combo
+      this.lives = Math.max(0, this.lives - 1);
+      this.combo = 0;
+
+      // Audio feedback for missed target
+      if (window.soundFx) {
+        window.soundFx.playError();
       }
+
+      // Visual feedback: board shake / flash
+      const board = document.getElementById('donttap-board-card');
+      if (board) {
+        board.classList.remove('donttap-screen-shake');
+        void board.offsetWidth;
+        board.classList.add('donttap-screen-shake');
+        setTimeout(() => {
+          board.classList.remove('donttap-screen-shake');
+        }, 400);
+      }
+
       const el = target.domElement;
       if (el) {
         el.classList.add('donttap-fade-miss');
         setTimeout(() => {
           if (el.parentNode) el.parentNode.removeChild(el);
         }, 150);
+      }
+
+      this.updateHUD();
+
+      if (this.lives <= 0) {
+        this.handleGameOver();
       }
     } else {
       // Danger target safely expired without tap — disciplined restraint!
