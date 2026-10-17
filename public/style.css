@@ -99,10 +99,10 @@ body {
   box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(244, 198, 106, 0.25) !important;
 }
 
-/* Shell Shuffle: Electric Cyan 3D Hover Identity (Border and Title only, matching other cards) */
+/* Shell Shuffle: Cosmic Violet 3D Hover Identity (Border and Title only, matching other cards) */
 .card-shell-shuffle:hover {
-  border-color: rgba(0, 229, 255, 0.6) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(0, 229, 255, 0.25) !important;
+  border-color: rgba(168, 85, 247, 0.65) !important;
+  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(168, 85, 247, 0.25) !important;
 }
 
 /* Primary Electric Blue Button */
