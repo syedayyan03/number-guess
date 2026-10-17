@@ -58,33 +58,27 @@ class ShellShuffleGame {
 
   // --- Dynamic Difficulty & Speed Progression ---
   getShuffleConfigForLevel(lvl) {
-    // Swaps count scales progressively:
-    // Level 1: 3 swaps
-    // Level 2: 4 swaps
-    // Level 3: 5 swaps
-    // Level 4: 6 swaps
-    // Level 5: 7 swaps
-    // Level 6: 8 swaps
-    // Level 7: 10 swaps
-    // Level 8: 12 swaps
-    // Level 9+: 14 swaps
-    const swapCount = Math.min(15, Math.max(3, 3 + Math.floor((lvl - 1) * 1.25)));
+    let duration;
+    if (lvl <= 1) {
+      duration = 820;
+    } else if (lvl <= 10) {
+      // Levels 1-10: Drops aggressively from 820ms down to ~104ms
+      duration = Math.round(820 * Math.pow(0.795, lvl - 1));
+    } else if (lvl <= 20) {
+      // Levels 11-20: Continues increasing speed from ~95ms (8.6x) down to ~40ms (20.5x)
+      const base10 = Math.round(820 * Math.pow(0.795, 9)); // ~104ms
+      duration = Math.round(base10 * Math.pow(0.91, lvl - 10));
+    } else {
+      // Level 21+: Continues speeding up by ~1-2ms per level down to absolute threshold of 25ms
+      const base20 = Math.round(Math.round(820 * Math.pow(0.795, 9)) * Math.pow(0.91, 10)); // ~40ms
+      duration = Math.max(25, base20 - Math.round((lvl - 20) * 1.5));
+    }
 
-    // Duration in ms per swap (starts at 820ms, drops aggressively each level):
-    // Level 1: 820ms (1.0x)
-    // Level 2: 660ms (1.2x)
-    // Level 3: 530ms (1.5x)
-    // Level 4: 420ms (2.0x)
-    // Level 5: 330ms (2.5x)
-    // Level 6: 260ms (3.2x)
-    // Level 7: 210ms (3.9x)
-    // Level 8: 170ms (4.8x)
-    // Level 9: 140ms (5.9x)
-    // Level 10+: 115ms (7.1x)
-    const duration = Math.max(115, Math.round(820 * Math.pow(0.80, lvl - 1)));
+    // Inter-swap delay shrinks from 50ms at lvl 1 down to 0ms at high levels
+    const gapDelay = Math.max(0, Math.round(50 - (lvl - 1) * 3.5));
 
-    // Inter-swap delay shrinks from 50ms at lvl 1 down to 10ms at high levels
-    const gapDelay = Math.max(10, Math.round(50 - (lvl - 1) * 5));
+    // Swaps count scales continuously across levels (up to 30 swaps)
+    const swapCount = Math.min(30, Math.max(3, 3 + Math.floor((lvl - 1) * 1.2)));
 
     // Multiplier for display
     const speedMultiplier = (820 / duration).toFixed(1);
