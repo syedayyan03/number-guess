@@ -582,3 +582,19 @@ input[type=number] {
   }
 }
 
+/* ==========================================================================
+   Countdown Calculation Game Styles
+   ========================================================================== */
+.countdown-flash-success {
+  animation: countdownFlashAnim 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-color: rgba(72, 214, 160, 0.6) !important;
+  box-shadow: 0 0 24px rgba(72, 214, 160, 0.35) !important;
+}
+
+@keyframes countdownFlashAnim {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+

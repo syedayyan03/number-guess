@@ -101,8 +101,8 @@
         </div>
       </div>
 
-      <!-- Cognitive Lab Modules / Game Selection Cards Grid (3-columns on Desktop) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
+      <!-- Cognitive Lab Modules / Game Selection Cards Grid (4-cards in 2x2 on Desktop) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl items-stretch">
         
         <!-- Game Module 1: Number Guessing (Indigo Identity) -->
         <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
@@ -188,6 +188,37 @@
             <div class="h-5 mt-2 flex items-center justify-center">
               <button id="donttap-card-reset-btn" onclick="event.stopPropagation(); app.resetDontTapProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
                 Reset High Score
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game Module 4: Countdown Calculation (Mental Math Identity) -->
+        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#F4C66A]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+             onclick="app.selectGame('countdown')">
+          <div>
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#F4C66A] transition">
+              Countdown Calculation
+            </h3>
+            
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
+              Subtract. Think fast. Stay focused. Rapid-fire mental subtraction against a 5-second timer. Race to zero with maximum speed and accuracy.
+            </p>
+            
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
+              <span id="countdown-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Best: 0</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">5s Per Answer</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">3 Mistakes Allowed</span>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-col items-center w-full">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="countdown-card-btn-text">Play Countdown</span>
+            </button>
+            <div class="h-5 mt-2 flex items-center justify-center">
+              <button id="countdown-card-reset-btn" onclick="event.stopPropagation(); app.resetCountdownProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+                Reset Best Score
               </button>
             </div>
           </div>
@@ -632,6 +663,173 @@
     </section>
 
     <!-- ============================================== -->
+    <!-- SCREEN 6: COUNTDOWN CALCULATION (RAPID MENTAL SUBTRACTION) -->
+    <!-- ============================================== -->
+    <section id="screen-countdown" class="w-full max-w-md hidden flex-col items-center py-2">
+
+      <!-- VIEW 1: SETUP SCREEN -->
+      <div id="countdown-setup-view" class="w-full flex flex-col items-center">
+        <!-- Top Nav / Back -->
+        <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
+          <button onclick="app.countdownGame.exitToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+          </button>
+          <div class="font-bold text-xs uppercase tracking-wider text-[#F4C66A] font-mono">
+            Setup Challenge
+          </div>
+          <div class="w-12"></div>
+        </div>
+
+        <!-- Setup Configuration Card -->
+        <div class="w-full clean-card p-6 mb-3 flex flex-col">
+          <div class="text-center mb-5">
+            <div class="w-12 h-12 rounded-2xl bg-[#F4C66A]/10 border border-[#F4C66A]/30 text-[#F4C66A] flex items-center justify-center mx-auto mb-2.5 font-bold text-xl">
+              −
+            </div>
+            <h2 class="text-xl font-bold text-[#F5F5FF] mb-1">Countdown Calculation</h2>
+            <p class="text-xs text-[#B8BCD0] italic">"Subtract. Think fast. Stay focused."</p>
+          </div>
+
+          <!-- Configuration Fields -->
+          <div class="space-y-4 text-xs">
+            <div>
+              <label for="countdown-start-input" class="block font-medium text-[#B8BCD0] mb-1.5 flex items-center justify-between">
+                <span>Starting Number</span>
+                <span class="text-[10px] font-mono text-[#858AA5]">Default: 100</span>
+              </label>
+              <input id="countdown-start-input" type="number" min="2" max="10000" value="100"
+                     oninput="app.countdownGame.updatePreviewAndValidation()"
+                     class="clean-input w-full px-3.5 py-2.5 text-sm font-bold font-mono">
+            </div>
+
+            <div>
+              <label for="countdown-gap-input" class="block font-medium text-[#B8BCD0] mb-1.5 flex items-center justify-between">
+                <span>Subtraction Gap</span>
+                <span class="text-[10px] font-mono text-[#858AA5]">Default: 7</span>
+              </label>
+              <input id="countdown-gap-input" type="number" min="1" max="1000" value="7"
+                     oninput="app.countdownGame.updatePreviewAndValidation()"
+                     class="clean-input w-full px-3.5 py-2.5 text-sm font-bold font-mono">
+            </div>
+
+            <!-- Sequence Live Preview -->
+            <div class="p-3.5 rounded-xl bg-[#191B2D] border border-[#34364A] text-xs">
+              <div class="flex items-center justify-between text-[11px] text-[#858AA5] font-mono mb-1.5">
+                <span>Sequence Preview:</span>
+                <span id="countdown-steps-estimate" class="text-[#F4C66A] font-semibold">14 calculations to complete</span>
+              </div>
+              <div id="countdown-sequence-preview" class="font-mono text-xs font-bold text-[#F5F5FF] truncate">
+                100 → 93 → 86 → ... → 2
+              </div>
+            </div>
+
+            <!-- Rules Summary -->
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono text-[#B8BCD0]">
+              <div class="p-2.5 rounded-xl bg-[#191B2D]/60 border border-[#34364A] flex items-center gap-1.5">
+                <span>⏱</span>
+                <span><strong>5s</strong> per answer</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-[#191B2D]/60 border border-[#34364A] flex items-center gap-1.5">
+                <span>⚠️</span>
+                <span><strong>3 mistakes</strong> max</span>
+              </div>
+            </div>
+
+            <!-- Inline Error -->
+            <div id="countdown-setup-error" class="hidden text-xs text-[#FF7185] font-mono bg-rose-950/30 p-2.5 rounded-xl border border-rose-500/30"></div>
+          </div>
+
+          <!-- Start Button -->
+          <button id="countdown-start-btn" onclick="app.countdownGame.startGame()" class="mt-6 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#4169FF]/25">
+            <i data-lucide="play" class="w-4 h-4 fill-current"></i> Start Game
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 2: ACTIVE GAMEPLAY SCREEN -->
+      <div id="countdown-play-view" class="w-full hidden flex-col items-center">
+        <!-- Top HUD Bar -->
+        <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
+          <button onclick="app.countdownGame.exitToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+          </button>
+
+          <div class="flex items-center gap-3 font-mono">
+            <div>
+              <span class="text-[#858AA5]">Score:</span>
+              <span id="countdown-hud-score" class="font-bold text-[#F5F5FF] ml-1">0</span>
+            </div>
+            <div>
+              <span class="text-[#858AA5]">Streak:</span>
+              <span id="countdown-hud-streak" class="font-bold text-[#48D6A0] ml-1">x0</span>
+            </div>
+          </div>
+
+          <!-- Mistakes 3 Indicators -->
+          <div id="countdown-mistakes-container" class="flex items-center gap-1">
+            <!-- Rendered by JS: 3 mistake slots -->
+          </div>
+
+          <!-- Pause Button -->
+          <button onclick="app.countdownGame.togglePause()" class="px-2 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1 text-[#B8BCD0] hover:text-white transition" title="Pause Game (Esc/P)">
+            <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- 5-Second Timer Bar & Countdown Header -->
+        <div class="w-full clean-card p-3 mb-3">
+          <div class="flex items-center justify-between mb-1.5 text-xs font-mono">
+            <div class="flex items-center gap-1.5 text-[#858AA5]">
+              <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+              <span>Time Remaining:</span>
+            </div>
+            <span id="countdown-timer-display" class="font-mono font-bold text-sm text-[#F5F5FF]">5.0s</span>
+          </div>
+          <!-- Time Bar -->
+          <div class="w-full h-1.5 rounded-full bg-[#191B2D] border border-[#34364A] overflow-hidden">
+            <div id="countdown-timer-bar" class="h-full bg-gradient-to-r from-[#4169FF] to-[#287BFF] transition-all duration-75 rounded-full" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Primary Target Number Display Card -->
+        <div id="countdown-number-card" class="w-full clean-card p-6 mb-3 text-center bg-[#111322] border border-[#34364A] shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden transition-all duration-200">
+          <div class="text-[11px] font-mono uppercase tracking-widest text-[#858AA5] mb-1">
+            Current Number
+          </div>
+          <div id="countdown-current-number" class="text-6xl sm:text-7xl font-black font-mono text-[#F5F5FF] tracking-tight py-1">
+            100
+          </div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#191B2D] border border-[#34364A] text-xs font-mono text-[#F4C66A] mt-2">
+            <span id="countdown-subtraction-instruction">Subtract 7 (−7)</span>
+          </div>
+        </div>
+
+        <!-- Answer Entry Input & Button Form -->
+        <form onsubmit="event.preventDefault(); app.countdownGame.submitAnswer();" class="w-full clean-card p-4 sm:p-5 mb-3 flex flex-col">
+          <label for="countdown-answer-input" class="text-xs font-medium text-[#B8BCD0] mb-2 flex items-center justify-between">
+            <span>Enter the Next Number:</span>
+            <span class="text-[10px] font-mono text-[#858AA5]">Press Enter ↵</span>
+          </label>
+          <input id="countdown-answer-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
+                 placeholder="Type result..."
+                 class="clean-input w-full text-center text-2xl font-black font-mono py-3 mb-3 focus:border-[#4169FF]">
+          
+          <button id="countdown-submit-btn" type="submit" class="w-full py-3 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-md shadow-[#4169FF]/25">
+            Submit Answer
+          </button>
+
+          <!-- Feedback text -->
+          <div id="countdown-feedback" class="hidden text-xs font-mono font-bold text-center mt-3 min-h-[1.25rem]"></div>
+        </form>
+
+        <div class="text-center text-[11px] text-[#858AA5] font-mono">
+          Enter each subtraction before 5 seconds • Challenge completes before crossing zero
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================== -->
     <!-- MODAL: MATRIX LEVEL COMPLETE -->
     <!-- ============================================== -->
     <div id="modal-matrix-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -804,6 +1002,131 @@
           </button>
           <button onclick="if (app.dontTapGame) { app.closeModal('modal-donttap-game-over'); app.dontTapGame.startGame(); }" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
             Play Again
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: COUNTDOWN CALCULATION PAUSE -->
+    <!-- ============================================== -->
+    <div id="modal-countdown-pause" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#34364A] shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#191B2D] border border-[#34364A] text-[#F4C66A] flex items-center justify-center mx-auto mb-3 font-bold text-xl shadow-lg">
+          ⏸
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-1">Game Paused</h3>
+        <p class="text-xs text-[#B8BCD0] mb-5">Calculation timer frozen.</p>
+        
+        <div class="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Score:</span>
+            <span id="countdown-pause-score" class="font-bold text-white text-sm">0</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Current Streak:</span>
+            <span id="countdown-pause-streak" class="font-bold text-[#48D6A0] text-sm">x0</span>
+          </div>
+        </div>
+
+        <div class="space-y-2.5">
+          <button onclick="if (app.countdownGame) app.countdownGame.resumeGame();" class="w-full py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold">
+            Resume
+          </button>
+          <button onclick="if (app.countdownGame) app.countdownGame.restartGame();" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Restart Sequence
+          </button>
+          <button onclick="if (app.countdownGame) app.countdownGame.backToSetup();" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Change Setup
+          </button>
+          <button onclick="if (app.countdownGame) app.countdownGame.exitToMenu();" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300">
+            Exit to Menu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: COUNTDOWN CALCULATION COMPLETE (ZERO-CROSSING REACHED) -->
+    <!-- ============================================== -->
+    <div id="modal-countdown-complete" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#48D6A0]/40 shadow-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-[#48D6A0]/15 border border-[#48D6A0]/35 text-[#48D6A0] flex items-center justify-center mx-auto mb-3 font-bold text-3xl shadow-lg shadow-[#48D6A0]/20 animate-bounce">
+          🎯
+        </div>
+        <h3 class="text-2xl font-black text-white mb-1">Challenge Completed!</h3>
+        <p class="text-xs text-[#B8BCD0] mb-4">You successfully reached zero with high cognitive focus!</p>
+        
+        <div id="countdown-complete-new-best" class="hidden mb-3 px-3 py-1 rounded-full bg-[#48D6A0]/15 border border-[#48D6A0]/40 text-[#48D6A0] text-xs font-bold uppercase tracking-wider inline-block">
+          ★ New Best Score! ★
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Final Score:</span>
+            <span id="countdown-complete-score" class="font-bold text-[#48D6A0] text-base">0</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Best Streak:</span>
+            <span id="countdown-complete-streak" class="font-bold text-[#287BFF] text-base">x0</span>
+          </div>
+          <div class="pt-2 border-t border-white/5">
+            <span class="text-[#858AA5] block mb-0.5">Correct Answers:</span>
+            <span id="countdown-complete-correct" class="font-bold text-white text-sm">0</span>
+          </div>
+          <div class="pt-2 border-t border-white/5">
+            <span class="text-[#858AA5] block mb-0.5">Mistakes Made:</span>
+            <span id="countdown-complete-mistakes" class="font-bold text-white text-sm">0 / 3</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="if (app.countdownGame) app.countdownGame.backToSetup();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            New Setup
+          </button>
+          <button onclick="if (app.countdownGame) app.countdownGame.restartGame();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Play Again
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: COUNTDOWN CALCULATION GAME OVER (3 MISTAKES) -->
+    <!-- ============================================== -->
+    <div id="modal-countdown-gameover" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#FF7185]/40 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#FF7185]/10 border border-[#FF7185]/30 text-[#FF7185] flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-[#FF7185]/20">
+          ✕
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Challenge Failed</h3>
+        <p class="text-xs text-[#FF7185]/80 mb-4 font-medium">3 mistakes limit reached!</p>
+        
+        <div id="countdown-gameover-new-best" class="hidden mb-3 px-3 py-1 rounded-full bg-[#48D6A0]/15 border border-[#48D6A0]/40 text-[#48D6A0] text-xs font-bold uppercase tracking-wider inline-block">
+          ★ New Best Score! ★
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Final Score:</span>
+            <span id="countdown-gameover-score" class="font-bold text-white text-base">0</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Correct Answers:</span>
+            <span id="countdown-gameover-correct" class="font-bold text-[#287BFF] text-base">0</span>
+          </div>
+          <div class="col-span-2 pt-2 border-t border-white/5">
+            <span class="text-[#858AA5]">Best Streak:</span>
+            <span id="countdown-gameover-streak" class="font-bold text-white ml-1">x0</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="if (app.countdownGame) app.countdownGame.backToSetup();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Setup
+          </button>
+          <button onclick="if (app.countdownGame) app.countdownGame.restartGame();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Retry
           </button>
         </div>
       </div>
@@ -1013,6 +1336,7 @@
   <script src="/js/sound.js"></script>
   <script src="/js/matrix.js?v=15.0"></script>
   <script src="/js/donttap.js?v=1.0"></script>
+  <script src="/js/countdown.js?v=1.0"></script>
   <script src="/js/app.js?v=15.0"></script>
 </body>
 </html>

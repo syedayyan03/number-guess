@@ -39,8 +39,12 @@ class NumberVerseApp {
     if (window.DontTapGame) {
       this.dontTapGame = new window.DontTapGame(this);
     }
+    if (window.CountdownCalculationGame) {
+      this.countdownGame = new window.CountdownCalculationGame(this);
+    }
     this.updateMatrixMenuCard();
     this.updateDontTapMenuCard();
+    this.updateCountdownMenuCard();
     this.showScreen(this.currentScreen);
     this.checkUrlParams();
     this.renderIcons();
@@ -224,6 +228,14 @@ class NumberVerseApp {
       if (this.dontTapGame) {
         this.dontTapGame.startGame();
       }
+    } else if (gameId === 'countdown') {
+      if (!this.countdownGame && window.CountdownCalculationGame) {
+        this.countdownGame = new window.CountdownCalculationGame(this);
+      }
+      this.showScreen('countdown');
+      if (this.countdownGame) {
+        this.countdownGame.initSetupScreen();
+      }
     }
   }
 
@@ -294,16 +306,39 @@ class NumberVerseApp {
     this.showToast("Don't Tap! high score reset", 'info');
   }
 
+  updateCountdownMenuCard() {
+    const bestScore = this.countdownGame ? this.countdownGame.bestScore : parseInt(localStorage.getItem('numberverse_countdown_best') || '0', 10);
+    const badge = document.getElementById('countdown-card-badge');
+    const resetBtn = document.getElementById('countdown-card-reset-btn');
+
+    if (badge) {
+      badge.innerText = bestScore > 0 ? `Best: ${bestScore.toLocaleString()}` : `5s Per Answer`;
+    }
+    if (resetBtn) {
+      resetBtn.classList.toggle('hidden', bestScore <= 0);
+    }
+  }
+
+  resetCountdownProgress() {
+    if (this.countdownGame) {
+      this.countdownGame.resetBestScore();
+    } else {
+      localStorage.removeItem('numberverse_countdown_best');
+    }
+    this.updateCountdownMenuCard();
+    this.showToast('Countdown Calculation best score reset', 'info');
+  }
+
   showScreen(screenId) {
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
-      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || !this.roomState);
+      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || screenId === 'countdown' || !this.roomState);
       if (this.roomState) {
         document.getElementById('nav-room-id').innerText = this.roomState.id;
       }
