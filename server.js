@@ -29,6 +29,24 @@ app.get('/favicon.ico', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
 });
 
+// SPA HTML handler
+const serveIndexHtml = (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+};
+
+// SPA routing middleware for games and client-side routes
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (req.path.startsWith('/socket.io')) return next();
+  if (path.extname(req.path)) {
+    return res.status(404).send('Not Found');
+  }
+  serveIndexHtml(req, res);
+});
+
 // In-memory Game Rooms
 const rooms = {};
 

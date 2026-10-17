@@ -45,8 +45,8 @@ class NumberVerseApp {
     this.updateMatrixMenuCard();
     this.updateDontTapMenuCard();
     this.updateCountdownMenuCard();
-    this.showScreen(this.currentScreen);
-    this.checkUrlParams();
+    this.setupRouter();
+    this.routeFromUrl(false);
     this.renderIcons();
   }
 
@@ -71,7 +71,7 @@ class NumberVerseApp {
     this.socket.on('room_created', ({ roomId, roomState }) => {
       this.roomState = roomState;
       this.updateUrl(roomId);
-      this.showScreen('lobby');
+      this.showScreen('lobby', false);
       this.renderLobby();
       this.showToast(`Room ${roomId} created`, 'info');
       window.soundFx.playClick();
@@ -80,7 +80,7 @@ class NumberVerseApp {
     this.socket.on('room_joined', ({ roomId, roomState }) => {
       this.roomState = roomState;
       this.updateUrl(roomId);
-      this.showScreen('lobby');
+      this.showScreen('lobby', false);
       this.renderLobby();
       this.showToast(`Joined room ${roomId}`, 'info');
       window.soundFx.playClick();
@@ -197,7 +197,10 @@ class NumberVerseApp {
     this.socket.on('kicked_from_room', ({ message }) => {
       this.roomState = null;
       this.clearCountdownIntervals();
-      this.showScreen('welcome');
+      const codeInput = document.getElementById('join-room-code-input');
+      if (codeInput) codeInput.value = '';
+      this.updateUrl(null);
+      this.showScreen('welcome', false);
       this.showToast(message || 'You were removed from the room by the host.', 'error');
     });
 
@@ -207,15 +210,15 @@ class NumberVerseApp {
   }
 
   // --- Screens & Navigation ---
-  selectGame(gameId) {
+  selectGame(gameId, updateHistory = true) {
     window.soundFx.playClick();
     if (gameId === 'number_guess') {
-      this.showScreen('welcome');
+      this.showScreen('welcome', updateHistory);
     } else if (gameId === 'speed_grid') {
       if (!this.matrixGame && window.SpeedMatrixGame) {
         this.matrixGame = new window.SpeedMatrixGame(this);
       }
-      this.showScreen('matrix');
+      this.showScreen('matrix', updateHistory);
       if (this.matrixGame) {
         // Starts freshly from the saved level with timer refreshed and target at 1
         this.matrixGame.startLevel();
@@ -224,7 +227,7 @@ class NumberVerseApp {
       if (!this.dontTapGame && window.DontTapGame) {
         this.dontTapGame = new window.DontTapGame(this);
       }
-      this.showScreen('donttap');
+      this.showScreen('donttap', updateHistory);
       if (this.dontTapGame) {
         this.dontTapGame.startGame();
       }
@@ -232,7 +235,7 @@ class NumberVerseApp {
       if (!this.countdownGame && window.CountdownCalculationGame) {
         this.countdownGame = new window.CountdownCalculationGame(this);
       }
-      this.showScreen('countdown');
+      this.showScreen('countdown', updateHistory);
       if (this.countdownGame) {
         this.countdownGame.initSetupScreen();
       }
@@ -329,7 +332,21 @@ class NumberVerseApp {
     this.showToast('Countdown Calculation best score reset', 'info');
   }
 
-  showScreen(screenId) {
+  showScreen(screenId, updateHistory = true) {
+    if (this.currentScreen !== screenId) {
+      if (this.currentScreen === 'matrix' && this.matrixGame) {
+        this.matrixGame.stopTimer();
+      } else if (this.currentScreen === 'donttap' && this.dontTapGame) {
+        this.dontTapGame.clearSpawnTimer();
+        this.dontTapGame.isPlaying = false;
+        this.dontTapGame.isPaused = false;
+      } else if (this.currentScreen === 'countdown' && this.countdownGame) {
+        this.countdownGame.clearTimer();
+        this.countdownGame.isPlaying = false;
+        this.countdownGame.isPaused = false;
+      }
+    }
+
     this.currentScreen = screenId;
     ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
@@ -345,6 +362,10 @@ class NumberVerseApp {
     }
 
     this.renderIcons();
+
+    if (updateHistory) {
+      this.syncUrlForScreen(screenId);
+    }
   }
 
   // --- Profile Setup ---
@@ -442,21 +463,99 @@ class NumberVerseApp {
     }, { passive: false });
   }
 
-  checkUrlParams() {
+  setupRouter() {
+    window.addEventListener('popstate', () => {
+      this.routeFromUrl(false);
+    });
+  }
+
+  routeFromUrl(updateHistory = false) {
+    const rawPath = (window.location.pathname || '/').toLowerCase();
+    const cleanPath = rawPath.replace(/\/+$/, '') || '/';
     const params = new URLSearchParams(window.location.search);
-    const roomParam = params.get('room');
-    if (roomParam) {
+    const roomId = params.get('room-id') || params.get('room');
+
+    // Handle legacy root link with room param e.g. /?room=XYZ or /?room-id=XYZ
+    if (cleanPath === '/' && roomId) {
       const codeInput = document.getElementById('join-room-code-input');
-      if (codeInput) codeInput.value = roomParam.toUpperCase();
-      // If invited via link, directly open the number guessing screen
-      this.showScreen('welcome');
+      if (codeInput) codeInput.value = roomId.toUpperCase();
+      this.updateUrl(roomId.toUpperCase());
+      this.showScreen('welcome', false);
+      return;
+    }
+
+    if (cleanPath === '/speed-matrix') {
+      this.selectGame('speed_grid', updateHistory);
+    } else if (cleanPath === '/dont-tap') {
+      this.selectGame('dont_tap', updateHistory);
+    } else if (cleanPath === '/countdown-calc' || cleanPath === '/countdown') {
+      this.selectGame('countdown', updateHistory);
+    } else if (cleanPath === '/num-guess-game') {
+      if (roomId) {
+        const codeInput = document.getElementById('join-room-code-input');
+        if (codeInput) codeInput.value = roomId.toUpperCase();
+      }
+
+      if (this.roomState && roomId && this.roomState.id === roomId.toUpperCase()) {
+        if (this.roomState.status === 'playing') {
+          this.showScreen('game', updateHistory);
+        } else {
+          this.showScreen('lobby', updateHistory);
+        }
+      } else {
+        this.showScreen('welcome', updateHistory);
+      }
+    } else {
+      this.showScreen('menu', updateHistory);
+    }
+  }
+
+  syncUrlForScreen(screenId) {
+    let targetPath = '/';
+    let targetSearch = '';
+
+    if (screenId === 'menu') {
+      targetPath = '/';
+    } else if (screenId === 'welcome') {
+      targetPath = '/num-guess-game/';
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('room-id') || params.get('room');
+      if (code) {
+        targetSearch = `?room-id=${encodeURIComponent(code.toUpperCase())}`;
+      }
+    } else if (screenId === 'lobby' || screenId === 'game') {
+      targetPath = '/num-guess-game/';
+      if (this.roomState && this.roomState.id) {
+        targetSearch = `?room-id=${encodeURIComponent(this.roomState.id)}`;
+      }
+    } else if (screenId === 'matrix') {
+      targetPath = '/speed-matrix/';
+    } else if (screenId === 'donttap') {
+      targetPath = '/dont-tap/';
+    } else if (screenId === 'countdown') {
+      targetPath = '/countdown-calc/';
+    }
+
+    const newUrl = targetPath + targetSearch;
+    const currentUrl = window.location.pathname + window.location.search;
+
+    if (currentUrl !== newUrl) {
+      window.history.pushState({ screen: screenId }, '', newUrl);
     }
   }
 
   updateUrl(roomId) {
-    const url = new URL(window.location);
-    url.searchParams.set('room', roomId);
-    window.history.pushState({}, '', url);
+    if (roomId) {
+      const newUrl = `/num-guess-game/?room-id=${encodeURIComponent(roomId)}`;
+      if (window.location.pathname + window.location.search !== newUrl) {
+        window.history.pushState({ screen: 'lobby', roomId }, '', newUrl);
+      }
+    } else {
+      const newUrl = '/num-guess-game/';
+      if (window.location.pathname + window.location.search !== newUrl) {
+        window.history.pushState({ screen: 'welcome' }, '', newUrl);
+      }
+    }
   }
 
   // --- Lobby Actions ---
@@ -530,7 +629,10 @@ class NumberVerseApp {
     }
     this.roomState = null;
     this.clearCountdownIntervals();
-    this.showScreen('welcome');
+    const codeInput = document.getElementById('join-room-code-input');
+    if (codeInput) codeInput.value = '';
+    this.updateUrl(null);
+    this.showScreen('welcome', false);
   }
 
   toggleReady() {
@@ -1340,7 +1442,7 @@ class NumberVerseApp {
 
   copyRoomLink() {
     if (!this.roomState) return;
-    const url = `${window.location.origin}/?room=${this.roomState.id}`;
+    const url = `${window.location.origin}/num-guess-game/?room-id=${encodeURIComponent(this.roomState.id)}`;
     navigator.clipboard.writeText(url).then(() => {
       this.showToast('Room link copied', 'info');
       window.soundFx.playClick();
