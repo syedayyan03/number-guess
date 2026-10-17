@@ -350,3 +350,235 @@ input[type=number] {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* ==========================================================================
+   Don't Tap! Cognitive Inhibitory Reflex Design Language
+   ========================================================================== */
+.donttap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+@media (max-width: 380px) {
+  .donttap-grid {
+    gap: 8px;
+    max-width: 280px;
+  }
+}
+
+.donttap-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  background-color: var(--bg-surface-secondary);
+  border: 1.5px solid var(--border-subtle);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.donttap-target {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  overflow: hidden;
+}
+
+.donttap-target:active {
+  transform: scale(0.95);
+}
+
+/* Safe Target: Cyan / Electric Blue dimensional highlight */
+.donttap-target-safe {
+  background: linear-gradient(135deg, #1A284A 0%, #101930 100%);
+  border: 2px solid var(--color-blue-highlight);
+  box-shadow: 0 0 18px rgba(40, 123, 255, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: var(--text-main);
+  animation: targetPopIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Forbidden Target: Danger coral red with warning distinction */
+.donttap-target-danger {
+  background: linear-gradient(135deg, #3A1620 0%, #200D13 100%);
+  border: 2px solid var(--status-error);
+  box-shadow: 0 0 18px rgba(255, 113, 133, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: var(--text-main);
+  animation: targetPopIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.donttap-target-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.donttap-glyph-safe {
+  color: var(--color-blue-highlight);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 5px rgba(40, 123, 255, 0.65));
+}
+
+.donttap-glyph-danger {
+  color: var(--status-error);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 5px rgba(255, 113, 133, 0.75));
+}
+
+.donttap-label-safe {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--color-blue-highlight);
+}
+
+.donttap-label-danger {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--status-error);
+}
+
+/* Shrinking Lifetime Indicator Bar */
+.donttap-timer-ring {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-blue-highlight);
+  animation: shrinkTargetTime linear forwards;
+}
+
+.donttap-timer-ring.danger-ring {
+  background: var(--status-error);
+}
+
+@keyframes shrinkTargetTime {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+@keyframes targetPopIn {
+  0% {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.donttap-hit-safe {
+  animation: hitSafeAnim 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes hitSafeAnim {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+    filter: brightness(1.6);
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+}
+
+.donttap-hit-danger {
+  animation: hitDangerAnim 0.25s ease forwards !important;
+}
+
+@keyframes hitDangerAnim {
+  0%, 100% {
+    transform: scale(1);
+  }
+  20%, 60% {
+    transform: scale(1.1) translateX(-6px);
+  }
+  40%, 80% {
+    transform: scale(1.1) translateX(6px);
+  }
+}
+
+.donttap-fade-miss {
+  animation: fadeMissAnim 0.15s ease forwards !important;
+}
+
+@keyframes fadeMissAnim {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+.donttap-fade-restraint {
+  animation: fadeRestraintAnim 0.15s ease forwards !important;
+}
+
+@keyframes fadeRestraintAnim {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+.donttap-screen-shake {
+  animation: arenaShakeAnim 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  border-color: rgba(255, 113, 133, 0.6) !important;
+}
+
+@keyframes arenaShakeAnim {
+  10%, 90% {
+    transform: translate3d(-2px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(4px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-6px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(6px, 0, 0);
+  }
+}
+

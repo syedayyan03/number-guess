@@ -36,7 +36,11 @@ class NumberVerseApp {
     if (window.SpeedMatrixGame) {
       this.matrixGame = new window.SpeedMatrixGame(this);
     }
+    if (window.DontTapGame) {
+      this.dontTapGame = new window.DontTapGame(this);
+    }
     this.updateMatrixMenuCard();
+    this.updateDontTapMenuCard();
     this.showScreen(this.currentScreen);
     this.checkUrlParams();
     this.renderIcons();
@@ -212,12 +216,28 @@ class NumberVerseApp {
         // Starts freshly from the saved level with timer refreshed and target at 1
         this.matrixGame.startLevel();
       }
+    } else if (gameId === 'dont_tap') {
+      if (!this.dontTapGame && window.DontTapGame) {
+        this.dontTapGame = new window.DontTapGame(this);
+      }
+      this.showScreen('donttap');
+      if (this.dontTapGame) {
+        this.dontTapGame.startGame();
+      }
     }
   }
 
   exitMatrixToMenu() {
     if (this.matrixGame) {
       this.matrixGame.exitToMenu();
+    } else {
+      this.showScreen('menu');
+    }
+  }
+
+  exitDontTapToMenu() {
+    if (this.dontTapGame) {
+      this.dontTapGame.exitToMenu();
     } else {
       this.showScreen('menu');
     }
@@ -250,16 +270,40 @@ class NumberVerseApp {
     this.showToast('Speed Matrix progress reset to Level 1', 'info');
   }
 
+  updateDontTapMenuCard() {
+    const highScore = this.dontTapGame ? this.dontTapGame.highScore : parseInt(localStorage.getItem('numberverse_donttap_highscore') || '0', 10);
+    const badge = document.getElementById('donttap-card-badge');
+    const resetBtn = document.getElementById('donttap-card-reset-btn');
+
+    if (badge) {
+      badge.innerText = highScore > 0 ? `High: ${highScore.toLocaleString()}` : `Reflex & Inhibition`;
+    }
+    if (resetBtn) {
+      resetBtn.classList.toggle('hidden', highScore <= 0);
+    }
+  }
+
+  resetDontTapProgress() {
+    if (this.dontTapGame) {
+      this.dontTapGame.resetHighScore();
+    } else {
+      localStorage.removeItem('numberverse_donttap_highscore');
+      localStorage.removeItem('numberverse_donttap_highest_level');
+    }
+    this.updateDontTapMenuCard();
+    this.showToast("Don't Tap! high score reset", 'info');
+  }
+
   showScreen(screenId) {
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game', 'matrix'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
-      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || !this.roomState);
+      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || !this.roomState);
       if (this.roomState) {
         document.getElementById('nav-room-id').innerText = this.roomState.id;
       }
@@ -1240,6 +1284,14 @@ class NumberVerseApp {
     if (modal) {
       modal.classList.toggle('hidden');
       modal.classList.toggle('flex');
+    }
+  }
+
+  openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
     }
   }
 

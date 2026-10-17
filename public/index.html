@@ -101,9 +101,8 @@
         </div>
       </div>
 
-      <!-- Cognitive Lab Modules / Game Selection Cards Grid (2-columns on Desktop) -->
-      <!-- Cognitive Lab Modules / Game Selection Cards Grid (2-columns on Desktop) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl items-stretch">
+      <!-- Cognitive Lab Modules / Game Selection Cards Grid (3-columns on Desktop) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
         
         <!-- Game Module 1: Number Guessing (Indigo Identity) -->
         <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
@@ -158,6 +157,37 @@
             <div class="h-5 mt-2 flex items-center justify-center">
               <button id="matrix-card-reset-btn" onclick="event.stopPropagation(); app.resetMatrixProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
                 Reset to Level 1
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game Module 3: Don't Tap! (Cognitive Inhibitory Reflex Identity) -->
+        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#48D6A0]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+             onclick="app.selectGame('dont_tap')">
+          <div>
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#48D6A0] transition">
+              Don't Tap!
+            </h3>
+            
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
+              Cognitive inhibitory reflex trainer. Tap safe targets at lightning speed while suppressing the instinct to tap forbidden hazard targets.
+            </p>
+            
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
+              <span id="donttap-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">High: 0</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Reflex & Inhibition</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Combo Streaks</span>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-col items-center w-full">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="donttap-card-btn-text">Play Don't Tap!</span>
+            </button>
+            <div class="h-5 mt-2 flex items-center justify-center">
+              <button id="donttap-card-reset-btn" onclick="event.stopPropagation(); app.resetDontTapProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+                Reset High Score
               </button>
             </div>
           </div>
@@ -543,6 +573,63 @@
     </section>
 
     <!-- ============================================== -->
+    <!-- SCREEN 5: DON'T TAP! (COGNITIVE INHIBITORY CONTROL) -->
+    <!-- ============================================== -->
+    <section id="screen-donttap" class="w-full max-w-sm hidden flex-col items-center py-2">
+      <!-- Don't Tap Top Bar -->
+      <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
+        <button onclick="app.exitDontTapToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        </button>
+
+        <div class="flex items-center gap-2 font-mono">
+          <span class="text-[#858AA5]">Level:</span>
+          <span id="donttap-level-badge" class="font-bold text-[#287BFF] text-sm">1</span>
+        </div>
+
+        <!-- Lives Battery / Hearts -->
+        <div id="donttap-lives-container" class="flex items-center gap-1.5">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Pause Button -->
+        <button onclick="if (app.dontTapGame) app.dontTapGame.togglePause()" class="px-2 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1 text-[#B8BCD0] hover:text-white transition" title="Pause Game">
+          <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Target Banner & Quota Progress Bar -->
+      <div class="w-full clean-card p-3.5 mb-3 text-center">
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="text-xs text-[#B8BCD0] font-medium">
+            Score: <strong id="donttap-score" class="text-2xl font-black text-[#287BFF] font-mono ml-1.5">0</strong>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-mono">
+            <span class="text-[#858AA5]">Quota: <strong id="donttap-quota" class="text-[#F5F5FF]">0 / 15</strong></span>
+            <span id="donttap-combo" class="text-[#858AA5] font-semibold">x1</span>
+          </div>
+        </div>
+        <!-- Wave Progress Bar -->
+        <div class="w-full h-1.5 rounded-full bg-[#191B2D] border border-[#34364A] overflow-hidden">
+          <div id="donttap-quota-bar" class="h-full bg-gradient-to-r from-[#4169FF] to-[#287BFF] transition-all duration-150 ease-out rounded-full" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Don't Tap Arena Board (16 Cognitive Sockets) -->
+      <div id="donttap-board-card" class="w-full clean-card p-4 sm:p-5 mb-3.5 flex items-center justify-center bg-[#111322] border border-[#34364A] shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden transition-all duration-200">
+        <div id="donttap-board" class="donttap-grid relative z-10">
+          <!-- Dynamically populated 16 sockets -->
+        </div>
+      </div>
+
+      <div class="text-center text-[11px] text-[#858AA5] font-mono flex items-center justify-center gap-2">
+        <span>Tap <strong class="text-[#287BFF]">Safe Targets (Blue)</strong></span>
+        <span>•</span>
+        <span>Never tap <strong class="text-[#FF7185]">Forbidden (Red)</strong></span>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
     <!-- MODAL: MATRIX LEVEL COMPLETE -->
     <!-- ============================================== -->
     <div id="modal-matrix-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -610,6 +697,113 @@
         <button onclick="if (app.matrixGame) app.matrixGame.restartFromBeginning(); app.showScreen('menu'); app.closeModal('modal-matrix-victory');" class="w-full py-3 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold">
           Play Again from Level 1
         </button>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: DON'T TAP LEVEL COMPLETE -->
+    <!-- ============================================== -->
+    <div id="modal-donttap-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#48D6A0]/40 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#48D6A0]/10 border border-[#48D6A0]/30 text-[#48D6A0] flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-[#48D6A0]/20">
+          ✓
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Level Cleared!</h3>
+        <p id="donttap-clear-message" class="text-xs text-[#B8BCD0] mb-5">Reflex inhibition verified. Next wave is ready.</p>
+        
+        <div class="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Total Score:</span>
+            <span id="donttap-clear-score" class="font-bold text-[#48D6A0] text-sm">0</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Max Combo:</span>
+            <span id="donttap-clear-max-combo" class="font-bold text-[#287BFF] text-sm">x1</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="if (app.dontTapGame) app.dontTapGame.exitToMenu();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Exit
+          </button>
+          <button onclick="if (app.dontTapGame) app.dontTapGame.nextLevel();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Continue →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: DON'T TAP PAUSE -->
+    <!-- ============================================== -->
+    <div id="modal-donttap-pause" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#34364A] shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#191B2D] border border-[#34364A] text-[#777BFF] flex items-center justify-center mx-auto mb-3 font-bold text-xl shadow-lg">
+          ⏸
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-1">Game Paused</h3>
+        <p class="text-xs text-[#B8BCD0] mb-5">Cognitive training on hold.</p>
+        
+        <div class="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Level:</span>
+            <span id="donttap-pause-level" class="font-bold text-[#287BFF] text-sm">1</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Score:</span>
+            <span id="donttap-pause-score" class="font-bold text-white text-sm">0</span>
+          </div>
+        </div>
+
+        <div class="space-y-2.5">
+          <button onclick="if (app.dontTapGame) app.dontTapGame.resumeGame();" class="w-full py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold">
+            Resume
+          </button>
+          <button onclick="if (app.dontTapGame) app.dontTapGame.exitToMenu();" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Exit to Menu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: DON'T TAP GAME OVER -->
+    <!-- ============================================== -->
+    <div id="modal-donttap-game-over" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#FF7185]/40 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#FF7185]/10 border border-[#FF7185]/30 text-[#FF7185] flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-[#FF7185]/20">
+          ✕
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Game Over</h3>
+        <p class="text-xs text-[#FF7185]/80 mb-4 font-medium">All reflex charges depleted!</p>
+        
+        <div id="donttap-gameover-new-high" class="hidden mb-3 px-3 py-1 rounded-full bg-[#48D6A0]/15 border border-[#48D6A0]/40 text-[#48D6A0] text-xs font-bold uppercase tracking-wider inline-block">
+          ★ New High Score! ★
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Final Score:</span>
+            <span id="donttap-gameover-score" class="font-bold text-white text-base">0</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Best Score:</span>
+            <span id="donttap-gameover-best" class="font-bold text-[#287BFF] text-base">0</span>
+          </div>
+          <div class="col-span-2 pt-1 border-t border-white/5">
+            <span class="text-[#858AA5]">Reached Level:</span>
+            <span id="donttap-gameover-level" class="font-bold text-white ml-1">1</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="if (app.dontTapGame) app.dontTapGame.exitToMenu();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Exit to Menu
+          </button>
+          <button onclick="if (app.dontTapGame) { app.closeModal('modal-donttap-game-over'); app.dontTapGame.startGame(); }" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Play Again
+          </button>
+        </div>
       </div>
     </div>
 
@@ -816,6 +1010,7 @@
   <!-- Scripts -->
   <script src="/js/sound.js"></script>
   <script src="/js/matrix.js?v=15.0"></script>
+  <script src="/js/donttap.js?v=1.0"></script>
   <script src="/js/app.js?v=15.0"></script>
 </body>
 </html>
