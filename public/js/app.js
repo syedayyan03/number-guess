@@ -42,9 +42,13 @@ class NumberVerseApp {
     if (window.CountdownCalculationGame) {
       this.countdownGame = new window.CountdownCalculationGame(this);
     }
+    if (window.ShellShuffleGame) {
+      this.shellShuffleGame = new window.ShellShuffleGame(this);
+    }
     this.updateMatrixMenuCard();
     this.updateDontTapMenuCard();
     this.updateCountdownMenuCard();
+    this.updateShellShuffleMenuCard();
     this.setupRouter();
     this.routeFromUrl(false);
     this.renderIcons();
@@ -239,6 +243,22 @@ class NumberVerseApp {
       if (this.countdownGame) {
         this.countdownGame.initSetupScreen();
       }
+    } else if (gameId === 'shell_shuffle') {
+      if (!this.shellShuffleGame && window.ShellShuffleGame) {
+        this.shellShuffleGame = new window.ShellShuffleGame(this);
+      }
+      this.showScreen('shellshuffle', updateHistory);
+      if (this.shellShuffleGame) {
+        this.shellShuffleGame.init();
+      }
+    }
+  }
+
+  exitShellShuffleToMenu() {
+    if (this.shellShuffleGame) {
+      this.shellShuffleGame.exitToMenu();
+    } else {
+      this.showScreen('menu');
     }
   }
 
@@ -332,6 +352,30 @@ class NumberVerseApp {
     this.showToast('Countdown Calculation best score reset', 'info');
   }
 
+  updateShellShuffleMenuCard() {
+    const highScore = this.shellShuffleGame ? this.shellShuffleGame.highScore : parseInt(localStorage.getItem('numberverse_shellshuffle_highscore') || '0', 10);
+    const badge = document.getElementById('shellshuffle-card-badge');
+    const resetBtn = document.getElementById('shellshuffle-card-reset-btn');
+
+    if (badge) {
+      badge.innerText = highScore > 0 ? `Best: ${highScore.toLocaleString()}` : `Real 3D Physics`;
+    }
+    if (resetBtn) {
+      resetBtn.classList.toggle('hidden', highScore <= 0);
+    }
+  }
+
+  resetShellShuffleProgress() {
+    if (this.shellShuffleGame) {
+      this.shellShuffleGame.resetHighScore();
+    } else {
+      localStorage.removeItem('numberverse_shellshuffle_highscore');
+      localStorage.removeItem('numberverse_shellshuffle_best_level');
+    }
+    this.updateShellShuffleMenuCard();
+    this.showToast('Shell Shuffle high score reset', 'info');
+  }
+
   showScreen(screenId, updateHistory = true) {
     if (this.currentScreen !== screenId) {
       if (this.currentScreen === 'matrix' && this.matrixGame) {
@@ -344,18 +388,20 @@ class NumberVerseApp {
         this.countdownGame.clearTimer();
         this.countdownGame.isPlaying = false;
         this.countdownGame.isPaused = false;
+      } else if (this.currentScreen === 'shellshuffle' && this.shellShuffleGame) {
+        this.shellShuffleGame.stopAnimations();
       }
     }
 
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
-      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || screenId === 'countdown' || !this.roomState);
+      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || screenId === 'countdown' || screenId === 'shellshuffle' || !this.roomState);
       if (this.roomState) {
         document.getElementById('nav-room-id').innerText = this.roomState.id;
       }
@@ -490,6 +536,8 @@ class NumberVerseApp {
       this.selectGame('dont_tap', updateHistory);
     } else if (cleanPath === '/countdown-calc' || cleanPath === '/countdown') {
       this.selectGame('countdown', updateHistory);
+    } else if (cleanPath === '/shell-shuffle' || cleanPath === '/shellshuffle') {
+      this.selectGame('shell_shuffle', updateHistory);
     } else if (cleanPath === '/num-guess-game') {
       if (roomId) {
         const codeInput = document.getElementById('join-room-code-input');
@@ -534,6 +582,8 @@ class NumberVerseApp {
       targetPath = '/dont-tap/';
     } else if (screenId === 'countdown') {
       targetPath = '/countdown-calc/';
+    } else if (screenId === 'shellshuffle') {
+      targetPath = '/shell-shuffle/';
     }
 
     const newUrl = targetPath + targetSearch;

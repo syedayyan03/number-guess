@@ -224,6 +224,38 @@
           </div>
         </div>
 
+        <!-- Game Module 5: Shell Shuffle (3D Visual Tracking Identity) -->
+        <div class="clean-card-interactive p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#4169FF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+             onclick="app.selectGame('shell_shuffle')">
+          <div>
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#4169FF] transition flex items-center gap-2">
+              Shell Shuffle
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#777BFF]">3D</span>
+            </h3>
+            
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
+              Watch the ball. Track the cup. Trust your eyes. 3D visual tracking challenge featuring physical cups, real lighting, dynamic swaps, and reflex precision.
+            </p>
+            
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
+              <span id="shellshuffle-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Best: 0</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Real 3D Physics</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">3–5 Cups</span>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-col items-center w-full">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="shellshuffle-card-btn-text">Play Shell Shuffle</span>
+            </button>
+            <div class="h-5 mt-2 flex items-center justify-center">
+              <button id="shellshuffle-card-reset-btn" onclick="event.stopPropagation(); app.resetShellShuffleProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+                Reset High Score
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -830,6 +862,70 @@
     </section>
 
     <!-- ============================================== -->
+    <!-- SCREEN 6: SHELL SHUFFLE 3D (VISUAL TRACKING) -->
+    <!-- ============================================== -->
+    <section id="screen-shellshuffle" class="w-full max-w-2xl hidden flex-col items-center py-2">
+      <!-- Shell Shuffle Top Bar -->
+      <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
+        <button onclick="app.exitShellShuffleToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        </button>
+
+        <div class="flex items-center gap-3 font-mono">
+          <div>
+            <span class="text-[#858AA5]">Level:</span>
+            <span id="shellshuffle-hud-level" class="font-bold text-[#4169FF] ml-1 text-sm">1</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5]">Score:</span>
+            <span id="shellshuffle-hud-score" class="font-bold text-[#F5F5FF] ml-1 text-sm">0</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5]">Streak:</span>
+            <span id="shellshuffle-hud-streak" class="font-bold text-[#48D6A0] ml-1 text-sm">x0</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span id="shellshuffle-hud-cups" class="hidden sm:inline-block px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] text-[11px] font-mono text-[#858AA5]">
+            3 Cups
+          </span>
+          <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.togglePause()" class="px-2 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1 text-[#B8BCD0] hover:text-white transition" title="Pause Game">
+            <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Phase / Instruction Banner -->
+      <div class="w-full clean-card p-3 mb-3 text-center flex items-center justify-between">
+        <div class="text-xs text-[#B8BCD0] font-medium flex items-center gap-2">
+          <span class="text-[#858AA5]">Target:</span> Follow the concealed gold ball
+        </div>
+        <div id="shellshuffle-phase-badge" class="px-3 py-1 rounded-full bg-[#191B2D] border border-[#34364A] text-[#858AA5] font-mono text-xs inline-flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-[#4169FF]"></span> Ready • Click Start Round
+        </div>
+      </div>
+
+      <!-- 3D Three.js Arena Viewport -->
+      <div class="w-full clean-card p-1.5 sm:p-2 mb-3 bg-[#0C0D19] border border-[#34364A] shadow-[0_16px_40px_rgba(0,0,0,0.6)] rounded-2xl relative overflow-hidden flex flex-col items-center">
+        <div id="shell-shuffle-canvas-container" class="w-full h-[340px] sm:h-[400px] relative rounded-xl overflow-hidden flex items-center justify-center">
+          <!-- Three.js Canvas gets injected here -->
+        </div>
+      </div>
+
+      <!-- Control Button Row -->
+      <div class="w-full flex items-center justify-center">
+        <button id="shellshuffle-start-btn" onclick="if (app.shellShuffleGame) app.shellShuffleGame.startRound()" class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#4169FF]/25">
+          <i data-lucide="play" class="w-4 h-4 fill-current"></i> Start Round
+        </button>
+      </div>
+
+      <div class="mt-3 text-center text-[11px] text-[#858AA5] font-mono">
+        Watch the ball • Follow the cup swaps • Tap the correct cup to claim points
+      </div>
+    </section>
+
+    <!-- ============================================== -->
     <!-- MODAL: MATRIX LEVEL COMPLETE -->
     <!-- ============================================== -->
     <div id="modal-matrix-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -1133,6 +1229,109 @@
     </div>
 
     <!-- ============================================== -->
+    <!-- MODAL: SHELL SHUFFLE LEVEL COMPLETE -->
+    <!-- ============================================== -->
+    <div id="modal-shellshuffle-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-emerald-500/30 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-emerald-500/20">
+          ✓
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Target Found!</h3>
+        <p class="text-xs text-[#B8BCD0] mb-5">You tracked the ball with visual accuracy.</p>
+        
+        <div class="grid grid-cols-3 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Points:</span>
+            <span id="shellshuffle-clear-points" class="font-bold text-emerald-400 text-sm">+100</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Level:</span>
+            <span id="shellshuffle-clear-level" class="font-bold text-white text-sm">Level 1</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Streak:</span>
+            <span id="shellshuffle-clear-streak" class="font-bold text-[#48D6A0] text-sm">x1</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="app.exitShellShuffleToMenu(); app.closeModal('modal-shellshuffle-level-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Exit
+          </button>
+          <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.nextLevel();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Next Level →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: SHELL SHUFFLE GAME OVER -->
+    <!-- ============================================== -->
+    <div id="modal-shellshuffle-game-over" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#FF7185]/40 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#FF7185]/10 border border-[#FF7185]/30 text-[#FF7185] flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-[#FF7185]/20">
+          ✕
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Round Over</h3>
+        <p class="text-xs text-[#FF7185]/80 mb-4 font-medium">The ball was hidden under another cup!</p>
+
+        <div class="grid grid-cols-2 gap-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Final Score:</span>
+            <span id="shellshuffle-over-score" class="font-bold text-white text-base">0</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5] block mb-0.5">Best Score:</span>
+            <span id="shellshuffle-over-best" class="font-bold text-[#48D6A0] text-base">0</span>
+          </div>
+          <div class="pt-2 border-t border-white/5">
+            <span class="text-[#858AA5]">Level Reached:</span>
+            <span id="shellshuffle-over-level" class="font-bold text-[#4169FF] ml-1">Level 1</span>
+          </div>
+          <div class="pt-2 border-t border-white/5">
+            <span class="text-[#858AA5]">Accuracy:</span>
+            <span id="shellshuffle-over-accuracy" class="font-bold text-white ml-1">0%</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="app.exitShellShuffleToMenu(); app.closeModal('modal-shellshuffle-game-over');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Menu
+          </button>
+          <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.restartGame();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
+            Play Again
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: SHELL SHUFFLE PAUSE -->
+    <!-- ============================================== -->
+    <div id="modal-shellshuffle-pause" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#34364A] shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#191B2D] border border-[#34364A] text-[#4169FF] flex items-center justify-center mx-auto mb-3 font-bold text-xl shadow-lg">
+          ⏸
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-1">Game Paused</h3>
+        <p class="text-xs text-[#B8BCD0] mb-5">Visual tracking paused.</p>
+
+        <div class="space-y-2.5">
+          <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.resumeGame();" class="w-full py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold">
+            Resume
+          </button>
+          <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.restartGame();" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Restart Round
+          </button>
+          <button onclick="app.exitShellShuffleToMenu(); app.closeModal('modal-shellshuffle-pause');" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300">
+            Exit to Menu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
     <!-- MODAL: ROUND RESULT -->
     <!-- ============================================== -->
     <div id="modal-round-end" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -1333,10 +1532,12 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="/js/three.min.js"></script>
   <script src="/js/sound.js"></script>
   <script src="/js/matrix.js?v=15.0"></script>
   <script src="/js/donttap.js?v=1.0"></script>
   <script src="/js/countdown.js?v=1.0"></script>
-  <script src="/js/app.js?v=16.0"></script>
+  <script src="/js/shellshuffle.js?v=1.0"></script>
+  <script src="/js/app.js?v=17.0"></script>
 </body>
 </html>
