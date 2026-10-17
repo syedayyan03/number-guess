@@ -99,26 +99,10 @@ body {
   box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(244, 198, 106, 0.25) !important;
 }
 
-/* Shell Shuffle: Glowing Electric Cyan 3D Hover Identity */
+/* Shell Shuffle: Electric Cyan 3D Hover Identity (Border and Title only, matching other cards) */
 .card-shell-shuffle:hover {
-  border-color: rgba(0, 229, 255, 0.75) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 35px -5px rgba(0, 229, 255, 0.38) !important;
-}
-
-.card-shell-shuffle .btn-shellshuffle-action {
-  background: var(--color-blue-primary);
-  color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 16px 0 rgba(65, 105, 255, 0.38);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.card-shell-shuffle:hover .btn-shellshuffle-action,
-.card-shell-shuffle .btn-shellshuffle-action:hover {
-  background: linear-gradient(135deg, #00E5FF 0%, #0284C7 100%);
-  color: #060A16;
-  border-color: rgba(0, 229, 255, 0.8);
-  box-shadow: 0 6px 24px 0 rgba(0, 229, 255, 0.55);
+  border-color: rgba(0, 229, 255, 0.6) !important;
+  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(0, 229, 255, 0.25) !important;
 }
 
 /* Primary Electric Blue Button */
