@@ -1003,9 +1003,9 @@
       <!-- Number Path Grid Board & SVG overlay (Clean White Board matching LinkedIn Zip) -->
       <div id="numberpath-board-card" class="w-full np-board-card p-3 sm:p-4 mb-2 rounded-3xl relative overflow-hidden flex flex-col items-center">
         <!-- Relative Grid Container for positioning SVG precisely over cells -->
-        <div class="np-grid-wrapper relative w-full aspect-square max-w-[385px] select-none touch-none rounded-2xl overflow-hidden">
-          <svg id="numberpath-svg-lines" class="absolute inset-0 w-full h-full pointer-events-none z-20"></svg>
-          <div id="numberpath-grid" class="w-full h-full grid relative z-10">
+        <div id="numberpath-grid-wrapper" class="np-grid-wrapper relative w-full aspect-square max-w-[385px] select-none touch-none rounded-2xl overflow-hidden">
+          <svg id="numberpath-svg-lines" viewBox="0 0 700 700" class="absolute inset-0 w-full h-full pointer-events-none z-20"></svg>
+          <div id="numberpath-grid" class="w-full h-full grid relative z-10 touch-none">
             <!-- 49 Cell divs generated dynamically by NumberPathGame -->
           </div>
         </div>
@@ -1677,7 +1677,7 @@
   <script src="/js/donttap.js?v=1.0"></script>
   <script src="/js/countdown.js?v=1.0"></script>
   <script src="/js/shellshuffle.js?v=1.1"></script>
-  <script src="/js/numberpath.js?v=2.0"></script>
+  <script src="/js/numberpath.js?v=2.2"></script>
   <script src="/js/app.js?v=20.0"></script>
 </body>
 </html>

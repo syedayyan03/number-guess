@@ -121,6 +121,7 @@ body {
   background: #FFFFFF;
   border: 1.5px solid #CBD5E1;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  touch-action: none;
 }
 
 .np-cell {
@@ -128,7 +129,6 @@ body {
   border: 1px solid #E2E8F0;
   aspect-ratio: 1 / 1;
   position: relative;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
   touch-action: none;
 }
 
@@ -154,8 +154,8 @@ body {
   border-radius: 9999px;
   font-weight: 900;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
   user-select: none;
+  pointer-events: none;
 }
 
 .np-checkpoint-pending {
@@ -167,30 +167,32 @@ body {
   background: #000000 !important;
   color: #FFFFFF !important;
   box-shadow: 0 0 0 2.5px #EA580C, 0 3px 8px rgba(0, 0, 0, 0.45);
-  transform: scale(1.05);
 }
 
-/* Thick rounded orange path line */
+/* Thick rounded orange path line (in 700x700 coordinate space) */
 .np-svg-shadow {
   fill: none;
   stroke: rgba(240, 91, 36, 0.28);
-  stroke-width: 18;
+  stroke-width: 38;
   stroke-linecap: round;
   stroke-linejoin: round;
+  pointer-events: none;
 }
 
 .np-svg-path {
   fill: none;
   stroke: #EA580C;
-  stroke-width: 11;
+  stroke-width: 22;
   stroke-linecap: round;
   stroke-linejoin: round;
+  pointer-events: none;
 }
 
 .np-svg-head {
   fill: #FFFFFF;
   stroke: #EA580C;
-  stroke-width: 3.5;
+  stroke-width: 7;
+  pointer-events: none;
 }
 
 @keyframes npPulseInvalid {
