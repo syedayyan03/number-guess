@@ -130,6 +130,7 @@ body {
   aspect-ratio: 1 / 1;
   position: relative;
   touch-action: none;
+  z-index: 5;
 }
 
 .np-cell:hover {
@@ -140,11 +141,13 @@ body {
 .np-cell-visited {
   background: rgba(240, 91, 36, 0.22) !important;
   border-color: rgba(240, 91, 36, 0.45) !important;
+  z-index: 5;
 }
 
 .np-cell-head {
   background: rgba(240, 91, 36, 0.38) !important;
   border-color: #EA580C !important;
+  z-index: 5;
 }
 
 /* Solid Black Circular Badges with Crisp White Digits matching LinkedIn Zip */
@@ -153,9 +156,11 @@ body {
   color: #FFFFFF !important;
   border-radius: 9999px;
   font-weight: 900;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   user-select: none;
   pointer-events: none;
+  position: relative;
+  z-index: 30;
 }
 
 .np-checkpoint-pending {
@@ -169,11 +174,11 @@ body {
   box-shadow: 0 0 0 2.5px #EA580C, 0 3px 8px rgba(0, 0, 0, 0.45);
 }
 
-/* Thick rounded orange path line (in 700x700 coordinate space) */
+/* Bold chunky rounded orange path line (in 700x700 coordinate space) */
 .np-svg-shadow {
   fill: none;
-  stroke: rgba(240, 91, 36, 0.28);
-  stroke-width: 38;
+  stroke: rgba(240, 91, 36, 0.32);
+  stroke-width: 58;
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
@@ -182,7 +187,7 @@ body {
 .np-svg-path {
   fill: none;
   stroke: #EA580C;
-  stroke-width: 22;
+  stroke-width: 36;
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
@@ -191,7 +196,7 @@ body {
 .np-svg-head {
   fill: #FFFFFF;
   stroke: #EA580C;
-  stroke-width: 7;
+  stroke-width: 8;
   pointer-events: none;
 }
 

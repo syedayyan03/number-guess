@@ -2346,7 +2346,7 @@ class NumberPathGame {
     svgEl.innerHTML = `
       <path id="np-svg-shadow" class="np-svg-shadow" d=""></path>
       <path id="np-svg-path" class="np-svg-path" d=""></path>
-      <circle id="np-svg-head" class="np-svg-head" cx="-100" cy="-100" r="14" style="display:none;"></circle>
+      <circle id="np-svg-head" class="np-svg-head" cx="-100" cy="-100" r="16" style="display:none;"></circle>
     `;
     this.svgShadowEl = document.getElementById('np-svg-shadow');
     this.svgMainEl = document.getElementById('np-svg-path');
@@ -2360,14 +2360,11 @@ class NumberPathGame {
     if (wrapper.dataset) wrapper.dataset.bound = 'true';
 
     const getGridCoords = (e) => {
-      if (!this.cachedGridRect) {
-        this.cachedGridRect = wrapper.getBoundingClientRect();
-      }
-      const rect = this.cachedGridRect;
+      const rect = wrapper.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return null;
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      if (x < 0 || y < 0 || x >= rect.width || y >= rect.height) return null;
+      // Clamp coordinates to wrapper bounds so fast/near-edge dragging never drops or freezes
+      const x = Math.max(0, Math.min(rect.width - 0.001, e.clientX - rect.left));
+      const y = Math.max(0, Math.min(rect.height - 0.001, e.clientY - rect.top));
       const c = Math.floor((x / rect.width) * 7);
       const r = Math.floor((y / rect.height) * 7);
       if (r < 0 || r >= 7 || c < 0 || c >= 7) return null;
@@ -2381,7 +2378,6 @@ class NumberPathGame {
         wrapper.setPointerCapture(e.pointerId);
       } catch (err) {}
 
-      this.cachedGridRect = wrapper.getBoundingClientRect();
       const coords = getGridCoords(e);
       if (!coords) return;
 
@@ -2434,28 +2430,97 @@ class NumberPathGame {
     // Already on current tip cell -> no-op
     if (currentTip.r === r && currentTip.c === c) return;
 
-    // Backtrack exactly 1 step if moving back onto the immediate previous cell
-    if (this.visitedPath.length >= 2) {
-      const prev = this.visitedPath[this.visitedPath.length - 2];
-      if (prev.r === r && prev.c === c) {
+    // Check if target is an already visited cell
+    const targetIdx = this.visitedPath.findIndex(p => p.r === r && p.c === c);
+    if (targetIdx !== -1) {
+      const stepsBack = (this.visitedPath.length - 1) - targetIdx;
+      // ONLY allow backtrack if moving back onto the immediate previous cell (stepsBack === 1)
+      if (stepsBack === 1) {
         this.undo();
+        return;
+      }
+      // If cursor accidentally brushes any other already visited cell (stepsBack > 1), ignore it completely!
+      return;
+    }
+
+    // Target is unvisited: smoothly step towards (r, c)
+    this.moveTowards(r, c);
+  }
+
+  moveTowards(targetR, targetC) {
+    if (this.isCompleted || this.visitedPath.length === 0) return;
+    let tip = this.visitedPath[this.visitedPath.length - 1];
+    let dr = targetR - tip.r;
+    let dc = targetC - tip.c;
+    let dist = Math.abs(dr) + Math.abs(dc);
+
+    if (dist === 0) return;
+
+    // 1. Direct orthogonal step
+    if (dist === 1) {
+      this.attemptStep(targetR, targetC);
+      return;
+    }
+
+    // 2. Diagonal corner turning (|dr| === 1 && |dc| === 1)
+    if (Math.abs(dr) === 1 && Math.abs(dc) === 1) {
+      // Option A: Horizontal first (tip.r, targetC), then (targetR, targetC)
+      // Option B: Vertical first (targetR, tip.c), then (targetR, targetC)
+      const canA = this.canStepInto(tip.r, targetC);
+      const canB = this.canStepInto(targetR, tip.c);
+
+      if (canA) {
+        if (this.attemptStep(tip.r, targetC)) {
+          this.attemptStep(targetR, targetC);
+        }
+        return;
+      } else if (canB) {
+        if (this.attemptStep(targetR, tip.c)) {
+          this.attemptStep(targetR, targetC);
+        }
         return;
       }
     }
 
-    // FIX FOR ISSUE 2:
-    // If cursor mistakenly brushes across ANY other already visited cell on the path,
-    // DO NOTHING! Completely ignore it to prevent accidental undo or truncation.
-    if (this.visitedPath.some(p => p.r === r && p.c === c)) {
-      return;
-    }
+    // 3. Fast drag across multiple cells in one swipe (dist between 2 and 6)
+    const maxSteps = Math.min(dist, 6);
+    for (let i = 0; i < maxSteps; i++) {
+      tip = this.visitedPath[this.visitedPath.length - 1];
+      dr = targetR - tip.r;
+      dc = targetC - tip.c;
+      if (dr === 0 && dc === 0) break;
 
-    // Otherwise, attempt forward step into the cell if adjacent
-    const dr = Math.abs(r - currentTip.r);
-    const dc = Math.abs(c - currentTip.c);
-    if (dr + dc === 1) {
-      this.attemptStep(r, c);
+      let nextR = tip.r;
+      let nextC = tip.c;
+
+      if (Math.abs(dr) >= Math.abs(dc) && dr !== 0) {
+        nextR += Math.sign(dr);
+      } else if (dc !== 0) {
+        nextC += Math.sign(dc);
+      } else if (dr !== 0) {
+        nextR += Math.sign(dr);
+      }
+
+      // If next step cannot be stepped into, stop smoothly
+      if (!this.canStepInto(nextR, nextC)) break;
+      if (!this.attemptStep(nextR, nextC)) break;
     }
+  }
+
+  canStepInto(r, c) {
+    if (r < 0 || r >= this.rows || c < 0 || c >= this.cols) return false;
+    if (this.visitedPath.some(p => p.r === r && p.c === c)) return false;
+
+    const cp = this.checkpoints.find(p => p.r === r && p.c === c);
+    if (cp) {
+      const collectedCount = this.getCollectedCheckpointCount();
+      const expectedNumber = collectedCount + 1;
+      if (cp.number !== expectedNumber) return false;
+      if (cp.number === this.checkpoints.length && this.visitedPath.length < (this.rows * this.cols - 1)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   attemptStep(r, c) {
