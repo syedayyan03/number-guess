@@ -613,6 +613,7 @@ input[type=number] {
 }
 
 .donttap-hit-safe {
+  pointer-events: none !important;
   animation: hitSafeAnim 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
@@ -631,6 +632,7 @@ input[type=number] {
 }
 
 .donttap-hit-danger {
+  pointer-events: none !important;
   animation: hitDangerAnim 0.25s ease forwards !important;
 }
 
@@ -647,6 +649,7 @@ input[type=number] {
 }
 
 .donttap-fade-miss {
+  pointer-events: none !important;
   animation: fadeMissAnim 0.15s ease forwards !important;
 }
 
@@ -661,6 +664,7 @@ input[type=number] {
 }
 
 .donttap-fade-restraint {
+  pointer-events: none !important;
   animation: fadeRestraintAnim 0.15s ease forwards !important;
 }
 

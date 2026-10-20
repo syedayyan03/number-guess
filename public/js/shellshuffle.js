@@ -67,27 +67,27 @@ class ShellShuffleGame {
     if (difficulty === 'easy') {
       // Easy 1 to 10: Smooth, highly trackable, relaxing. 3 cups.
       // Easy 1: 850ms, 4 swaps, 60ms gap
-      // Easy 10: 445ms, 8 swaps, 35ms gap
-      duration = Math.round(850 - (cleanLvl - 1) * 45);
-      swapCount = 4 + Math.floor((cleanLvl - 1) * 0.45);
-      gapDelay = Math.max(30, 60 - (cleanLvl - 1) * 3);
+      // Easy 10: 520ms, 7 swaps, 35ms gap
+      duration = Math.round(850 - (cleanLvl - 1) * 36.6);
+      swapCount = 4 + Math.floor((cleanLvl - 1) * 0.35);
+      gapDelay = Math.max(35, Math.round(60 - (cleanLvl - 1) * 2.5));
       cups = 3;
     } else if (difficulty === 'medium') {
       // Medium 1 to 10: Seamlessly picks up from Easy 10 and accelerates.
-      // Medium 1: 440ms, 9 swaps, 3 cups
-      // Medium 10: 228ms, 15 swaps, 4 cups
-      duration = Math.round(440 - (cleanLvl - 1) * 23.5);
-      swapCount = 9 + Math.floor((cleanLvl - 1) * 0.7);
-      gapDelay = Math.max(15, 30 - (cleanLvl - 1) * 1.5);
+      // Medium 1: 500ms, 7 swaps, 3 cups
+      // Medium 10: 340ms, 11 swaps, 4 cups
+      duration = Math.round(500 - (cleanLvl - 1) * 17.7);
+      swapCount = 7 + Math.floor((cleanLvl - 1) * 0.45);
+      gapDelay = Math.max(25, Math.round(35 - (cleanLvl - 1) * 1.1));
       cups = cleanLvl >= 6 ? 4 : 3;
     } else {
-      // Hard 1 to 10: High-speed tracking challenge (fair and trackable with focus)
-      // Hard 1: 220ms, 12 swaps, 4 cups
-      // Hard 10: 140ms, 20 swaps, 5 cups
-      duration = Math.round(220 - (cleanLvl - 1) * 8.8);
-      swapCount = 12 + Math.floor((cleanLvl - 1) * 0.9);
-      gapDelay = Math.max(10, 20 - cleanLvl * 1.0);
-      cups = cleanLvl >= 5 ? 5 : 4;
+      // Hard 1 to 10: Fast visual tracking challenge, completely trackable with focused eyes
+      // Hard 1: 320ms, 10 swaps, 4 cups
+      // Hard 10: 220ms, 14 swaps, 5 cups
+      duration = Math.round(320 - (cleanLvl - 1) * 11.1);
+      swapCount = 10 + Math.floor((cleanLvl - 1) * 0.45);
+      gapDelay = Math.max(18, Math.round(25 - (cleanLvl - 1) * 0.8));
+      cups = cleanLvl >= 6 ? 5 : 4;
     }
 
     const speedMultiplier = (850 / duration).toFixed(1);

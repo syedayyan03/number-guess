@@ -18,38 +18,38 @@ class SpeedMatrixGame {
       easy: [
         { level: 1,  cols: 3, total: 9,  time: 45 }, // 5.00s / tile
         { level: 2,  cols: 3, total: 9,  time: 40 }, // 4.44s / tile
-        { level: 3,  cols: 3, total: 9,  time: 35 }, // 3.89s / tile
-        { level: 4,  cols: 4, total: 12, time: 40 }, // 3.33s / tile
-        { level: 5,  cols: 4, total: 12, time: 35 }, // 2.92s / tile
-        { level: 6,  cols: 4, total: 12, time: 30 }, // 2.50s / tile
-        { level: 7,  cols: 4, total: 16, time: 36 }, // 2.25s / tile
-        { level: 8,  cols: 4, total: 16, time: 32 }, // 2.00s / tile
-        { level: 9,  cols: 4, total: 16, time: 28 }, // 1.75s / tile
-        { level: 10, cols: 4, total: 16, time: 25 }  // 1.56s / tile
+        { level: 3,  cols: 3, total: 9,  time: 36 }, // 4.00s / tile
+        { level: 4,  cols: 4, total: 12, time: 42 }, // 3.50s / tile
+        { level: 5,  cols: 4, total: 12, time: 38 }, // 3.17s / tile
+        { level: 6,  cols: 4, total: 12, time: 34 }, // 2.83s / tile
+        { level: 7,  cols: 4, total: 16, time: 40 }, // 2.50s / tile
+        { level: 8,  cols: 4, total: 16, time: 36 }, // 2.25s / tile
+        { level: 9,  cols: 4, total: 16, time: 32 }, // 2.00s / tile
+        { level: 10, cols: 4, total: 16, time: 29 }  // 1.81s / tile
       ],
       medium: [
-        { level: 1,  cols: 5, total: 20, time: 30 }, // 1.50s / tile
-        { level: 2,  cols: 5, total: 20, time: 28 }, // 1.40s / tile
-        { level: 3,  cols: 5, total: 25, time: 32 }, // 1.28s / tile
-        { level: 4,  cols: 5, total: 25, time: 30 }, // 1.20s / tile
-        { level: 5,  cols: 5, total: 25, time: 28 }, // 1.12s / tile
-        { level: 6,  cols: 6, total: 30, time: 31 }, // 1.03s / tile
-        { level: 7,  cols: 6, total: 30, time: 29 }, // 0.97s / tile
-        { level: 8,  cols: 6, total: 30, time: 27 }, // 0.90s / tile
-        { level: 9,  cols: 6, total: 36, time: 32 }, // 0.89s / tile
-        { level: 10, cols: 6, total: 36, time: 30 }  // 0.83s / tile
+        { level: 1,  cols: 5, total: 20, time: 35 }, // 1.75s / tile
+        { level: 2,  cols: 5, total: 20, time: 33 }, // 1.65s / tile
+        { level: 3,  cols: 5, total: 25, time: 38 }, // 1.52s / tile
+        { level: 4,  cols: 5, total: 25, time: 35 }, // 1.40s / tile
+        { level: 5,  cols: 5, total: 25, time: 33 }, // 1.32s / tile
+        { level: 6,  cols: 6, total: 30, time: 37 }, // 1.23s / tile
+        { level: 7,  cols: 6, total: 30, time: 35 }, // 1.17s / tile
+        { level: 8,  cols: 6, total: 30, time: 33 }, // 1.10s / tile
+        { level: 9,  cols: 6, total: 36, time: 37 }, // 1.03s / tile
+        { level: 10, cols: 6, total: 36, time: 35 }  // 0.97s / tile
       ],
       hard: [
-        { level: 1,  cols: 6, total: 36, time: 29 }, // 0.81s / tile
-        { level: 2,  cols: 6, total: 36, time: 28 }, // 0.78s / tile
-        { level: 3,  cols: 7, total: 42, time: 31 }, // 0.74s / tile
-        { level: 4,  cols: 7, total: 42, time: 30 }, // 0.71s / tile
-        { level: 5,  cols: 7, total: 42, time: 28 }, // 0.67s / tile
-        { level: 6,  cols: 7, total: 49, time: 29 }, // 0.59s / tile
-        { level: 7,  cols: 7, total: 49, time: 28 }, // 0.57s / tile
-        { level: 8,  cols: 7, total: 49, time: 27 }, // 0.55s / tile
-        { level: 9,  cols: 7, total: 49, time: 26 }, // 0.53s / tile
-        { level: 10, cols: 7, total: 49, time: 25 }  // 0.51s / tile (25 seconds for the 7x7 matrix!)
+        { level: 1,  cols: 6, total: 36, time: 34 }, // 0.94s / tile
+        { level: 2,  cols: 6, total: 36, time: 32 }, // 0.89s / tile
+        { level: 3,  cols: 7, total: 42, time: 36 }, // 0.86s / tile
+        { level: 4,  cols: 7, total: 42, time: 34 }, // 0.81s / tile
+        { level: 5,  cols: 7, total: 42, time: 32 }, // 0.76s / tile
+        { level: 6,  cols: 7, total: 49, time: 36 }, // 0.73s / tile
+        { level: 7,  cols: 7, total: 49, time: 35 }, // 0.71s / tile
+        { level: 8,  cols: 7, total: 49, time: 34 }, // 0.69s / tile
+        { level: 9,  cols: 7, total: 49, time: 33 }, // 0.67s / tile
+        { level: 10, cols: 7, total: 49, time: 32 }  // 0.65s / tile (32 seconds for 49 numbers: intense, fair & winnable!)
       ]
     };
   }

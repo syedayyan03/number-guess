@@ -2217,16 +2217,16 @@ class NumberPathGame {
   getCheckpointCount(lvl = this.level, difficulty = this.difficulty || 'easy') {
     const cleanLvl = Math.max(1, Math.min(10, parseInt(lvl, 10) || 1));
     if (difficulty === 'easy') {
-      // 18 down to 12 checkpoints across 49 cells (frequent guidance)
-      const counts = [18, 17, 16, 15, 15, 14, 13, 13, 12, 12];
+      // 20 down to 13 checkpoints across 49 cells (frequent guidance, highly intuitive)
+      const counts = [20, 19, 18, 17, 16, 15, 15, 14, 14, 13];
       return counts[cleanLvl - 1];
     } else if (difficulty === 'medium') {
-      // 11 down to 7 checkpoints across 49 cells (moderate guidance)
-      const counts = [11, 10, 10, 9, 9, 8, 8, 7, 7, 7];
+      // 13 down to 8 checkpoints across 49 cells (moderate guidance, logical deduction required)
+      const counts = [13, 12, 12, 11, 11, 10, 10, 9, 9, 8];
       return counts[cleanLvl - 1];
     } else {
-      // 6 down to 3 checkpoints across 49 cells (hard deduction!)
-      const counts = [6, 6, 5, 5, 4, 4, 4, 3, 3, 3];
+      // 8 down to 5 checkpoints across 49 cells (challenging deduction, perfectly solvable without guessing)
+      const counts = [8, 8, 7, 7, 6, 6, 6, 5, 5, 5];
       return counts[cleanLvl - 1];
     }
   }

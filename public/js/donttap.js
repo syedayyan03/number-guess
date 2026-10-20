@@ -25,6 +25,7 @@ class DontTapGame {
     this.activeTargets = new Map(); // cellIndex -> targetObject
     this.spawnTimer = null;
     this.targetIdCounter = 0;
+    this.recentlyExpiredSafe = null; // Grace recovery cache for taps landing during expiration race
 
     // Load saved high score & highest level
     this.highScore = this.getSavedHighScore();
@@ -104,26 +105,32 @@ class DontTapGame {
     let quota, lifetime, spawnInterval, dangerChance, maxConcurrent;
 
     if (diff === 'easy') {
-      // Relaxed, friendly, high reaction window
-      quota = 8 + lvl * 1;
-      lifetime = Math.max(1400, 2300 - (lvl - 1) * 90);
-      spawnInterval = Math.max(900, 1400 - (lvl - 1) * 50);
-      dangerChance = Math.min(0.20, 0.10 + (lvl - 1) * 0.012);
+      // Relaxed, friendly reaction window
+      // Quota: 8 to 17
+      // Lifetime: 2400ms down to 1725ms
+      quota = 8 + (lvl - 1);
+      lifetime = Math.round(2400 - (lvl - 1) * 75);
+      spawnInterval = Math.round(1300 - (lvl - 1) * 40);
+      dangerChance = Math.min(0.18, 0.08 + (lvl - 1) * 0.011);
       maxConcurrent = lvl <= 4 ? 1 : 2;
     } else if (diff === 'medium') {
-      // Balanced test of reflex & inhibition
-      quota = 14 + Math.round(lvl * 1.5);
-      lifetime = Math.max(850, 1400 - (lvl - 1) * 60);
-      spawnInterval = Math.max(600, 950 - (lvl - 1) * 38);
-      dangerChance = Math.min(0.36, 0.22 + (lvl - 1) * 0.016);
-      maxConcurrent = lvl <= 3 ? 2 : 3;
+      // Balanced test of reflex & inhibition: challenging, fair & achievable
+      // Quota: 12 to 21
+      // Lifetime: 1600ms down to 1150ms
+      quota = 12 + (lvl - 1);
+      lifetime = Math.round(1600 - (lvl - 1) * 50);
+      spawnInterval = Math.round(900 - (lvl - 1) * 25);
+      dangerChance = Math.min(0.28, 0.18 + (lvl - 1) * 0.011);
+      maxConcurrent = lvl <= 4 ? 2 : 3;
     } else {
-      // Hard: lightning reflex & strict inhibition (intense but achievable)
-      quota = 20 + lvl * 2;
-      lifetime = Math.max(550, 850 - (lvl - 1) * 33);
-      spawnInterval = Math.max(420, 650 - (lvl - 1) * 25);
-      dangerChance = Math.min(0.48, 0.32 + (lvl - 1) * 0.016);
-      maxConcurrent = lvl <= 3 ? 3 : 4;
+      // Hard: Fast reflexes & tight inhibition, perfectly winnable by a skilled player
+      // Quota: 16 to 25
+      // Lifetime: 1100ms down to 800ms
+      quota = 16 + (lvl - 1);
+      lifetime = Math.round(1100 - (lvl - 1) * 33.3);
+      spawnInterval = Math.round(650 - (lvl - 1) * 20);
+      dangerChance = Math.min(0.38, 0.26 + (lvl - 1) * 0.013);
+      maxConcurrent = 3;
     }
 
     return { quota, lifetime, spawnInterval, dangerChance, maxConcurrent };
@@ -147,6 +154,7 @@ class DontTapGame {
     this.combo = 0;
     this.maxCombo = 0;
     this.safeTapsCount = 0;
+    this.recentlyExpiredSafe = null;
     const config = this.getLevelConfig(this.level, this.difficulty);
     this.targetQuota = config.quota;
     this.clearAllActiveTargets();
@@ -161,7 +169,7 @@ class DontTapGame {
     // Small delay before spawning starts
     this.spawnTimer = setTimeout(() => {
       this.scheduleNextSpawn();
-    }, 600);
+    }, 500);
   }
 
   renderBoard() {
@@ -173,7 +181,16 @@ class DontTapGame {
       const cell = document.createElement('div');
       cell.className = 'donttap-cell';
       cell.dataset.index = i;
-      cell.onclick = (e) => this.handleCellClick(i, e);
+      cell.style.touchAction = 'manipulation';
+      // Use pointerdown for 0ms instantaneous response on mouse, touch & stylus
+      cell.addEventListener('pointerdown', (e) => this.handleCellPointerDown(i, e), { passive: false });
+      // Suppress legacy click to prevent duplicate handling or release delays
+      cell.onclick = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
       board.appendChild(cell);
     }
   }
@@ -237,9 +254,21 @@ class DontTapGame {
     this.clearSpawnTimer();
     const config = this.getLevelConfig(this.level);
 
-    // Random interval variation around base
-    const variance = (Math.random() - 0.5) * 200;
-    const delay = Math.max(350, config.spawnInterval + variance);
+    // Count how many active safe targets exist
+    let activeSafeCount = 0;
+    for (const t of this.activeTargets.values()) {
+      if (t.type === 'safe') activeSafeCount++;
+    }
+
+    let delay;
+    if (activeSafeCount === 0) {
+      // If no safe target is currently active, spawn the next target promptly!
+      delay = Math.max(220, Math.round(config.spawnInterval * 0.45) + Math.random() * 120);
+    } else {
+      // Background interval for danger obstacles
+      const variance = (Math.random() - 0.5) * 160;
+      delay = Math.max(340, config.spawnInterval + variance);
+    }
 
     this.spawnTimer = setTimeout(() => {
       this.spawnTarget();
@@ -273,9 +302,29 @@ class DontTapGame {
     const available = this.getAvailableCells();
     if (available.length === 0) return;
 
+    // Count currently active safe targets
+    let activeSafeCount = 0;
+    for (const t of this.activeTargets.values()) {
+      if (t.type === 'safe') activeSafeCount++;
+    }
+
+    // HUMAN ERGONOMIC CONSTRAINT:
+    // A player only has one cursor/finger. Never spawn more than 1 active safe target!
+    // This strictly prevents simultaneous multi-life expiration losses.
+    let type;
+    if (activeSafeCount === 0) {
+      // Prioritize spawning the safe target so gameplay proceeds smoothly
+      if (this.activeTargets.size > 0 && Math.random() < config.dangerChance) {
+        type = 'danger';
+      } else {
+        type = 'safe';
+      }
+    } else {
+      // A safe target is already active on the board: only spawn a danger obstacle!
+      type = 'danger';
+    }
+
     const cellIndex = available[Math.floor(Math.random() * available.length)];
-    const isDanger = Math.random() < config.dangerChance;
-    const type = isDanger ? 'danger' : 'safe';
     const duration = config.lifetime;
     const targetId = ++this.targetIdCounter;
 
@@ -341,12 +390,61 @@ class DontTapGame {
 
   // --- Interaction Handling ---
   handleCellClick(cellIndex, event) {
-    if (event) event.stopPropagation();
+    this.handleCellPointerDown(cellIndex, event);
+  }
+
+  handleCellPointerDown(cellIndex, event) {
+    if (event) {
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    }
     if (!this.isPlaying || this.isPaused || this.isGameOver) return;
 
     const target = this.activeTargets.get(cellIndex);
     if (!target) {
-      // Tapped an empty socket
+      // Check for Expiration Grace Window (150ms):
+      // If the safe target expired milliseconds ago right before the tap registered,
+      // recover the life and reward the hit!
+      const now = Date.now();
+      if (
+        this.recentlyExpiredSafe &&
+        this.recentlyExpiredSafe.cellIndex === cellIndex &&
+        (now - this.recentlyExpiredSafe.expiredAt) <= 150
+      ) {
+        const expiredInfo = this.recentlyExpiredSafe;
+        this.recentlyExpiredSafe = null;
+
+        // Restore the lost life
+        this.lives = Math.min(this.maxLives, this.lives + 1);
+
+        // Record tap & combo
+        this.safeTapsCount++;
+        this.combo++;
+        if (this.combo > this.maxCombo) {
+          this.maxCombo = this.combo;
+        }
+
+        const comboMult = Math.min(this.combo, 10);
+        this.score += (100 * comboMult) + 20;
+
+        if (window.soundFx) {
+          window.soundFx.playTileTap(this.combo);
+        }
+
+        // Clean up fading DOM element
+        if (expiredInfo.domElement && expiredInfo.domElement.parentNode) {
+          expiredInfo.domElement.parentNode.removeChild(expiredInfo.domElement);
+        }
+
+        this.updateHUD();
+
+        // Promptly schedule next target
+        this.scheduleNextSpawn();
+
+        if (this.safeTapsCount >= this.targetQuota) {
+          this.handleLevelCleared();
+        }
+      }
       return;
     }
 
@@ -382,6 +480,7 @@ class DontTapGame {
     // Hit Animation
     const el = target.domElement;
     if (el) {
+      el.style.pointerEvents = 'none';
       el.classList.add('donttap-hit-safe');
       setTimeout(() => {
         if (el.parentNode) el.parentNode.removeChild(el);
@@ -389,6 +488,9 @@ class DontTapGame {
     }
 
     this.updateHUD();
+
+    // Promptly schedule next target for ultra-smooth fast rhythm
+    this.scheduleNextSpawn();
 
     // Check if level clear quota reached
     if (this.safeTapsCount >= this.targetQuota) {
@@ -412,6 +514,7 @@ class DontTapGame {
     // Violent shake and danger burst
     const el = target.domElement;
     if (el) {
+      el.style.pointerEvents = 'none';
       el.classList.add('donttap-hit-danger');
       setTimeout(() => {
         if (el.parentNode) el.parentNode.removeChild(el);
@@ -444,7 +547,20 @@ class DontTapGame {
     this.activeTargets.delete(cellIndex);
 
     if (target.type === 'safe') {
-      // Failed to tap safe target before it disappeared: deduct 1 life and reset combo
+      // Safe target expired: record for grace recovery window (150ms)
+      this.recentlyExpiredSafe = {
+        cellIndex,
+        targetId,
+        expiredAt: Date.now(),
+        domElement: target.domElement
+      };
+      setTimeout(() => {
+        if (this.recentlyExpiredSafe && this.recentlyExpiredSafe.targetId === targetId) {
+          this.recentlyExpiredSafe = null;
+        }
+      }, 180);
+
+      // Deduct 1 life and reset combo
       this.lives = Math.max(0, this.lives - 1);
       this.combo = 0;
 
@@ -466,6 +582,7 @@ class DontTapGame {
 
       const el = target.domElement;
       if (el) {
+        el.style.pointerEvents = 'none';
         el.classList.add('donttap-fade-miss');
         setTimeout(() => {
           if (el.parentNode) el.parentNode.removeChild(el);
@@ -473,6 +590,9 @@ class DontTapGame {
       }
 
       this.updateHUD();
+
+      // Schedule next spawn so game continues smoothly
+      this.scheduleNextSpawn();
 
       if (this.lives <= 0) {
         this.handleGameOver();
@@ -483,6 +603,7 @@ class DontTapGame {
       this.updateHUD();
       const el = target.domElement;
       if (el) {
+        el.style.pointerEvents = 'none';
         el.classList.add('donttap-fade-restraint');
         setTimeout(() => {
           if (el.parentNode) el.parentNode.removeChild(el);
