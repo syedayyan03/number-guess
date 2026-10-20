@@ -46,6 +46,16 @@ class GameSettingsManager {
         accentColor: '#EA580C',
         icon: 'route',
         totalLevels: 10
+      },
+      sudoku: {
+        id: 'sudoku',
+        slug: 'sudoku',
+        name: 'Sudoku Classic',
+        subtitle: '9x9 Logic Number Grid',
+        themeColor: '#8B5CF6',
+        accentColor: '#7C3AED',
+        icon: 'grid',
+        totalLevels: 10
       }
     };
   }
@@ -149,6 +159,8 @@ class GameSettingsManager {
       this.app.updateShellShuffleMenuCard();
     } else if (gameId === 'number_path' && typeof this.app.updateNumberPathMenuCard === 'function') {
       this.app.updateNumberPathMenuCard();
+    } else if (gameId === 'sudoku' && typeof this.app.updateSudokuMenuCard === 'function') {
+      this.app.updateSudokuMenuCard();
     }
   }
 
@@ -362,6 +374,14 @@ class GameSettingsManager {
       this.app.showScreen('numberpath', false);
       if (this.app.numberPathGame) {
         this.app.numberPathGame.startLevel(cleanLvl, difficulty);
+      }
+    } else if (cfg.id === 'sudoku') {
+      if (!this.app.sudokuGame && window.SudokuGame) {
+        this.app.sudokuGame = new window.SudokuGame(this.app);
+      }
+      this.app.showScreen('sudoku', false);
+      if (this.app.sudokuGame) {
+        this.app.sudokuGame.startLevel(cleanLvl, difficulty);
       }
     }
 

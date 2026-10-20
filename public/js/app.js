@@ -48,6 +48,9 @@ class NumberVerseApp {
     if (window.NumberPathGame) {
       this.numberPathGame = new window.NumberPathGame(this);
     }
+    if (window.SudokuGame) {
+      this.sudokuGame = new window.SudokuGame(this);
+    }
     if (window.GameSettingsManager) {
       this.gameSettingsManager = new window.GameSettingsManager(this);
     }
@@ -56,6 +59,7 @@ class NumberVerseApp {
     this.updateCountdownMenuCard();
     this.updateShellShuffleMenuCard();
     this.updateNumberPathMenuCard();
+    this.updateSudokuMenuCard();
     this.setupRouter();
     this.routeFromUrl(false);
     this.renderIcons();
@@ -422,6 +426,43 @@ class NumberVerseApp {
     this.showToast('Number Path progress reset to Level 1', 'info');
   }
 
+  updateSudokuMenuCard() {
+    const badge = document.getElementById('sudoku-card-badge');
+    const btnText = document.getElementById('sudoku-card-btn-text');
+    const resetBtn = document.getElementById('sudoku-card-reset-btn');
+    if (!badge || !this.gameSettingsManager) return;
+
+    const totalStars = this.gameSettingsManager.getTotalStars('sudoku', 'easy') +
+                       this.gameSettingsManager.getTotalStars('sudoku', 'medium') +
+                       this.gameSettingsManager.getTotalStars('sudoku', 'hard');
+
+    if (totalStars > 0) {
+      badge.innerText = `⭐ ${totalStars} / 90 Stars`;
+      if (btnText) btnText.innerText = 'Continue Sudoku';
+      if (resetBtn) resetBtn.classList.remove('hidden');
+    } else {
+      badge.innerText = '10 Levels';
+      if (btnText) btnText.innerText = 'Play Sudoku';
+      if (resetBtn) resetBtn.classList.add('hidden');
+    }
+  }
+
+  resetSudokuProgress() {
+    if (this.gameSettingsManager) {
+      this.gameSettingsManager.resetAllProgressForGame('sudoku');
+      this.updateSudokuMenuCard();
+      this.showToast('Sudoku progress reset to Level 1', 'info');
+    }
+  }
+
+  exitSudokuToMenu() {
+    if (this.sudokuGame) {
+      this.sudokuGame.exitToMenu();
+    } else {
+      this.showScreen('menu');
+    }
+  }
+
   showScreen(screenId, updateHistory = true) {
     if (this.currentScreen !== screenId) {
       if (this.currentScreen === 'matrix' && this.matrixGame) {
@@ -438,11 +479,13 @@ class NumberVerseApp {
         this.shellShuffleGame.stopAnimations();
       } else if (this.currentScreen === 'numberpath' && this.numberPathGame) {
         this.numberPathGame.stopTimer();
+      } else if (this.currentScreen === 'sudoku' && this.sudokuGame) {
+        this.sudokuGame.stopTimer();
       }
     }
 
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle', 'numberpath', 'settings', 'levels'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle', 'numberpath', 'sudoku', 'settings', 'levels'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });

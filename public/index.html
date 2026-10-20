@@ -288,6 +288,38 @@
           </div>
         </div>
 
+        <!-- Game Module 7: Sudoku Classic -->
+        <div class="clean-card-interactive card-sudoku p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-amber-500/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+             onclick="app.selectGame('sudoku')">
+          <div>
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-amber-300 transition flex items-center gap-2">
+              Sudoku Classic
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">9x9</span>
+            </h3>
+            
+            <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
+              Pure mathematical logic. Fill the 9×9 grid so every row, column, and 3×3 box contains digits 1 to 9. Features candidate notes, mistake limits, auto-cleanup, and progressive deductions.
+            </p>
+            
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
+              <span id="sudoku-card-badge" class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200/90 font-medium">10 Levels</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Pencil Notes</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">3 Mistakes Limit</span>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-col items-center w-full">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#D97706]/35 transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="sudoku-card-btn-text">Play Sudoku</span>
+            </button>
+            <div class="h-5 mt-2 flex items-center justify-center">
+              <button id="sudoku-card-reset-btn" onclick="event.stopPropagation(); app.resetSudokuProgress();" class="hidden text-xs font-mono text-amber-400/80 hover:text-amber-200 hover:underline cursor-pointer transition">
+                Reset to Level 1
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -1166,6 +1198,124 @@
     </section>
 
     <!-- ============================================== -->
+    <!-- SCREEN 8: SUDOKU CLASSIC (9x9 LOGIC NUMBER GRID) -->
+    <!-- ============================================== -->
+    <section id="screen-sudoku" class="w-full max-w-lg hidden flex-col items-center py-2 px-3">
+      <!-- Sudoku Top Bar -->
+      <div class="w-full clean-card px-4 py-2.5 mb-2.5 flex items-center justify-between text-xs">
+        <button onclick="app.gameSettingsManager ? app.gameSettingsManager.exitGameToLevels('sudoku') : app.exitSudokuToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition cursor-pointer">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Levels
+        </button>
+
+        <div class="flex items-center gap-2.5 font-mono">
+          <span id="sudoku-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
+          <div>
+            <span class="text-[#858AA5]">Level:</span>
+            <span id="sudoku-hud-level" class="font-bold text-amber-300 ml-1 text-sm">1 / 10</span>
+          </div>
+          <div>
+            <span class="text-[#858AA5]">Mistakes:</span>
+            <span id="sudoku-hud-mistakes" class="font-bold text-rose-400 ml-1 text-sm">0 / 3</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 font-mono text-xs text-amber-200 bg-black/40 px-2 py-1 rounded-lg border border-amber-500/20">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="sudoku-timer">00:00</span>
+          </div>
+          <button onclick="if(app.sudokuGame) app.sudokuGame.togglePause()" class="p-1 rounded-lg bg-black/40 hover:bg-black/60 border border-slate-700/60 text-slate-300 hover:text-white cursor-pointer transition">
+            <i data-lucide="pause" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sudoku 9x9 Board Card -->
+      <div id="sudoku-board-card" class="w-full nv-level-box p-3 sm:p-4 flex flex-col items-center relative rounded-2xl shadow-2xl">
+        <div id="sudoku-grid" class="w-full aspect-square grid grid-cols-9 grid-rows-9 border-2 border-amber-500/80 rounded-xl overflow-hidden bg-[#0F101A] shadow-inner">
+          <!-- 81 Sudoku cells injected by sudoku.js -->
+        </div>
+      </div>
+
+      <!-- Action Tools: Undo, Erase, Pencil (Notes), Hint -->
+      <div class="w-full grid grid-cols-4 gap-2 mt-3 mb-2 font-mono text-xs">
+        <!-- Undo -->
+        <button onclick="if(app.sudokuGame) app.sudokuGame.undo()" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-[#191B2D] hover:bg-white/10 border border-[#34364A] text-slate-300 hover:text-white transition cursor-pointer">
+          <i data-lucide="undo" class="w-4 h-4 mb-1 text-amber-400"></i>
+          <span class="text-[11px] font-bold">Undo</span>
+        </button>
+
+        <!-- Erase -->
+        <button onclick="if(app.sudokuGame) app.sudokuGame.erase()" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-[#191B2D] hover:bg-white/10 border border-[#34364A] text-slate-300 hover:text-white transition cursor-pointer">
+          <i data-lucide="eraser" class="w-4 h-4 mb-1 text-rose-400"></i>
+          <span class="text-[11px] font-bold">Erase</span>
+        </button>
+
+        <!-- Pencil / Notes Mode -->
+        <button id="sudoku-btn-pencil" onclick="if(app.sudokuGame) app.sudokuGame.toggleNotesMode()" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-[#191B2D] hover:bg-white/10 border border-[#34364A] text-slate-300 hover:text-white transition cursor-pointer relative">
+          <div class="flex items-center gap-1 mb-1">
+            <i data-lucide="pencil" class="w-4 h-4 text-sky-400"></i>
+            <span id="sudoku-pencil-badge" class="text-[9px] font-bold px-1.5 py-0.2 rounded font-mono bg-slate-700 text-slate-300">OFF</span>
+          </div>
+          <span class="text-[11px] font-bold">Notes</span>
+        </button>
+
+        <!-- Hint -->
+        <button onclick="if(app.sudokuGame) app.sudokuGame.giveHint()" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-[#191B2D] hover:bg-white/10 border border-[#34364A] text-slate-300 hover:text-white transition cursor-pointer relative">
+          <div class="flex items-center gap-1 mb-1">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-300"></i>
+            <span id="sudoku-hints-left" class="text-[9px] font-bold px-1.5 py-0.2 rounded font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">3</span>
+          </div>
+          <span class="text-[11px] font-bold">Hint</span>
+        </button>
+      </div>
+
+      <!-- Tactile Number Pad (1 to 9) -->
+      <div class="w-full grid grid-cols-9 gap-1.5 my-1">
+        <button id="sudoku-key-1" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(1)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">1</span>
+          <span id="sudoku-key-badge-1" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-2" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(2)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">2</span>
+          <span id="sudoku-key-badge-2" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-3" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(3)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">3</span>
+          <span id="sudoku-key-badge-3" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-4" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(4)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">4</span>
+          <span id="sudoku-key-badge-4" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-5" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(5)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">5</span>
+          <span id="sudoku-key-badge-5" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-6" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(6)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">6</span>
+          <span id="sudoku-key-badge-6" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-7" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(7)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">7</span>
+          <span id="sudoku-key-badge-7" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-8" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(8)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">8</span>
+          <span id="sudoku-key-badge-8" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+        <button id="sudoku-key-9" onclick="if(app.sudokuGame) app.sudokuGame.inputNumber(9)" class="sudoku-keypad-btn aspect-[3/4] rounded-xl bg-gradient-to-b from-[#2A2D40] to-[#1A1C29] border border-[#3D425C] hover:border-amber-400 flex flex-col items-center justify-center cursor-pointer transition shadow">
+          <span class="text-lg sm:text-xl font-black font-mono text-white">9</span>
+          <span id="sudoku-key-badge-9" class="text-[9px] font-mono text-slate-400">9</span>
+        </button>
+      </div>
+
+      <div class="mt-2 text-center text-[11px] text-[#858AA5] font-mono">
+        Keyboard: 1–9 to enter • Arrows to move • N for Notes • Del to erase
+      </div>
+    </section>
+
+    <!-- ============================================== -->
     <!-- MODAL: MATRIX LEVEL COMPLETE -->
     <!-- ============================================== -->
     <div id="modal-matrix-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -1643,6 +1793,100 @@
     </div>
 
     <!-- ============================================== -->
+    <!-- MODAL: SUDOKU LEVEL CLEAR                      -->
+    <!-- ============================================== -->
+    <div id="modal-sudoku-level-clear" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-amber-500/30 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-amber-500/20">
+          ✓
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Sudoku Solved!</h3>
+        <p class="text-xs text-slate-400 mb-5">All rows, columns, and 3×3 blocks correctly deduction-verified.</p>
+        
+        <div class="space-y-2 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Level Cleared:</span>
+            <span id="sudoku-clear-level" class="font-bold text-amber-300">Level 1</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Time Taken:</span>
+            <span id="sudoku-clear-time" class="font-bold text-emerald-400">02:14</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Mistakes Made:</span>
+            <span id="sudoku-clear-mistakes" class="font-bold text-amber-200">0 / 3</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="if (app.sudokuGame) app.sudokuGame.exitToLevels(); app.closeModal('modal-sudoku-level-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold cursor-pointer">
+            Levels
+          </button>
+          <button onclick="app.sudokuGame.nextLevel()" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-amber-500/25 cursor-pointer">
+            Next Level →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: SUDOKU GAME OVER                        -->
+    <!-- ============================================== -->
+    <div id="modal-sudoku-game-over" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-rose-500/40 shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto mb-3 font-bold text-2xl shadow-lg shadow-rose-500/20">
+          ✕
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Game Over</h3>
+        <p class="text-xs text-rose-400/90 mb-4 font-medium">3 mistakes exceeded! The grid deduction collapsed.</p>
+
+        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono flex justify-between items-center">
+          <span class="text-slate-400">Level:</span>
+          <span id="sudoku-over-level" class="font-bold text-white">Level 1</span>
+        </div>
+
+        <div class="flex gap-2.5">
+          <button onclick="if (app.sudokuGame) app.sudokuGame.exitToLevels(); app.closeModal('modal-sudoku-game-over');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold cursor-pointer">
+            Levels
+          </button>
+          <button onclick="if (app.sudokuGame) app.sudokuGame.restartLevel();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-amber-500/25 cursor-pointer">
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: SUDOKU PAUSE                            -->
+    <!-- ============================================== -->
+    <div id="modal-sudoku-pause" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="clean-card max-w-sm w-full p-6 text-center border border-[#34364A] shadow-2xl">
+        <div class="w-14 h-14 rounded-2xl bg-[#191B2D] border border-[#34364A] text-amber-400 flex items-center justify-center mx-auto mb-3 font-bold text-xl shadow-lg">
+          ⏸
+        </div>
+        <h3 class="text-2xl font-extrabold text-white mb-1">Game Paused</h3>
+        <p class="text-xs text-slate-400 mb-5">Take a breather. Grid is paused.</p>
+
+        <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 mb-5 text-xs font-mono flex justify-between items-center">
+          <span class="text-slate-400">Current Level:</span>
+          <span id="sudoku-pause-level" class="font-bold text-amber-300">Level 1</span>
+        </div>
+
+        <div class="space-y-2.5">
+          <button onclick="if (app.sudokuGame) app.sudokuGame.resumeGame();" class="w-full py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-amber-500/25 cursor-pointer">
+            Resume Game
+          </button>
+          <button onclick="if (app.sudokuGame) app.sudokuGame.restartLevel();" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold cursor-pointer">
+            Restart Level
+          </button>
+          <button onclick="if (app.sudokuGame) app.sudokuGame.exitToLevels(); app.closeModal('modal-sudoku-pause');" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300 cursor-pointer">
+            Exit to Levels
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
     <!-- MODAL: ROUND RESULT -->
     <!-- ============================================== -->
     <div id="modal-round-end" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
@@ -1851,6 +2095,8 @@
   <script src="/js/countdown.js?v=1.0"></script>
   <script src="/js/shellshuffle.js?v=2.0"></script>
   <script src="/js/numberpath.js?v=3.0"></script>
+  <script src="/js/sudoku-puzzles.js"></script>
+  <script src="/js/sudoku.js"></script>
   <script src="/js/app.js?v=21.0"></script>
 </body>
 </html>
