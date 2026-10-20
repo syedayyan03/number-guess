@@ -33,6 +33,7 @@ class ShellShuffleGame {
     // Logical State
     // States: 'idle', 'revealing', 'hiding', 'shuffling', 'awaiting_selection', 'result', 'paused'
     this.state = 'idle';
+    this.difficulty = 'easy';
     this.level = 1;
     this.score = 0;
     this.streak = 0;
@@ -58,40 +59,44 @@ class ShellShuffleGame {
     this.onPointerDown = this.handlePointerDown.bind(this);
   }
 
-  // --- Dynamic Difficulty & Speed Progression ---
-  getShuffleConfigForLevel(lvl) {
-    let duration;
-    if (lvl <= 1) {
-      duration = 820;
-    } else if (lvl <= 10) {
-      // Levels 1-10: Drops aggressively from 820ms down to ~104ms
-      duration = Math.round(820 * Math.pow(0.795, lvl - 1));
-    } else if (lvl <= 20) {
-      // Levels 11-20: Continues increasing speed from ~95ms (8.6x) down to ~40ms (20.5x)
-      const base10 = Math.round(820 * Math.pow(0.795, 9)); // ~104ms
-      duration = Math.round(base10 * Math.pow(0.91, lvl - 10));
+  // --- Dynamic Difficulty & Speed Progression (Strictly Monotonic Across 30 Levels) ---
+  getShuffleConfigForLevel(lvl = this.level, difficulty = this.difficulty || 'easy') {
+    const cleanLvl = Math.max(1, Math.min(10, parseInt(lvl, 10) || 1));
+    let duration, swapCount, gapDelay, cups;
+
+    if (difficulty === 'easy') {
+      // Easy 1 to 10: Smooth, highly trackable, relaxing. 3 cups.
+      // Easy 1: 850ms, 4 swaps, 60ms gap
+      // Easy 10: 445ms, 8 swaps, 35ms gap
+      duration = Math.round(850 - (cleanLvl - 1) * 45);
+      swapCount = 4 + Math.floor((cleanLvl - 1) * 0.45);
+      gapDelay = Math.max(30, 60 - (cleanLvl - 1) * 3);
+      cups = 3;
+    } else if (difficulty === 'medium') {
+      // Medium 1 to 10: Seamlessly picks up from Easy 10 and accelerates.
+      // Medium 1: 420ms, 9 swaps, 3 cups
+      // Medium 10: 204ms, 15 swaps, 4 cups
+      duration = Math.round(420 - (cleanLvl - 1) * 24);
+      swapCount = 9 + Math.floor((cleanLvl - 1) * 0.7);
+      gapDelay = Math.max(15, 30 - (cleanLvl - 1) * 1.5);
+      cups = cleanLvl >= 6 ? 4 : 3;
     } else {
-      // Level 21+: Continues speeding up by ~1-2ms per level down to absolute threshold of 25ms
-      const base20 = Math.round(Math.round(820 * Math.pow(0.795, 9)) * Math.pow(0.91, 10)); // ~40ms
-      duration = Math.max(25, base20 - Math.round((lvl - 20) * 1.5));
+      // Hard 1 to 10: Serious cognitive visual tracking test!
+      // Hard 1: 190ms, 16 swaps, 4 cups
+      // Hard 10: 73ms, 26 swaps, 5 cups
+      duration = Math.round(190 - (cleanLvl - 1) * 13);
+      swapCount = 16 + Math.floor((cleanLvl - 1) * 1.1);
+      gapDelay = Math.max(0, 15 - cleanLvl * 1.5);
+      cups = cleanLvl >= 5 ? 5 : 4;
     }
 
-    // Inter-swap delay shrinks from 50ms at lvl 1 down to 0ms at high levels
-    const gapDelay = Math.max(0, Math.round(50 - (lvl - 1) * 3.5));
-
-    // Swaps count scales continuously across levels (up to 30 swaps)
-    const swapCount = Math.min(30, Math.max(3, 3 + Math.floor((lvl - 1) * 1.2)));
-
-    // Multiplier for display
-    const speedMultiplier = (820 / duration).toFixed(1);
-
-    return { swapCount, duration, gapDelay, speedMultiplier };
+    const speedMultiplier = (850 / duration).toFixed(1);
+    return { swapCount, duration, gapDelay, speedMultiplier, cups };
   }
 
-  getCupCountForLevel(lvl) {
-    if (lvl >= 8) return 5;
-    if (lvl >= 5) return 4;
-    return 3;
+  getCupCountForLevel(lvl = this.level, difficulty = this.difficulty || 'easy') {
+    const cfg = this.getShuffleConfigForLevel(lvl, difficulty);
+    return cfg.cups;
   }
 
   // --- Initialization & Setup ---
@@ -109,11 +114,26 @@ class ShellShuffleGame {
       return;
     }
 
-    this.level = parseInt(localStorage.getItem(this.savedLevelKey) || '1', 10);
+    if (!this.level || this.level < 1) {
+      this.level = parseInt(localStorage.getItem(this.savedLevelKey) || '1', 10);
+    }
     this.setupScene();
     this.setupEventListeners();
     this.updateHUD();
     this.setPhase('ready');
+  }
+
+  startLevel(lvl = 1, difficulty = 'easy') {
+    this.difficulty = difficulty;
+    this.level = Math.max(1, Math.min(10, parseInt(lvl, 10) || 1));
+    this.init();
+    this.resetCupsToRestPosition();
+    if (this.ball) this.ball.visible = false;
+    this.setPhase('ready');
+    this.updateHUD();
+    setTimeout(() => {
+      this.startRound();
+    }, 450);
   }
 
   isWebGLAvailable() {
@@ -667,6 +687,9 @@ class ShellShuffleGame {
       if (window.soundFx) window.soundFx.playCorrect();
       this.ball.visible = true;
       this.animateLift(selectedCup, 1.8, -0.15, 500, () => {
+        if (this.app && this.app.gameSettingsManager) {
+          this.app.gameSettingsManager.markLevelCompleted('shell_shuffle', this.difficulty || 'easy', this.level, 3, this.score);
+        }
         if (this.app && typeof this.app.triggerConfetti === 'function') {
           this.app.triggerConfetti();
         }
@@ -834,18 +857,29 @@ class ShellShuffleGame {
   }
 
   updateHUD() {
-    const config = this.getShuffleConfigForLevel(this.level);
+    const config = this.getShuffleConfigForLevel(this.level, this.difficulty);
     const lvlEl = document.getElementById('shellshuffle-hud-level');
     const speedEl = document.getElementById('shellshuffle-hud-speed');
     const scoreEl = document.getElementById('shellshuffle-hud-score');
     const streakEl = document.getElementById('shellshuffle-hud-streak');
     const cupsCountEl = document.getElementById('shellshuffle-hud-cups');
+    const diffBadge = document.getElementById('shellshuffle-diff-badge');
 
-    if (lvlEl) lvlEl.innerText = this.level.toString();
+    if (lvlEl) lvlEl.innerText = `${this.level} / 10`;
     if (speedEl) speedEl.innerText = `${config.speedMultiplier}x`;
     if (scoreEl) scoreEl.innerText = this.score.toLocaleString();
     if (streakEl) streakEl.innerText = `x${this.streak}`;
-    if (cupsCountEl) cupsCountEl.innerText = `${this.getCupCountForLevel(this.level)} Cups`;
+    if (cupsCountEl) cupsCountEl.innerText = `${config.cups} Cups`;
+    if (diffBadge) {
+      diffBadge.innerText = (this.difficulty || 'easy').toUpperCase();
+      diffBadge.className = `px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
+        this.difficulty === 'hard'
+          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+          : this.difficulty === 'medium'
+          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+          : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+      }`;
+    }
 
     if (this.app && typeof this.app.updateShellShuffleMenuCard === 'function') {
       this.app.updateShellShuffleMenuCard();
@@ -860,7 +894,7 @@ class ShellShuffleGame {
     const streakEl = document.getElementById('shellshuffle-clear-streak');
 
     if (ptsEl) ptsEl.innerText = `+${pts}`;
-    if (lvlEl) lvlEl.innerText = `Level ${this.level}`;
+    if (lvlEl) lvlEl.innerText = `Level ${this.level} (${(this.difficulty || 'easy').toUpperCase()})`;
     if (streakEl) streakEl.innerText = `x${this.streak}`;
 
     if (this.app) this.app.openModal('modal-shellshuffle-level-clear');
@@ -868,29 +902,23 @@ class ShellShuffleGame {
 
   nextLevel() {
     if (this.app) this.app.closeModal('modal-shellshuffle-level-clear');
-    this.level++;
-    try {
-      localStorage.setItem(this.savedLevelKey, this.level.toString());
-      if (this.level > this.highestLevel) {
-        this.highestLevel = this.level;
-        localStorage.setItem(this.bestLevelKey, this.highestLevel.toString());
+    if (this.level < 10) {
+      this.level++;
+      if (this.app && this.app.gameSettingsManager) {
+        this.app.gameSettingsManager.startLevel('shell_shuffle', this.difficulty || 'easy', this.level);
+      } else {
+        this.startLevel(this.level, this.difficulty);
       }
-    } catch (e) {}
-    this.updateHUD();
-
-    if (this.app && typeof this.app.updateShellShuffleMenuCard === 'function') {
-      this.app.updateShellShuffleMenuCard();
+    } else {
+      if (this.app && this.app.gameSettingsManager) {
+        this.app.gameSettingsManager.exitGameToLevels('shell_shuffle');
+      } else {
+        this.exitToMenu();
+      }
+      if (this.app && typeof this.app.showToast === 'function') {
+        this.app.showToast(`🎉 Mastered all 10 ${(this.difficulty || 'easy').toUpperCase()} levels of Shell Shuffle!`, 'success');
+      }
     }
-
-    // Reset cup positions to ground flush
-    this.resetCupsToRestPosition();
-    this.ball.visible = false;
-    this.setPhase('ready');
-
-    // Auto-start round after short delay
-    setTimeout(() => {
-      this.startRound();
-    }, 400);
   }
 
   showGameOverModal() {
@@ -989,6 +1017,20 @@ class ShellShuffleGame {
   }
 
   // --- Cleanup & Unmount ---
+  exitToLevels() {
+    this.stopAnimations();
+    if (this.app) {
+      this.app.closeModal('modal-shellshuffle-level-clear');
+      this.app.closeModal('modal-shellshuffle-game-over');
+      this.app.closeModal('modal-shellshuffle-pause');
+    }
+    if (this.app && this.app.gameSettingsManager) {
+      this.app.gameSettingsManager.openLevels('shell_shuffle', this.difficulty || 'easy');
+    } else if (this.app) {
+      this.app.showScreen('menu');
+    }
+  }
+
   exitToMenu() {
     this.stopAnimations();
     if (this.app) {

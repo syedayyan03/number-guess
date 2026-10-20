@@ -48,6 +48,9 @@ class NumberVerseApp {
     if (window.NumberPathGame) {
       this.numberPathGame = new window.NumberPathGame(this);
     }
+    if (window.GameSettingsManager) {
+      this.gameSettingsManager = new window.GameSettingsManager(this);
+    }
     this.updateMatrixMenuCard();
     this.updateDontTapMenuCard();
     this.updateCountdownMenuCard();
@@ -222,23 +225,6 @@ class NumberVerseApp {
     window.soundFx.playClick();
     if (gameId === 'number_guess') {
       this.showScreen('welcome', updateHistory);
-    } else if (gameId === 'speed_grid') {
-      if (!this.matrixGame && window.SpeedMatrixGame) {
-        this.matrixGame = new window.SpeedMatrixGame(this);
-      }
-      this.showScreen('matrix', updateHistory);
-      if (this.matrixGame) {
-        // Starts freshly from the saved level with timer refreshed and target at 1
-        this.matrixGame.startLevel();
-      }
-    } else if (gameId === 'dont_tap') {
-      if (!this.dontTapGame && window.DontTapGame) {
-        this.dontTapGame = new window.DontTapGame(this);
-      }
-      this.showScreen('donttap', updateHistory);
-      if (this.dontTapGame) {
-        this.dontTapGame.startGame();
-      }
     } else if (gameId === 'countdown') {
       if (!this.countdownGame && window.CountdownCalculationGame) {
         this.countdownGame = new window.CountdownCalculationGame(this);
@@ -247,21 +233,16 @@ class NumberVerseApp {
       if (this.countdownGame) {
         this.countdownGame.initSetupScreen();
       }
-    } else if (gameId === 'shell_shuffle') {
-      if (!this.shellShuffleGame && window.ShellShuffleGame) {
-        this.shellShuffleGame = new window.ShellShuffleGame(this);
-      }
-      this.showScreen('shellshuffle', updateHistory);
-      if (this.shellShuffleGame) {
-        this.shellShuffleGame.init();
-      }
-    } else if (gameId === 'number_path') {
-      if (!this.numberPathGame && window.NumberPathGame) {
-        this.numberPathGame = new window.NumberPathGame(this);
-      }
-      this.showScreen('numberpath', updateHistory);
-      if (this.numberPathGame) {
-        this.numberPathGame.startLevel();
+    } else {
+      // Speed Matrix, Don't Tap, Shell Shuffle, Number Path open Settings Screen (Image 1)
+      if (this.gameSettingsManager) {
+        this.gameSettingsManager.openSettings(gameId, updateHistory);
+      } else {
+        // Fallback if gameSettingsManager not loaded yet
+        if (gameId === 'speed_grid') this.showScreen('matrix', updateHistory);
+        else if (gameId === 'dont_tap') this.showScreen('donttap', updateHistory);
+        else if (gameId === 'shell_shuffle') this.showScreen('shellshuffle', updateHistory);
+        else if (gameId === 'number_path') this.showScreen('numberpath', updateHistory);
       }
     }
   }
@@ -461,14 +442,14 @@ class NumberVerseApp {
     }
 
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle', 'numberpath'].forEach(s => {
+    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle', 'numberpath', 'settings', 'levels'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
-      navBadge.classList.toggle('hidden', screenId === 'menu' || screenId === 'welcome' || screenId === 'matrix' || screenId === 'donttap' || screenId === 'countdown' || screenId === 'shellshuffle' || screenId === 'numberpath' || !this.roomState);
+      navBadge.classList.toggle('hidden', (screenId !== 'lobby' && screenId !== 'game') || !this.roomState);
       if (this.roomState) {
         document.getElementById('nav-room-id').innerText = this.roomState.id;
       }
@@ -597,16 +578,52 @@ class NumberVerseApp {
       return;
     }
 
-    if (cleanPath === '/speed-matrix') {
-      this.selectGame('speed_grid', updateHistory);
-    } else if (cleanPath === '/dont-tap') {
-      this.selectGame('dont_tap', updateHistory);
-    } else if (cleanPath === '/countdown-calc' || cleanPath === '/countdown') {
+    // Pattern 1: /<game-slug>/settings/level/<difficulty>/?level=k
+    const levelMatch = cleanPath.match(/^\/([a-z0-9-]+)\/settings\/level\/([a-z]+)$/);
+    if (levelMatch) {
+      const slug = levelMatch[1];
+      const diff = levelMatch[2].toLowerCase();
+      const cfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigBySlug(slug) : null;
+      if (cfg) {
+        const lvl = parseInt(params.get('level') || params.get('k') || '1', 10);
+        this.gameSettingsManager.startLevel(cfg.id, diff, lvl, false);
+        return;
+      }
+    }
+
+    // Pattern 2: /<game-slug>/settings/levels
+    const levelsMatch = cleanPath.match(/^\/([a-z0-9-]+)\/settings\/levels$/);
+    if (levelsMatch) {
+      const slug = levelsMatch[1];
+      const cfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigBySlug(slug) : null;
+      if (cfg) {
+        const diff = params.get('diff') || this.gameSettingsManager.activeDifficulty || 'easy';
+        this.gameSettingsManager.openLevels(cfg.id, diff, false);
+        return;
+      }
+    }
+
+    // Pattern 3: /<game-slug>/settings
+    const settingsMatch = cleanPath.match(/^\/([a-z0-9-]+)\/settings$/);
+    if (settingsMatch) {
+      const slug = settingsMatch[1];
+      const cfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigBySlug(slug) : null;
+      if (cfg) {
+        this.gameSettingsManager.openSettings(cfg.id, false);
+        return;
+      }
+    }
+
+    // Pattern 4: Direct game URL (e.g. /speed-matrix, /dont-tap, /shell-shuffle, /number-path) -> Opens Settings
+    const directCfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigBySlug(cleanPath.replace(/^\//, '')) : null;
+    if (directCfg) {
+      this.gameSettingsManager.openSettings(directCfg.id, true);
+      return;
+    }
+
+    // Pattern 5: Countdown & Number Guessing (Exempted)
+    if (cleanPath === '/countdown-calc' || cleanPath === '/countdown') {
       this.selectGame('countdown', updateHistory);
-    } else if (cleanPath === '/shell-shuffle' || cleanPath === '/shellshuffle') {
-      this.selectGame('shell_shuffle', updateHistory);
-    } else if (cleanPath === '/number-path' || cleanPath === '/numberpath') {
-      this.selectGame('number_path', updateHistory);
     } else if (cleanPath === '/num-guess-game') {
       if (roomId) {
         const codeInput = document.getElementById('join-room-code-input');
@@ -633,6 +650,12 @@ class NumberVerseApp {
 
     if (screenId === 'menu') {
       targetPath = '/';
+    } else if (screenId === 'settings') {
+      const cfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigById(this.gameSettingsManager.activeGameId) : null;
+      targetPath = cfg ? `/${cfg.slug}/settings/` : '/speed-matrix/settings/';
+    } else if (screenId === 'levels') {
+      const cfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigById(this.gameSettingsManager.activeGameId) : null;
+      targetPath = cfg ? `/${cfg.slug}/settings/levels/` : '/speed-matrix/settings/levels/';
     } else if (screenId === 'welcome') {
       targetPath = '/num-guess-game/';
       const params = new URLSearchParams(window.location.search);
@@ -646,15 +669,27 @@ class NumberVerseApp {
         targetSearch = `?room-id=${encodeURIComponent(this.roomState.id)}`;
       }
     } else if (screenId === 'matrix') {
-      targetPath = '/speed-matrix/';
+      const diff = this.matrixGame ? this.matrixGame.difficulty : 'easy';
+      const lvl = this.matrixGame ? this.matrixGame.level : 1;
+      targetPath = `/speed-matrix/settings/level/${encodeURIComponent(diff)}/`;
+      targetSearch = `?level=${lvl}`;
     } else if (screenId === 'donttap') {
-      targetPath = '/dont-tap/';
+      const diff = this.dontTapGame ? this.dontTapGame.difficulty : 'easy';
+      const lvl = this.dontTapGame ? this.dontTapGame.level : 1;
+      targetPath = `/dont-tap/settings/level/${encodeURIComponent(diff)}/`;
+      targetSearch = `?level=${lvl}`;
     } else if (screenId === 'countdown') {
       targetPath = '/countdown-calc/';
     } else if (screenId === 'shellshuffle') {
-      targetPath = '/shell-shuffle/';
+      const diff = this.shellShuffleGame ? this.shellShuffleGame.difficulty : 'easy';
+      const lvl = this.shellShuffleGame ? this.shellShuffleGame.level : 1;
+      targetPath = `/shell-shuffle/settings/level/${encodeURIComponent(diff)}/`;
+      targetSearch = `?level=${lvl}`;
     } else if (screenId === 'numberpath') {
-      targetPath = '/number-path/';
+      const diff = this.numberPathGame ? this.numberPathGame.difficulty : 'easy';
+      const lvl = this.numberPathGame ? this.numberPathGame.level : 1;
+      targetPath = `/number-path/settings/level/${encodeURIComponent(diff)}/`;
+      targetSearch = `?level=${lvl}`;
     }
 
     const newUrl = targetPath + targetSearch;

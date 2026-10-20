@@ -5,6 +5,7 @@ class DontTapGame {
     this.app = app;
     this.highScoreKey = 'numberverse_donttap_highscore';
     this.highestLevelKey = 'numberverse_donttap_highest_level';
+    this.difficulty = 'easy'; // 'easy' | 'medium' | 'hard'
 
     // Game state
     this.level = 1;
@@ -98,38 +99,55 @@ class DontTapGame {
   }
 
   // --- Level Settings ---
-  getLevelConfig(lvl = this.level) {
-    // Progressive configuration up to Level 10 and beyond
-    const quota = 10 + lvl * 3;
-    // Lifetime decreases with level (from 1900ms down to 850ms)
-    const lifetime = Math.max(850, 1900 - (lvl - 1) * 115);
-    // Spawn interval decreases (from 1100ms down to 500ms)
-    const spawnInterval = Math.max(500, 1150 - (lvl - 1) * 70);
-    // Danger probability increases (from 18% up to 40%)
-    const dangerChance = Math.min(0.40, 0.18 + (lvl - 1) * 0.025);
-    // Concurrent targets max
-    const maxConcurrent = lvl <= 2 ? 2 : (lvl <= 5 ? 3 : 4);
+  getLevelConfig(lvl = this.level, diff = this.difficulty) {
+    diff = diff || 'easy';
+    let quota, lifetime, spawnInterval, dangerChance, maxConcurrent;
+
+    if (diff === 'easy') {
+      // Relaxed, friendly, high reaction window
+      quota = 8 + lvl * 1;
+      lifetime = Math.max(1400, 2300 - (lvl - 1) * 90);
+      spawnInterval = Math.max(900, 1400 - (lvl - 1) * 50);
+      dangerChance = Math.min(0.20, 0.10 + (lvl - 1) * 0.012);
+      maxConcurrent = lvl <= 4 ? 1 : 2;
+    } else if (diff === 'medium') {
+      // Balanced test of reflex & inhibition
+      quota = 14 + Math.round(lvl * 1.5);
+      lifetime = Math.max(850, 1400 - (lvl - 1) * 60);
+      spawnInterval = Math.max(600, 950 - (lvl - 1) * 38);
+      dangerChance = Math.min(0.36, 0.22 + (lvl - 1) * 0.016);
+      maxConcurrent = lvl <= 3 ? 2 : 3;
+    } else {
+      // Hard: literally fast, lightning reflex & strict inhibition!
+      quota = 22 + lvl * 2;
+      lifetime = Math.max(420, 800 - (lvl - 1) * 42);
+      spawnInterval = Math.max(320, 580 - (lvl - 1) * 28);
+      dangerChance = Math.min(0.55, 0.38 + (lvl - 1) * 0.018);
+      maxConcurrent = lvl <= 2 ? 3 : 4;
+    }
 
     return { quota, lifetime, spawnInterval, dangerChance, maxConcurrent };
   }
 
   // --- Game Lifecycle ---
   startGame() {
-    this.level = 1;
+    this.startLevel(1, this.difficulty || 'easy');
+  }
+
+  startLevel(lvl = 1, difficulty = null) {
+    if (difficulty) {
+      this.difficulty = difficulty;
+    } else if (!this.difficulty) {
+      this.difficulty = 'easy';
+    }
+
+    this.level = Math.max(1, Math.min(10, lvl));
     this.score = 0;
     this.lives = this.maxLives;
     this.combo = 0;
     this.maxCombo = 0;
-    this.isPaused = false;
-    this.isGameOver = false;
-    this.isPlaying = true;
-    this.startLevel(1);
-  }
-
-  startLevel(lvl = 1) {
-    this.level = lvl;
     this.safeTapsCount = 0;
-    const config = this.getLevelConfig(this.level);
+    const config = this.getLevelConfig(this.level, this.difficulty);
     this.targetQuota = config.quota;
     this.clearAllActiveTargets();
     this.clearSpawnTimer();
@@ -498,13 +516,18 @@ class DontTapGame {
       window.soundFx.playCorrect();
     }
 
+    // Save to Game Settings Manager
+    if (this.app && this.app.gameSettingsManager) {
+      this.app.gameSettingsManager.markLevelCompleted('dont_tap', this.difficulty, this.level, 3, this.score);
+    }
+
     // Populate Level Clear Modal
     const modal = document.getElementById('modal-donttap-level-clear');
     const msg = document.getElementById('donttap-clear-message');
     const scoreVal = document.getElementById('donttap-clear-score');
     const comboVal = document.getElementById('donttap-clear-max-combo');
 
-    if (msg) msg.innerText = `Reflex inhibition verified. Level ${this.level} conquered!`;
+    if (msg) msg.innerText = `${(this.difficulty || 'Easy').toUpperCase()} - Level ${this.level} Conquered!`;
     if (scoreVal) scoreVal.innerText = this.score.toLocaleString();
     if (comboVal) comboVal.innerText = `x${this.maxCombo}`;
 
@@ -517,7 +540,33 @@ class DontTapGame {
     if (this.app) {
       this.app.closeModal('modal-donttap-level-clear');
     }
-    this.startLevel(this.level + 1);
+    if (this.level < 10) {
+      const nextLvl = this.level + 1;
+      if (this.app && this.app.gameSettingsManager) {
+        this.app.gameSettingsManager.startLevel('dont_tap', this.difficulty, nextLvl, true);
+      } else {
+        this.startLevel(nextLvl);
+      }
+    } else {
+      this.exitToLevels();
+    }
+  }
+
+  exitToLevels() {
+    this.isPlaying = false;
+    this.isPaused = false;
+    this.clearSpawnTimer();
+    this.clearAllActiveTargets();
+    if (this.app) {
+      this.app.closeModal('modal-donttap-pause');
+      this.app.closeModal('modal-donttap-level-clear');
+      this.app.closeModal('modal-donttap-game-over');
+    }
+    if (this.app && this.app.gameSettingsManager) {
+      this.app.gameSettingsManager.openLevels('dont_tap', this.difficulty);
+    } else if (this.app) {
+      this.app.showScreen('menu');
+    }
   }
 
   handleGameOver() {

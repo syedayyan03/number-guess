@@ -728,4 +728,138 @@ input[type=number] {
   100% { transform: scale(1); }
 }
 
+/* ==========================================================================
+   Game Settings & Level Selection Styles (Matching Images 1 & 2)
+   ========================================================================== */
+
+/* Arched Top Banner Ribbon (Image 1 & 2) */
+.nv-arched-ribbon {
+  background: linear-gradient(180deg, #D97706 0%, #B45309 60%, #78350F 100%);
+  border: 3px solid #FDE68A;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  border-radius: 18px 18px 12px 12px;
+  color: #FEF3C7;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+/* Image 1: Setting Popup Box Frame */
+.nv-setting-box {
+  background: linear-gradient(180deg, #853808 0%, #632604 40%, #3B1402 100%);
+  border: 6px solid #D97706;
+  outline: 3px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 35px rgba(0, 0, 0, 0.6);
+  border-radius: 36px;
+  position: relative;
+}
+
+/* Image 1: Golden Difficulty Play Buttons */
+.nv-diff-btn {
+  background: linear-gradient(180deg, #3D1A04 0%, #240F02 60%, #150801 100%);
+  border: 2.5px solid #B45309;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(251, 191, 36, 0.25);
+  border-radius: 18px;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nv-diff-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: #FBBF24;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4), inset 0 2px 6px rgba(251, 191, 36, 0.4);
+}
+
+.nv-diff-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.nv-diff-btn-easy {
+  border-color: #059669;
+}
+.nv-diff-btn-easy:hover {
+  border-color: #10B981;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+}
+
+.nv-diff-btn-medium {
+  border-color: #D97706;
+}
+.nv-diff-btn-medium:hover {
+  border-color: #FBBF24;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.nv-diff-btn-hard {
+  border-color: #DC2626;
+}
+.nv-diff-btn-hard:hover {
+  border-color: #EF4444;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+}
+
+/* Image 2: Level Selection Slate Frame */
+.nv-level-box {
+  background: linear-gradient(180deg, #1C1E2A 0%, #131520 50%, #0C0D15 100%);
+  border: 6px solid #374151;
+  outline: 2px solid rgba(75, 85, 99, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 40px rgba(0, 0, 0, 0.7);
+  border-radius: 36px;
+  position: relative;
+}
+
+/* Image 2: Level Cards (Stone / Metal style) */
+.nv-level-card {
+  aspect-ratio: 1 / 1.15;
+  background: linear-gradient(180deg, #2D3142 0%, #1F222E 60%, #161822 100%);
+  border: 2px solid #4B5563;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.12);
+}
+
+.nv-level-card:hover {
+  transform: translateY(-2px);
+}
+
+.nv-card-completed {
+  border-color: #D97706 !important;
+  background: linear-gradient(180deg, #37332F 0%, #242220 60%, #181716 100%) !important;
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25), inset 0 1px 3px rgba(251, 191, 36, 0.25) !important;
+}
+
+.nv-card-completed:hover {
+  border-color: #F59E0B !important;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4) !important;
+}
+
+.nv-card-ongoing {
+  border-color: #F59E0B !important;
+  background: linear-gradient(180deg, #3D2D1B 0%, #2A1F13 60%, #1C140C 100%) !important;
+}
+
+.nv-card-unlocked {
+  border-color: #38BDF8;
+}
+
+.nv-card-locked {
+  background: linear-gradient(180deg, #161822 0%, #0F1018 100%) !important;
+  border-color: #262938 !important;
+}
+
+/* Difficulty Tabs */
+.nv-tab-active {
+  background: linear-gradient(180deg, #D97706 0%, #B45309 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #FDE68A !important;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4) !important;
+}
+
+.nv-tab-inactive {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #94A3B8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.nv-tab-inactive:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #F1F5F9 !important;
+}
+
 

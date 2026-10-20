@@ -619,16 +619,148 @@
     </section>
 
     <!-- ============================================== -->
+    <!-- SCREEN: GAME SETTINGS (DIFFICULTY SELECTOR - IMAGE 1) -->
+    <!-- ============================================== -->
+    <section id="screen-settings" class="w-full max-w-md hidden flex-col items-center py-6 px-4">
+      <div class="w-full nv-setting-box pt-8 pb-7 px-6 sm:px-8 mt-5 flex flex-col items-center relative">
+        <!-- Close (X) button at top right -->
+        <button onclick="app.showScreen('menu')" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 border border-amber-500/30 flex items-center justify-center text-amber-200 hover:text-white transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Arched Top Ribbon (SETTING) -->
+        <div class="absolute -top-6 left-1/2 -translate-x-1/2 px-10 py-2.5 nv-arched-ribbon text-xl sm:text-2xl uppercase tracking-widest font-black shadow-2xl flex items-center justify-center">
+          SETTING
+        </div>
+
+        <!-- Game Title & Subtitle inside the box -->
+        <div class="text-center mt-3 mb-6">
+          <h2 id="nv-settings-game-title" class="text-2xl font-black text-amber-100 drop-shadow tracking-wide">Speed Matrix</h2>
+          <p id="nv-settings-game-subtitle" class="text-xs text-amber-300/80 font-mono mt-0.5">Sequential Deduction • 10 Levels Each</p>
+        </div>
+
+        <!-- 3 Difficulty Play Buttons (Image 1) -->
+        <div class="w-full space-y-4">
+          <!-- Easy -->
+          <button onclick="app.gameSettingsManager.selectDifficulty('easy')" class="w-full nv-diff-btn nv-diff-btn-easy py-4 px-6 flex items-center justify-between group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition">
+                <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+              </div>
+              <div class="text-left">
+                <div class="text-lg font-black text-emerald-300 tracking-wide">EASY</div>
+                <div class="text-[11px] text-emerald-200/60 font-mono">Accessible & relaxed pace</div>
+              </div>
+            </div>
+            <div id="nv-settings-stars-easy" class="text-xs font-mono font-bold text-amber-300/90 bg-black/30 px-2.5 py-1 rounded-lg border border-amber-500/20">
+              0 / 30 ★
+            </div>
+          </button>
+
+          <!-- Medium -->
+          <button onclick="app.gameSettingsManager.selectDifficulty('medium')" class="w-full nv-diff-btn nv-diff-btn-medium py-4 px-6 flex items-center justify-between group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition">
+                <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+              </div>
+              <div class="text-left">
+                <div class="text-lg font-black text-amber-300 tracking-wide">MEDIUM</div>
+                <div class="text-[11px] text-amber-200/60 font-mono">Balanced cognitive challenge</div>
+              </div>
+            </div>
+            <div id="nv-settings-stars-medium" class="text-xs font-mono font-bold text-amber-300/90 bg-black/30 px-2.5 py-1 rounded-lg border border-amber-500/20">
+              0 / 30 ★
+            </div>
+          </button>
+
+          <!-- Hard -->
+          <button onclick="app.gameSettingsManager.selectDifficulty('hard')" class="w-full nv-diff-btn nv-diff-btn-hard py-4 px-6 flex items-center justify-between group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400 group-hover:scale-110 transition">
+                <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+              </div>
+              <div class="text-left">
+                <div class="text-lg font-black text-red-300 tracking-wide">HARD</div>
+                <div class="text-[11px] text-red-200/60 font-mono">Extreme speed & razor focus</div>
+              </div>
+            </div>
+            <div id="nv-settings-stars-hard" class="text-xs font-mono font-bold text-amber-300/90 bg-black/30 px-2.5 py-1 rounded-lg border border-amber-500/20">
+              0 / 30 ★
+            </div>
+          </button>
+        </div>
+
+        <button onclick="app.showScreen('menu')" class="mt-6 text-xs text-amber-200/70 hover:text-white font-mono hover:underline flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Main Menu
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN: GAME LEVELS (LEVEL SELECTOR - IMAGE 2) -->
+    <!-- ============================================== -->
+    <section id="screen-levels" class="w-full max-w-lg hidden flex-col items-center py-6 px-4">
+      <div class="w-full nv-level-box pt-8 pb-7 px-5 sm:px-7 mt-5 flex flex-col items-center relative">
+        <!-- Close (X) button at top right -->
+        <button onclick="app.gameSettingsManager.exitLevelsToSettings()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 border border-slate-600/50 flex items-center justify-center text-slate-300 hover:text-white transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Arched Top Ribbon (LEVEL) -->
+        <div class="absolute -top-6 left-1/2 -translate-x-1/2 px-10 py-2.5 nv-arched-ribbon text-xl sm:text-2xl uppercase tracking-widest font-black shadow-2xl flex items-center justify-center">
+          LEVEL
+        </div>
+
+        <!-- Header: Game title & Difficulty Switcher Tabs -->
+        <div class="w-full text-center mt-3 mb-5">
+          <h2 id="nv-levels-game-title" class="text-2xl font-black text-white drop-shadow tracking-wide">Speed Matrix</h2>
+          
+          <div class="flex items-center justify-center gap-2 mt-3">
+            <button id="nv-level-tab-easy" onclick="app.gameSettingsManager.selectDifficulty('easy')" class="px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition cursor-pointer nv-tab-inactive">
+              Easy
+            </button>
+            <button id="nv-level-tab-medium" onclick="app.gameSettingsManager.selectDifficulty('medium')" class="px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition cursor-pointer nv-tab-inactive">
+              Medium
+            </button>
+            <button id="nv-level-tab-hard" onclick="app.gameSettingsManager.selectDifficulty('hard')" class="px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition cursor-pointer nv-tab-inactive">
+              Hard
+            </button>
+          </div>
+
+          <div class="flex items-center justify-center gap-3 mt-3 text-xs font-mono text-amber-300/80">
+            <span id="nv-levels-stars-summary">⭐ 0 / 30 Stars</span>
+          </div>
+        </div>
+
+        <!-- 10 Level Cards Grid (Matching Image 2: 5 columns x 2 rows) -->
+        <div id="nv-levels-grid" class="w-full grid grid-cols-5 gap-2.5 sm:gap-3.5 my-2">
+          <!-- Populated dynamically by gameSettingsManager.openLevels() -->
+        </div>
+
+        <!-- Footer / Navigation -->
+        <div class="w-full flex items-center justify-between mt-5 pt-3 border-t border-slate-700/60 text-xs font-mono text-slate-400">
+          <button onclick="app.gameSettingsManager.exitLevelsToSettings()" class="hover:text-white flex items-center gap-1 cursor-pointer">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Settings
+          </button>
+          <button onclick="app.showScreen('menu')" class="hover:text-white flex items-center gap-1 cursor-pointer">
+            Main Menu <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
     <!-- SCREEN 4: SPEED MATRIX (1 TO N SEQUENTIAL GAME) -->
     <!-- ============================================== -->
     <section id="screen-matrix" class="w-full max-w-sm hidden flex-col items-center py-2">
       <!-- Matrix Top Bar -->
       <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
-        <button onclick="app.exitMatrixToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        <button onclick="app.gameSettingsManager ? app.gameSettingsManager.exitGameToLevels('speed_grid') : app.exitMatrixToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Levels
         </button>
 
         <div class="flex items-center gap-2 font-mono">
+          <span id="matrix-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <span class="text-[#858AA5]">Level:</span>
           <span id="matrix-level-badge" class="font-bold text-[#287BFF] text-sm">1 / 10</span>
         </div>
@@ -673,13 +805,14 @@
     <section id="screen-donttap" class="w-full max-w-sm hidden flex-col items-center py-2">
       <!-- Don't Tap Top Bar -->
       <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
-        <button onclick="app.exitDontTapToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        <button onclick="app.gameSettingsManager ? app.gameSettingsManager.exitGameToLevels('dont_tap') : app.exitDontTapToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Levels
         </button>
 
         <div class="flex items-center gap-2 font-mono">
+          <span id="donttap-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <span class="text-[#858AA5]">Level:</span>
-          <span id="donttap-level-badge" class="font-bold text-[#287BFF] text-sm">1</span>
+          <span id="donttap-level-badge" class="font-bold text-[#287BFF] text-sm">1 / 10</span>
         </div>
 
         <!-- Lives Battery / Hearts -->
@@ -899,14 +1032,15 @@
     <section id="screen-shellshuffle" class="w-full max-w-2xl hidden flex-col items-center py-2">
       <!-- Shell Shuffle Top Bar -->
       <div class="w-full clean-card px-4 py-2.5 mb-3 flex items-center justify-between text-xs">
-        <button onclick="app.exitShellShuffleToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        <button onclick="app.gameSettingsManager ? app.gameSettingsManager.exitGameToLevels('shell_shuffle') : app.exitShellShuffleToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Levels
         </button>
 
         <div class="flex items-center gap-3 font-mono">
+          <span id="shellshuffle-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <div>
             <span class="text-[#858AA5]">Level:</span>
-            <span id="shellshuffle-hud-level" class="font-bold text-[#4169FF] ml-1 text-sm">1</span>
+            <span id="shellshuffle-hud-level" class="font-bold text-[#4169FF] ml-1 text-sm">1 / 10</span>
           </div>
           <div>
             <span class="text-[#858AA5]">Speed:</span>
@@ -967,11 +1101,12 @@
     <section id="screen-numberpath" class="w-full max-w-md hidden flex-col items-center py-2">
       <!-- Number Path Top Bar -->
       <div class="w-full clean-card px-4 py-2.5 mb-2.5 flex items-center justify-between text-xs">
-        <button onclick="app.exitNumberPathToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Menu
+        <button onclick="app.gameSettingsManager ? app.gameSettingsManager.exitGameToLevels('number_path') : app.exitNumberPathToMenu()" class="px-2.5 py-1 rounded-lg btn-secondary text-xs flex items-center gap-1.5 text-[#B8BCD0] hover:text-white transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Levels
         </button>
 
         <div class="flex items-center gap-3 font-mono">
+          <span id="numberpath-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <div>
             <span class="text-[#858AA5]">Level:</span>
             <span id="numberpath-hud-level" class="font-bold text-[#FB923C] ml-1 text-sm">1 / 10</span>
@@ -1044,8 +1179,8 @@
         </div>
 
         <div class="flex gap-2.5">
-          <button onclick="app.exitMatrixToMenu(); app.closeModal('modal-matrix-level-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
-            Exit
+          <button onclick="if (app.matrixGame) app.matrixGame.exitToLevels(); app.closeModal('modal-matrix-level-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Levels
           </button>
           <button onclick="app.matrixGame.nextLevel()" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
             Continue →
@@ -1071,8 +1206,8 @@
         </div>
 
         <div class="flex gap-2.5">
-          <button onclick="app.exitMatrixToMenu(); app.closeModal('modal-matrix-fail');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs font-semibold">
-            Exit to Menu
+          <button onclick="if (app.matrixGame) app.matrixGame.exitToLevels(); app.closeModal('modal-matrix-fail');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs font-semibold">
+            Levels
           </button>
           <button onclick="app.matrixGame.retryLevel()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs uppercase tracking-wider font-bold shadow-md shadow-rose-600/30">
             Retry Level
@@ -1121,8 +1256,8 @@
         </div>
 
         <div class="flex gap-2.5">
-          <button onclick="if (app.dontTapGame) app.dontTapGame.exitToMenu();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
-            Exit
+          <button onclick="if (app.dontTapGame) app.dontTapGame.exitToLevels();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Levels
           </button>
           <button onclick="if (app.dontTapGame) app.dontTapGame.nextLevel();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
             Continue →
@@ -1195,8 +1330,8 @@
         </div>
 
         <div class="flex gap-2.5">
-          <button onclick="if (app.dontTapGame) app.dontTapGame.exitToMenu();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
-            Exit to Menu
+          <button onclick="if (app.dontTapGame) app.dontTapGame.exitToLevels();" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Levels
           </button>
           <button onclick="if (app.dontTapGame) { app.closeModal('modal-donttap-game-over'); app.dontTapGame.startGame(); }" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
             Play Again
@@ -1357,8 +1492,8 @@
         </div>
 
         <div class="flex gap-2.5">
-          <button onclick="app.exitShellShuffleToMenu(); app.closeModal('modal-shellshuffle-level-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
-            Exit
+          <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.exitToLevels(); app.closeModal('modal-shellshuffle-level-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Levels
           </button>
           <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.nextLevel();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
             Next Level →
@@ -1398,8 +1533,8 @@
         </div>
 
         <div class="flex gap-2.5">
-          <button onclick="app.exitShellShuffleToMenu(); app.closeModal('modal-shellshuffle-game-over');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
-            Menu
+          <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.exitToLevels(); app.closeModal('modal-shellshuffle-game-over');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Levels
           </button>
           <button onclick="if (app.shellShuffleGame) app.shellShuffleGame.restartGame();" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
             Play Again
@@ -1460,8 +1595,8 @@
         </div>
 
         <div class="flex gap-2.5">
-          <button onclick="app.exitNumberPathToMenu(); app.closeModal('modal-numberpath-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
-            Exit
+          <button onclick="if (app.numberPathGame) app.numberPathGame.exitToLevels(); app.closeModal('modal-numberpath-clear');" class="flex-1 py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider font-semibold">
+            Levels
           </button>
           <button onclick="app.numberPathGame.nextLevel()" class="flex-1 py-2.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold shadow-lg shadow-[#4169FF]/25">
             Next Level →
@@ -1673,11 +1808,12 @@
   <!-- Scripts -->
   <script src="/js/three.min.js"></script>
   <script src="/js/sound.js"></script>
-  <script src="/js/matrix.js?v=15.0"></script>
-  <script src="/js/donttap.js?v=1.0"></script>
+  <script src="/js/game-settings.js?v=1.0"></script>
+  <script src="/js/matrix.js?v=16.0"></script>
+  <script src="/js/donttap.js?v=2.0"></script>
   <script src="/js/countdown.js?v=1.0"></script>
-  <script src="/js/shellshuffle.js?v=1.1"></script>
-  <script src="/js/numberpath.js?v=2.3"></script>
-  <script src="/js/app.js?v=20.0"></script>
+  <script src="/js/shellshuffle.js?v=2.0"></script>
+  <script src="/js/numberpath.js?v=3.0"></script>
+  <script src="/js/app.js?v=21.0"></script>
 </body>
 </html>

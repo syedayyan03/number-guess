@@ -6,6 +6,7 @@ class NumberPathGame {
     this.storageKey = 'numberverse_numberpath_level';
     this.bestTimesKey = 'numberverse_numberpath_best_times';
     this.maxLevel = 10;
+    this.difficulty = 'easy';
     this.level = this.getSavedLevel();
 
     // Board & Path State (Strictly 7x7 grid = 49 cells across all levels)
@@ -2212,8 +2213,39 @@ class NumberPathGame {
     } catch (e) {}
   }
 
+  // --- Difficulty & Progressive Checkpoints ---
+  getCheckpointCount(lvl = this.level, difficulty = this.difficulty || 'easy') {
+    const cleanLvl = Math.max(1, Math.min(10, parseInt(lvl, 10) || 1));
+    if (difficulty === 'easy') {
+      // 18 down to 12 checkpoints across 49 cells (frequent guidance)
+      const counts = [18, 17, 16, 15, 15, 14, 13, 13, 12, 12];
+      return counts[cleanLvl - 1];
+    } else if (difficulty === 'medium') {
+      // 11 down to 7 checkpoints across 49 cells (moderate guidance)
+      const counts = [11, 10, 10, 9, 9, 8, 8, 7, 7, 7];
+      return counts[cleanLvl - 1];
+    } else {
+      // 6 down to 3 checkpoints across 49 cells (hard deduction!)
+      const counts = [6, 6, 5, 5, 4, 4, 4, 3, 3, 3];
+      return counts[cleanLvl - 1];
+    }
+  }
+
+  getCheckpointStepIndices(pathLength, count) {
+    if (count <= 2) return [0, pathLength - 1];
+    const steps = [0];
+    const stepSize = (pathLength - 1) / (count - 1);
+    for (let i = 1; i < count - 1; i++) {
+      steps.push(Math.round(i * stepSize));
+    }
+    steps.push(pathLength - 1);
+    // Ensure strictly unique and sorted
+    return Array.from(new Set(steps)).sort((a, b) => a - b);
+  }
+
   // --- Start & Init Game ---
-  startLevel(lvl = this.level) {
+  startLevel(lvl = this.level, difficulty = 'easy') {
+    this.difficulty = difficulty;
     this.level = Math.min(this.maxLevel, Math.max(1, lvl));
     this.saveProgress(this.level);
 
@@ -2224,8 +2256,11 @@ class NumberPathGame {
     this.isDragging = false;
     this.clearError();
 
+    const cpCount = this.getCheckpointCount(this.level, this.difficulty);
+    const cpSteps = this.getCheckpointStepIndices(config.path.length, cpCount);
+
     // Build checkpoints: number starts from 1..K
-    this.checkpoints = config.checkpointSteps.map((stepIdx, idx) => {
+    this.checkpoints = cpSteps.map((stepIdx, idx) => {
       const [r, c] = config.path[stepIdx];
       return {
         number: idx + 1,
@@ -2747,6 +2782,10 @@ class NumberPathGame {
       // Record best time
       this.recordBestTime();
 
+      if (this.app && this.app.gameSettingsManager) {
+        this.app.gameSettingsManager.markLevelCompleted('number_path', this.difficulty || 'easy', this.level, 3, this.secondsElapsed);
+      }
+
       setTimeout(() => {
         this.showLevelClearModal();
       }, 500);
@@ -2773,7 +2812,7 @@ class NumberPathGame {
     const mins = Math.floor(this.secondsElapsed / 60);
     const secs = this.secondsElapsed % 60;
     if (timeEl) timeEl.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    if (lvlEl) lvlEl.innerText = `Level ${this.level}`;
+    if (lvlEl) lvlEl.innerText = `Level ${this.level} (${(this.difficulty || 'easy').toUpperCase()})`;
     if (cellsEl) cellsEl.innerText = '49 / 49';
 
     if (this.app) this.app.openModal('modal-numberpath-clear');
@@ -2784,13 +2823,19 @@ class NumberPathGame {
     if (this.level < this.maxLevel) {
       this.level++;
       this.saveProgress(this.level);
-      this.startLevel(this.level);
+      if (this.app && this.app.gameSettingsManager) {
+        this.app.gameSettingsManager.startLevel('number_path', this.difficulty || 'easy', this.level);
+      } else {
+        this.startLevel(this.level, this.difficulty);
+      }
     } else {
-      if (this.app) {
+      if (this.app && this.app.gameSettingsManager) {
+        this.app.gameSettingsManager.exitGameToLevels('number_path');
+      } else if (this.app) {
         this.app.exitNumberPathToMenu();
-        if (typeof this.app.showToast === 'function') {
-          this.app.showToast('🎉 Mastermind! You completed all 10 Number Path levels!', 'success');
-        }
+      }
+      if (this.app && typeof this.app.showToast === 'function') {
+        this.app.showToast(`🎉 Mastermind! You completed all 10 ${(this.difficulty || 'easy').toUpperCase()} Number Path levels!`, 'success');
       }
     }
   }
@@ -2800,9 +2845,20 @@ class NumberPathGame {
     const lvlEl = document.getElementById('numberpath-hud-level');
     const progEl = document.getElementById('numberpath-hud-progress');
     const cpEl = document.getElementById('numberpath-hud-checkpoints');
+    const diffBadge = document.getElementById('numberpath-diff-badge');
 
     if (lvlEl) lvlEl.innerText = `${this.level} / ${this.maxLevel}`;
     if (progEl) progEl.innerText = `${this.visitedPath.length} / 49`;
+    if (diffBadge) {
+      diffBadge.innerText = (this.difficulty || 'easy').toUpperCase();
+      diffBadge.className = `px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
+        this.difficulty === 'hard'
+          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+          : this.difficulty === 'medium'
+          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+          : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+      }`;
+    }
 
     if (cpEl) {
       const collected = this.getCollectedCheckpointCount();
@@ -2815,6 +2871,22 @@ class NumberPathGame {
       } else {
         cpEl.innerText = `All ${total} reached! Solved!`;
       }
+    }
+  }
+
+  exitToLevels() {
+    this.stopTimer();
+    this.clearError();
+    this.isDragging = false;
+    this.cachedGridRect = null;
+    if (this.app) {
+      this.app.closeModal('modal-numberpath-clear');
+      this.app.closeModal('modal-numberpath-fail');
+    }
+    if (this.app && this.app.gameSettingsManager) {
+      this.app.gameSettingsManager.openLevels('number_path', this.difficulty || 'easy');
+    } else if (this.app) {
+      this.app.showScreen('menu');
     }
   }
 
