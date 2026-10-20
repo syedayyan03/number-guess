@@ -39,9 +39,10 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-space);
   background-image: 
-    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(65, 105, 255, 0.18), transparent 60%),
-    radial-gradient(ellipse 70% 40% at 85% 60%, rgba(119, 123, 255, 0.08), transparent 50%),
-    radial-gradient(ellipse 60% 50% at 15% 75%, rgba(40, 123, 255, 0.09), transparent 50%),
+    radial-gradient(ellipse 85% 55% at 50% -10%, rgba(217, 119, 6, 0.14), transparent 60%),
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(65, 105, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 70% 40% at 85% 60%, rgba(217, 119, 6, 0.05), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 15% 75%, rgba(40, 123, 255, 0.06), transparent 50%),
     radial-gradient(1px 1px at 20px 30px, rgba(245, 245, 255, 0.25), transparent),
     radial-gradient(1px 1px at 75px 120px, rgba(184, 188, 208, 0.2), transparent),
     radial-gradient(1.5px 1.5px at 160px 85px, rgba(245, 245, 255, 0.35), transparent);
@@ -72,43 +73,17 @@ body {
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.clean-card-interactive:hover {
-  background: var(--bg-surface-secondary);
-  transform: translateY(-3px);
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 25px -5px rgba(65, 105, 255, 0.12);
-}
-
-/* Distinct Card Hover Color Palettes */
-.card-number-guess:hover {
-  border-color: rgba(119, 123, 255, 0.6) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(119, 123, 255, 0.25) !important;
-}
-
-.card-speed-matrix:hover {
-  border-color: rgba(40, 123, 255, 0.6) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(40, 123, 255, 0.25) !important;
-}
-
-.card-dont-tap:hover {
-  border-color: rgba(72, 214, 160, 0.6) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(72, 214, 160, 0.25) !important;
-}
-
-.card-countdown:hover {
-  border-color: rgba(244, 198, 106, 0.6) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(244, 198, 106, 0.25) !important;
-}
-
-/* Shell Shuffle: Cosmic Violet 3D Hover Identity (Border and Title only, matching other cards) */
-.card-shell-shuffle:hover {
-  border-color: rgba(168, 85, 247, 0.65) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(168, 85, 247, 0.25) !important;
-}
-
-/* Number Path: Cyber Tangerine Hover Identity */
+.clean-card-interactive:hover,
+.card-number-guess:hover,
+.card-speed-matrix:hover,
+.card-dont-tap:hover,
+.card-countdown:hover,
+.card-shell-shuffle:hover,
 .card-number-path:hover {
-  border-color: rgba(251, 146, 60, 0.65) !important;
-  box-shadow: 0 20px 40px -12px rgba(8, 9, 20, 0.8), 0 0 30px -5px rgba(251, 146, 60, 0.25) !important;
+  background: linear-gradient(180deg, rgba(38, 28, 20, 0.5) 0%, #161726 60%, #11121F 100%) !important;
+  border-color: rgba(245, 158, 11, 0.65) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85), 0 0 28px rgba(217, 119, 6, 0.22), inset 0 1px 0 rgba(254, 243, 199, 0.15) !important;
 }
 
 /* Number Path Puzzle Arena Styles (Matching LinkedIn Zip Screenshot) */
@@ -210,29 +185,35 @@ body {
   animation: npPulseInvalid 0.35s ease-in-out;
 }
 
-/* Primary Electric Blue Button */
+/* Classy Golden-Amber Primary Action Button (Matching Image 1) */
 .btn-solid-primary {
-  background: var(--color-blue-primary);
-  color: #FFFFFF;
-  font-weight: 600;
-  border-radius: 12px;
+  background: linear-gradient(180deg, #D97706 0%, #B45309 60%, #78350F 100%);
+  color: #FEF3C7;
+  font-weight: 700;
+  border-radius: 14px;
   height: 48px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 16px 0 rgba(65, 105, 255, 0.38);
+  border: 1.5px solid #FDE68A;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 16px rgba(217, 119, 6, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .btn-solid-primary:hover:not(:disabled) {
-  background: var(--color-blue-highlight);
-  box-shadow: 0 6px 24px 0 rgba(40, 123, 255, 0.52);
-  transform: translateY(-1px);
+  background: linear-gradient(180deg, #F59E0B 0%, #D97706 55%, #92400E 100%);
+  border-color: #FEF3C7;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45), 0 0 24px rgba(245, 158, 11, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  color: #FFFFFF;
 }
 
 .btn-solid-primary:active:not(:disabled) {
   transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .btn-solid-primary:disabled {
@@ -797,12 +778,12 @@ input[type=number] {
   box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
 }
 
-/* Image 2: Level Selection Slate Frame */
+/* Image 2: Level Selection Frame - Classy Warm Amber Frame matching Settings */
 .nv-level-box {
-  background: linear-gradient(180deg, #1C1E2A 0%, #131520 50%, #0C0D15 100%);
-  border: 6px solid #374151;
-  outline: 2px solid rgba(75, 85, 99, 0.5);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 40px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(180deg, #1C1713 0%, #141217 50%, #0C0D15 100%);
+  border: 5px solid #B45309;
+  outline: 2px solid rgba(245, 158, 11, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(217, 119, 6, 0.2);
   border-radius: 36px;
   position: relative;
 }
@@ -836,7 +817,13 @@ input[type=number] {
 }
 
 .nv-card-unlocked {
-  border-color: #38BDF8;
+  border-color: #D97706;
+  background: linear-gradient(180deg, #2A2219 0%, #1C191E 60%, #12131C 100%) !important;
+}
+
+.nv-card-unlocked:hover {
+  border-color: #FBBF24;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35) !important;
 }
 
 .nv-card-locked {
@@ -858,8 +845,9 @@ input[type=number] {
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 .nv-tab-inactive:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #F1F5F9 !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #FDE68A !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
 }
 
 

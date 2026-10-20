@@ -285,7 +285,7 @@ class GameSettingsManager {
         } else if (isOngoing) {
           bottomStatus.innerHTML = '<span class="text-amber-300 animate-pulse">PLAY</span>';
         } else if (isUnlocked) {
-          bottomStatus.innerHTML = '<span class="text-sky-300">OPEN</span>';
+          bottomStatus.innerHTML = '<span class="text-amber-300 font-semibold">OPEN</span>';
         } else {
           // Lock icon in bottom right (matching Image 2)
           bottomStatus.innerHTML = '<i data-lucide="lock" class="w-3.5 h-3.5 text-slate-500 ml-auto mr-1"></i>';

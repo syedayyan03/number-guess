@@ -17,9 +17,9 @@
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css?v=22.0">
+  <link rel="stylesheet" href="/style.css?v=23.0">
 </head>
-<body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-[#4169FF] selection:text-white">
+<body class="flex flex-col min-h-screen text-[#F5F5FF] antialiased selection:bg-amber-600 selection:text-white">
 
   <!-- Header -->
   <header class="w-full border-b border-[#34364A] bg-[#0C0D19]/90 backdrop-blur-md sticky top-0 z-40">
@@ -30,7 +30,7 @@
         <div>
           <div class="font-bold text-base tracking-tight text-[#F5F5FF] flex items-center gap-2">
             NumberVerse
-            <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#B8BCD0]">Arcade</span>
+            <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">Arcade</span>
           </div>
         </div>
       </div>
@@ -47,12 +47,12 @@
 
       <!-- Header Actions -->
       <div class="flex items-center gap-2.5">
-        <button onclick="app.toggleHowToPlay()" class="px-3.5 py-1.5 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] text-[#B8BCD0] hover:text-[#F5F5FF] text-xs font-medium flex items-center gap-1.5 transition">
+        <button onclick="app.toggleHowToPlay()" class="px-3.5 py-1.5 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] hover:border-amber-500/40 text-[#B8BCD0] hover:text-amber-200 text-xs font-medium flex items-center gap-1.5 transition">
           <i data-lucide="help-circle" class="w-3.5 h-3.5 text-[#858AA5]"></i>
           <span>Rules</span>
         </button>
-        <button id="sound-toggle-btn" onclick="app.toggleSound()" class="p-2 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] text-[#B8BCD0] hover:text-[#F5F5FF] transition" title="Toggle Sound">
-          <i data-lucide="volume-2" id="sound-icon" class="w-4 h-4 text-[#48D6A0]"></i>
+        <button id="sound-toggle-btn" onclick="app.toggleSound()" class="p-2 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] hover:border-amber-500/40 text-[#B8BCD0] hover:text-amber-200 transition" title="Toggle Sound">
+          <i data-lucide="volume-2" id="sound-icon" class="w-4 h-4 text-amber-400"></i>
         </button>
       </div>
     </div>
@@ -68,15 +68,15 @@
       <!-- Cinematic Hero Section -->
       <div class="w-full text-center max-w-3xl mb-10 sm:mb-14">
         <!-- Eyebrow -->
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#777BFF] text-xs font-semibold uppercase tracking-[0.2em] mb-5">
-          <span class="w-2 h-2 rounded-full bg-[#4169FF] shadow-[0_0_8px_#4169FF]"></span>
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold uppercase tracking-[0.2em] mb-5">
+          <span class="w-2 h-2 rounded-full bg-[#F59E0B] shadow-[0_0_10px_#F59E0B]"></span>
           The Cognitive Arcade
         </div>
         
         <!-- Headline: Enter the Mind. Master the Game. -->
         <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-[#F5F5FF] leading-[1.1] mb-5">
           ENTER THE MIND.<br>
-          <span class="bg-gradient-to-r from-[#4169FF] via-[#777BFF] to-[#287BFF] bg-clip-text text-transparent">MASTER THE GAME.</span>
+          <span class="bg-gradient-to-r from-[#F59E0B] via-[#FBBF24] to-[#D97706] bg-clip-text text-transparent">MASTER THE GAME.</span>
         </h1>
         
         <!-- Supporting text -->
@@ -104,11 +104,11 @@
       <!-- Cognitive Lab Modules / Game Selection Cards Grid (3 cards per row on big screens, 1 on small screens) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
         
-        <!-- Game Module 1: Number Guessing (Indigo Identity) -->
-        <div class="clean-card-interactive card-number-guess p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#777BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <!-- Game Module 1: Number Guessing -->
+        <div class="clean-card-interactive card-number-guess p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-amber-500/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('number_guess')">
           <div>
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#777BFF] transition">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-amber-300 transition">
               Number Guessing
             </h3>
             
@@ -117,25 +117,25 @@
             </p>
             
             <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">1–10 Players</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Turn-Based & Blitz</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">AI Bot Match</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">1–10 Players</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Turn-Based & Blitz</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">AI Bot Match</span>
             </div>
           </div>
 
           <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#D97706]/35 transition">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play Game
             </button>
             <div class="h-5 mt-2"></div>
           </div>
         </div>
 
-        <!-- Game Module 2: Speed Matrix (Electric Blue Identity) -->
-        <div class="clean-card-interactive card-speed-matrix p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#287BFF]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <!-- Game Module 2: Speed Matrix -->
+        <div class="clean-card-interactive card-speed-matrix p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-amber-500/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('speed_grid')">
           <div>
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#287BFF] transition">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-amber-300 transition">
               Speed Matrix
             </h3>
             
@@ -144,29 +144,29 @@
             </p>
             
             <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
-              <span id="matrix-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">10 Levels</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Anti-Mugup Reshuffle</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Timer Reflexes</span>
+              <span id="matrix-card-badge" class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200/90 font-medium">10 Levels</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Anti-Mugup Reshuffle</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Timer Reflexes</span>
             </div>
           </div>
 
           <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#D97706]/35 transition">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="matrix-card-btn-text">Play Matrix</span>
             </button>
             <div class="h-5 mt-2 flex items-center justify-center">
-              <button id="matrix-card-reset-btn" onclick="event.stopPropagation(); app.resetMatrixProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+              <button id="matrix-card-reset-btn" onclick="event.stopPropagation(); app.resetMatrixProgress();" class="hidden text-xs font-mono text-amber-400/80 hover:text-amber-200 hover:underline cursor-pointer transition">
                 Reset to Level 1
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Game Module 3: Don't Tap! (Cognitive Inhibitory Reflex Identity) -->
-        <div class="clean-card-interactive card-dont-tap p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#48D6A0]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <!-- Game Module 3: Don't Tap! -->
+        <div class="clean-card-interactive card-dont-tap p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-amber-500/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('dont_tap')">
           <div>
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#48D6A0] transition">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-amber-300 transition">
               Don't Tap!
             </h3>
             
@@ -175,29 +175,29 @@
             </p>
             
             <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
-              <span id="donttap-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">High: 0</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Reflex & Inhibition</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Combo Streaks</span>
+              <span id="donttap-card-badge" class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200/90 font-medium">High: 0</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Reflex & Inhibition</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Combo Streaks</span>
             </div>
           </div>
 
           <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#D97706]/35 transition">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="donttap-card-btn-text">Play Don't Tap!</span>
             </button>
             <div class="h-5 mt-2 flex items-center justify-center">
-              <button id="donttap-card-reset-btn" onclick="event.stopPropagation(); app.resetDontTapProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+              <button id="donttap-card-reset-btn" onclick="event.stopPropagation(); app.resetDontTapProgress();" class="hidden text-xs font-mono text-amber-400/80 hover:text-amber-200 hover:underline cursor-pointer transition">
                 Reset High Score
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Game Module 4: Countdown Calculation (Mental Math Identity) -->
-        <div class="clean-card-interactive card-countdown p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#F4C66A]/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <!-- Game Module 4: Countdown Calculation -->
+        <div class="clean-card-interactive card-countdown p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-amber-500/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('countdown')">
           <div>
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#F4C66A] transition">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-amber-300 transition">
               Countdown Calculation
             </h3>
             
@@ -206,31 +206,31 @@
             </p>
             
             <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
-              <span id="countdown-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Best: 0</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Custom Gap & Limit</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">3 Mistakes Allowed</span>
+              <span id="countdown-card-badge" class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200/90 font-medium">Best: 0</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Custom Gap & Limit</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">3 Mistakes Allowed</span>
             </div>
           </div>
 
           <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#D97706]/35 transition">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="countdown-card-btn-text">Play Countdown</span>
             </button>
             <div class="h-5 mt-2 flex items-center justify-center">
-              <button id="countdown-card-reset-btn" onclick="event.stopPropagation(); app.resetCountdownProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+              <button id="countdown-card-reset-btn" onclick="event.stopPropagation(); app.resetCountdownProgress();" class="hidden text-xs font-mono text-amber-400/80 hover:text-amber-200 hover:underline cursor-pointer transition">
                 Reset Best Score
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Game Module 5: Shell Shuffle (3D Visual Tracking - Cosmic Violet Identity) -->
-        <div class="clean-card-interactive card-shell-shuffle p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#A855F7]/60 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <!-- Game Module 5: Shell Shuffle -->
+        <div class="clean-card-interactive card-shell-shuffle p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-amber-500/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('shell_shuffle')">
           <div>
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#C084FC] transition flex items-center gap-2">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-amber-300 transition flex items-center gap-2">
               Shell Shuffle
-              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#858AA5]">3D</span>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">3D</span>
             </h3>
             
             <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
@@ -238,31 +238,31 @@
             </p>
             
             <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
-              <span id="shellshuffle-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">3–5 Cups</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Real 3D Physics</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Identical Shells</span>
+              <span id="shellshuffle-card-badge" class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200/90 font-medium">3–5 Cups</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Real 3D Physics</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Identical Shells</span>
             </div>
           </div>
 
           <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#D97706]/35 transition">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="shellshuffle-card-btn-text">Play Shell Shuffle</span>
             </button>
             <div class="h-5 mt-2 flex items-center justify-center">
-              <button id="shellshuffle-card-reset-btn" onclick="event.stopPropagation(); app.resetShellShuffleProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+              <button id="shellshuffle-card-reset-btn" onclick="event.stopPropagation(); app.resetShellShuffleProgress();" class="hidden text-xs font-mono text-amber-400/80 hover:text-amber-200 hover:underline cursor-pointer transition">
                 Reset to Level 1
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Game Module 6: Number Path (Zip Sequential Grid Puzzle Identity) -->
-        <div class="clean-card-interactive card-number-path p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-[#FB923C]/60 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
+        <!-- Game Module 6: Number Path -->
+        <div class="clean-card-interactive card-number-path p-7 sm:p-8 flex flex-col justify-between cursor-pointer border border-[#34364A] hover:border-amber-500/50 bg-gradient-to-b from-[#191B2D]/50 via-[#111322] to-[#111322] group h-full"
              onclick="app.selectGame('number_path')">
           <div>
-            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-[#FB923C] transition flex items-center gap-2">
+            <h3 class="text-2xl font-bold text-[#F5F5FF] mb-3 group-hover:text-amber-300 transition flex items-center gap-2">
               Number Path
-              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#191B2D] border border-[#34364A] text-[#858AA5]">Zip</span>
+              <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">Zip</span>
             </h3>
             
             <p class="text-sm text-[#B8BCD0] leading-relaxed mb-6 min-h-[4.5rem]">
@@ -270,18 +270,18 @@
             </p>
             
             <div class="flex flex-wrap gap-2 text-xs font-mono text-[#858AA5] min-h-[2rem]">
-              <span id="numberpath-card-badge" class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">10 Levels</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Sequential Checkpoints</span>
-              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">Fill 100% Grid</span>
+              <span id="numberpath-card-badge" class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200/90 font-medium">10 Levels</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Sequential Checkpoints</span>
+              <span class="px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A] group-hover:border-amber-500/20 group-hover:text-amber-200/70 transition">Fill 100% Grid</span>
             </div>
           </div>
 
           <div class="mt-8 flex flex-col items-center w-full">
-            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#4169FF]/30 transition">
+            <button class="w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-[#D97706]/35 transition">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span id="numberpath-card-btn-text">Play Number Path</span>
             </button>
             <div class="h-5 mt-2 flex items-center justify-center">
-              <button id="numberpath-card-reset-btn" onclick="event.stopPropagation(); app.resetNumberPathProgress();" class="hidden text-xs font-mono text-[#FF7185] hover:text-[#ff4d6d] hover:underline cursor-pointer transition">
+              <button id="numberpath-card-reset-btn" onclick="event.stopPropagation(); app.resetNumberPathProgress();" class="hidden text-xs font-mono text-amber-400/80 hover:text-amber-200 hover:underline cursor-pointer transition">
                 Reset to Level 1
               </button>
             </div>
@@ -762,7 +762,7 @@
         <div class="flex items-center gap-2 font-mono">
           <span id="matrix-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <span class="text-[#858AA5]">Level:</span>
-          <span id="matrix-level-badge" class="font-bold text-[#287BFF] text-sm">1 / 10</span>
+          <span id="matrix-level-badge" class="font-bold text-amber-300 text-sm">1 / 10</span>
         </div>
 
         <div class="flex items-center gap-1.5 font-mono">
@@ -812,7 +812,7 @@
         <div class="flex items-center gap-2 font-mono">
           <span id="donttap-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <span class="text-[#858AA5]">Level:</span>
-          <span id="donttap-level-badge" class="font-bold text-[#287BFF] text-sm">1 / 10</span>
+          <span id="donttap-level-badge" class="font-bold text-amber-300 text-sm">1 / 10</span>
         </div>
 
         <!-- Lives Battery / Hearts -->
@@ -1040,7 +1040,7 @@
           <span id="shellshuffle-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <div>
             <span class="text-[#858AA5]">Level:</span>
-            <span id="shellshuffle-hud-level" class="font-bold text-[#4169FF] ml-1 text-sm">1 / 10</span>
+            <span id="shellshuffle-hud-level" class="font-bold text-amber-300 ml-1 text-sm">1 / 10</span>
           </div>
           <div>
             <span class="text-[#858AA5]">Speed:</span>
@@ -1109,7 +1109,7 @@
           <span id="numberpath-diff-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EASY</span>
           <div>
             <span class="text-[#858AA5]">Level:</span>
-            <span id="numberpath-hud-level" class="font-bold text-[#FB923C] ml-1 text-sm">1 / 10</span>
+            <span id="numberpath-hud-level" class="font-bold text-amber-300 ml-1 text-sm">1 / 10</span>
           </div>
           <div>
             <span class="text-[#858AA5]">Step:</span>
@@ -1119,7 +1119,7 @@
 
         <!-- Stopwatch -->
         <div class="flex items-center gap-1.5 font-mono px-2.5 py-1 rounded-lg bg-[#191B2D] border border-[#34364A]">
-          <i data-lucide="clock" class="w-3.5 h-3.5 text-[#FB923C]"></i>
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
           <span id="numberpath-timer" class="font-bold text-white text-sm">0:00</span>
         </div>
       </div>
