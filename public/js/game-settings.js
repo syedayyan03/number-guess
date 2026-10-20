@@ -40,8 +40,8 @@ class GameSettingsManager {
       number_path: {
         id: 'number_path',
         slug: 'number-path',
-        name: 'Number Path (Zip)',
-        subtitle: '7x7 Sequential Path',
+        name: 'Zip',
+        subtitle: '7x7 Sequential Path Grid',
         themeColor: '#FB923C',
         accentColor: '#EA580C',
         icon: 'route',
@@ -167,6 +167,7 @@ class GameSettingsManager {
   // --- Slug & ID Helpers ---
   getGameConfigBySlug(slug) {
     const clean = slug.toLowerCase().replace(/\/+$/, '');
+    if (clean === 'zip') return this.gameConfigs.number_path;
     return Object.values(this.gameConfigs).find(cfg => cfg.slug === clean);
   }
 

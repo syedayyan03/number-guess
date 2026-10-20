@@ -407,11 +407,11 @@ class NumberVerseApp {
 
     if (savedLevel > 1) {
       if (badge) badge.innerText = `Level ${savedLevel} / 10`;
-      if (btnText) btnText.innerText = `Resume Level ${savedLevel}`;
+      if (btnText) btnText.innerText = `Resume Zip (Level ${savedLevel})`;
       if (resetBtn) resetBtn.classList.remove('hidden');
     } else {
       if (badge) badge.innerText = `10 Levels`;
-      if (btnText) btnText.innerText = `Play Number Path`;
+      if (btnText) btnText.innerText = `Play Zip`;
       if (resetBtn) resetBtn.classList.add('hidden');
     }
   }
@@ -423,7 +423,7 @@ class NumberVerseApp {
       localStorage.removeItem('numberverse_numberpath_level');
     }
     this.updateNumberPathMenuCard();
-    this.showToast('Number Path progress reset to Level 1', 'info');
+    this.showToast('Zip progress reset to Level 1', 'info');
   }
 
   updateSudokuMenuCard() {

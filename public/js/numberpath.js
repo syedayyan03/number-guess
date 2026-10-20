@@ -2835,7 +2835,7 @@ class NumberPathGame {
         this.app.exitNumberPathToMenu();
       }
       if (this.app && typeof this.app.showToast === 'function') {
-        this.app.showToast(`🎉 Mastermind! You completed all 10 ${(this.difficulty || 'easy').toUpperCase()} Number Path levels!`, 'success');
+        this.app.showToast(`🎉 Mastermind! You completed all 10 ${(this.difficulty || 'easy').toUpperCase()} Zip levels!`, 'success');
       }
     }
   }
