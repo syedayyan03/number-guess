@@ -66,28 +66,28 @@ class ShellShuffleGame {
 
     if (difficulty === 'easy') {
       // Easy 1 to 10: Smooth, highly trackable, relaxing. 3 cups.
-      // Easy 1: 850ms, 4 swaps, 60ms gap
-      // Easy 10: 520ms, 7 swaps, 35ms gap
-      duration = Math.round(850 - (cleanLvl - 1) * 36.6);
+      // Easy 1: 850ms, 4 swaps, 50ms gap
+      // Easy 10: 500ms, 7 swaps, 30ms gap
+      duration = Math.round(850 - (cleanLvl - 1) * 38.8);
       swapCount = 4 + Math.floor((cleanLvl - 1) * 0.35);
-      gapDelay = Math.max(35, Math.round(60 - (cleanLvl - 1) * 2.5));
+      gapDelay = Math.max(30, Math.round(50 - (cleanLvl - 1) * 2.2));
       cups = 3;
     } else if (difficulty === 'medium') {
-      // Medium 1 to 10: Seamlessly picks up from Easy 10 and accelerates.
-      // Medium 1: 500ms, 7 swaps, 3 cups
-      // Medium 10: 340ms, 11 swaps, 4 cups
-      duration = Math.round(500 - (cleanLvl - 1) * 17.7);
-      swapCount = 7 + Math.floor((cleanLvl - 1) * 0.45);
-      gapDelay = Math.max(25, Math.round(35 - (cleanLvl - 1) * 1.1));
+      // Medium 1 to 10: Balanced challenge.
+      // Medium 1: 440ms, 8 swaps, 3 cups, 30ms gap
+      // Medium 10: 250ms, 14 swaps, 4 cups, 18ms gap
+      duration = Math.round(440 - (cleanLvl - 1) * 21.1);
+      swapCount = 8 + Math.floor((cleanLvl - 1) * 0.7);
+      gapDelay = Math.max(18, Math.round(30 - (cleanLvl - 1) * 1.3));
       cups = cleanLvl >= 6 ? 4 : 3;
     } else {
-      // Hard 1 to 10: Fast visual tracking challenge, completely trackable with focused eyes
-      // Hard 1: 320ms, 10 swaps, 4 cups
-      // Hard 10: 220ms, 14 swaps, 5 cups
-      duration = Math.round(320 - (cleanLvl - 1) * 11.1);
-      swapCount = 10 + Math.floor((cleanLvl - 1) * 0.45);
-      gapDelay = Math.max(18, Math.round(25 - (cleanLvl - 1) * 0.8));
-      cups = cleanLvl >= 6 ? 5 : 4;
+      // Hard 1 to 10: High-speed, intense visual tracking challenge!
+      // Hard 1: 210ms, 16 swaps, 5 cups, 18ms gap
+      // Hard 10: 125ms, 26 swaps, 6 cups, 8ms gap
+      duration = Math.round(210 - (cleanLvl - 1) * 9.44);
+      swapCount = 16 + Math.floor((cleanLvl - 1) * 1.12);
+      gapDelay = Math.max(8, Math.round(18 - (cleanLvl - 1) * 1.1));
+      cups = cleanLvl >= 6 ? 6 : 5;
     }
 
     const speedMultiplier = (850 / duration).toFixed(1);
@@ -328,11 +328,11 @@ class ShellShuffleGame {
   }
 
   buildGameObjects() {
-    const cupCount = this.getCupCountForLevel(this.level);
+    const cupCount = this.getCupCountForLevel(this.level, this.difficulty);
 
     // Calculate slot positions with comfortable spacing
     this.slots = [];
-    const spacing = cupCount === 3 ? 1.9 : cupCount === 4 ? 1.5 : 1.35;
+    const spacing = cupCount === 3 ? 1.9 : cupCount === 4 ? 1.5 : cupCount === 5 ? 1.25 : 1.05;
     const startX = -((cupCount - 1) * spacing) / 2;
     for (let i = 0; i < cupCount; i++) {
       this.slots.push(startX + i * spacing);
@@ -531,7 +531,7 @@ class ShellShuffleGame {
     if (this.state === 'shuffling' || this.state === 'revealing' || this.state === 'hiding') return;
 
     // Refresh cups if cup count changed
-    const neededCups = this.getCupCountForLevel(this.level);
+    const neededCups = this.getCupCountForLevel(this.level, this.difficulty);
     if (this.cups.length !== neededCups) {
       this.rebuildSceneForLevel();
     }
@@ -586,19 +586,95 @@ class ShellShuffleGame {
   }
 
   generateShufflePlan() {
-    const config = this.getShuffleConfigForLevel(this.level);
+    const config = this.getShuffleConfigForLevel(this.level, this.difficulty);
     this.swapQueue = [];
     const numSlots = this.slots.length;
+    const isHard = (this.difficulty === 'hard');
+    const isMedium = (this.difficulty === 'medium');
+
+    // Simulate slot positions so we know exactly where the target cup is at each step
+    const simSlots = {};
+    for (let i = 0; i < numSlots; i++) {
+      simSlots[i] = this.cupPositionMap[i] || `cup-${i}`;
+    }
 
     let lastA = -1;
     let lastB = -1;
 
     for (let s = 0; s < config.swapCount; s++) {
-      let slotA = Math.floor(Math.random() * numSlots);
-      let slotB = Math.floor(Math.random() * numSlots);
-      while (slotB === slotA || (slotA === lastA && slotB === lastB) || (slotA === lastB && slotB === lastA)) {
-        slotB = Math.floor(Math.random() * numSlots);
+      // Find current slot of target cup
+      let targetSlot = -1;
+      for (let sl = 0; sl < numSlots; sl++) {
+        if (simSlots[sl] === this.targetCupId) {
+          targetSlot = sl;
+          break;
+        }
       }
+
+      let slotA, slotB;
+      // In Hard mode, ensure target cup actively moves in ~72% of swaps (never rests motionless!)
+      // In Medium, ~52% of swaps. In Easy, ~40%.
+      const targetMoveChance = isHard ? 0.72 : isMedium ? 0.52 : 0.40;
+      const shouldMoveTarget = (Math.random() < targetMoveChance) && targetSlot !== -1;
+
+      if (shouldMoveTarget) {
+        slotA = targetSlot;
+        // In Hard mode, favor dramatic distant/cross swaps (distance >= 2) across the table
+        const candidates = [];
+        for (let i = 0; i < numSlots; i++) {
+          if (i !== slotA && !(slotA === lastA && i === lastB) && !(slotA === lastB && i === lastA)) {
+            candidates.push(i);
+          }
+        }
+        if (isHard && candidates.length > 1) {
+          // Weight distant swaps higher to force cross-screen ocular tracking
+          const distantCandidates = candidates.filter(c => Math.abs(c - slotA) >= 2);
+          if (distantCandidates.length > 0 && Math.random() < 0.65) {
+            slotB = distantCandidates[Math.floor(Math.random() * distantCandidates.length)];
+          } else {
+            slotB = candidates[Math.floor(Math.random() * candidates.length)];
+          }
+        } else if (candidates.length > 0) {
+          slotB = candidates[Math.floor(Math.random() * candidates.length)];
+        } else {
+          slotB = (slotA === 0 ? 1 : 0);
+        }
+      } else {
+        // Distraction / deceptive feint swap between two other cups
+        const otherSlots = [];
+        for (let i = 0; i < numSlots; i++) {
+          if (i !== targetSlot) otherSlots.push(i);
+        }
+
+        if (otherSlots.length >= 2) {
+          let attempts = 0;
+          do {
+            const idx1 = Math.floor(Math.random() * otherSlots.length);
+            let idx2 = Math.floor(Math.random() * otherSlots.length);
+            while (idx2 === idx1) {
+              idx2 = Math.floor(Math.random() * otherSlots.length);
+            }
+            slotA = otherSlots[idx1];
+            slotB = otherSlots[idx2];
+            attempts++;
+          } while (
+            ((slotA === lastA && slotB === lastB) || (slotA === lastB && slotB === lastA)) &&
+            attempts < 20
+          );
+        } else {
+          slotA = Math.floor(Math.random() * numSlots);
+          slotB = Math.floor(Math.random() * numSlots);
+          while (slotB === slotA) {
+            slotB = Math.floor(Math.random() * numSlots);
+          }
+        }
+      }
+
+      // Update simulation
+      const temp = simSlots[slotA];
+      simSlots[slotA] = simSlots[slotB];
+      simSlots[slotB] = temp;
+
       lastA = slotA;
       lastB = slotB;
 
