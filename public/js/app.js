@@ -598,7 +598,17 @@ class NumberVerseApp {
       const cfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigBySlug(slug) : null;
       if (cfg) {
         const diff = params.get('diff') || this.gameSettingsManager.activeDifficulty || 'easy';
-        this.gameSettingsManager.openLevels(cfg.id, diff, false);
+        const resetParam = params.get('reset');
+        if (resetParam) {
+          if (resetParam.toLowerCase() === 'all') {
+            this.gameSettingsManager.resetAllProgressForGame(cfg.id);
+          } else {
+            const targetDiff = (resetParam === 'true' || resetParam === '1') ? diff : resetParam.toLowerCase();
+            this.gameSettingsManager.resetDifficultyProgress(cfg.id, targetDiff);
+          }
+        } else {
+          this.gameSettingsManager.openLevels(cfg.id, diff, false);
+        }
         return;
       }
     }

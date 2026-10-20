@@ -382,6 +382,84 @@ class GameSettingsManager {
   exitLevelsToSettings(gameId = this.activeGameId) {
     this.openSettings(gameId, true);
   }
+
+  // --- Progress Reset Management ---
+  confirmResetDifficulty() {
+    const cfg = this.getGameConfigById(this.activeGameId);
+    const infoEl = document.getElementById('reset-modal-game-info');
+    if (infoEl) {
+      infoEl.innerText = `${cfg.name} • ${(this.activeDifficulty || 'easy').toUpperCase()}`;
+    }
+    if (this.app) {
+      this.app.openModal('modal-reset-progress');
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  executeResetDifficulty() {
+    if (this.app) {
+      this.app.closeModal('modal-reset-progress');
+    }
+    this.resetDifficultyProgress(this.activeGameId, this.activeDifficulty);
+  }
+
+  executeResetAllDifficulties() {
+    if (this.app) {
+      this.app.closeModal('modal-reset-progress');
+    }
+    this.resetAllProgressForGame(this.activeGameId);
+  }
+
+  resetDifficultyProgress(gameId = this.activeGameId, difficulty = this.activeDifficulty) {
+    const all = this.getAllProgress(gameId);
+    all[difficulty] = { unlocked: 1, completed: {} };
+    this.saveAllProgress(gameId, all);
+
+    // Clear legacy game-specific single-level keys
+    try {
+      if (gameId === 'shell_shuffle') {
+        localStorage.setItem('numberverse_shellshuffle_saved_level', '1');
+      } else if (gameId === 'number_path') {
+        localStorage.setItem('numberverse_numberpath_level', '1');
+      }
+    } catch (e) {}
+
+    this.updateAppMenuCards(gameId);
+    this.openLevels(gameId, difficulty, false);
+
+    const cfg = this.getGameConfigById(gameId);
+    if (this.app && typeof this.app.showToast === 'function') {
+      this.app.showToast(`✨ ${cfg.name} (${difficulty.toUpperCase()}) reset! Ready to play Level 1.`, 'success');
+    }
+    if (window.soundFx) window.soundFx.playClick();
+  }
+
+  resetAllProgressForGame(gameId = this.activeGameId) {
+    const all = {
+      easy: { unlocked: 1, completed: {} },
+      medium: { unlocked: 1, completed: {} },
+      hard: { unlocked: 1, completed: {} }
+    };
+    this.saveAllProgress(gameId, all);
+
+    try {
+      if (gameId === 'shell_shuffle') {
+        localStorage.setItem('numberverse_shellshuffle_saved_level', '1');
+        localStorage.removeItem('numberverse_shellshuffle_best_level');
+      } else if (gameId === 'number_path') {
+        localStorage.setItem('numberverse_numberpath_level', '1');
+      }
+    } catch (e) {}
+
+    this.updateAppMenuCards(gameId);
+    this.openLevels(gameId, this.activeDifficulty, false);
+
+    const cfg = this.getGameConfigById(gameId);
+    if (this.app && typeof this.app.showToast === 'function') {
+      this.app.showToast(`✨ All difficulties reset for ${cfg.name}!`, 'success');
+    }
+    if (window.soundFx) window.soundFx.playClick();
+  }
 }
 
 if (typeof window !== 'undefined') {

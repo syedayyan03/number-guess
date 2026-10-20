@@ -742,6 +742,9 @@
           <button onclick="app.gameSettingsManager.exitLevelsToSettings()" class="hover:text-white flex items-center gap-1 cursor-pointer">
             <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Settings
           </button>
+          <button onclick="app.gameSettingsManager.confirmResetDifficulty()" class="hover:text-amber-300 text-slate-400 flex items-center gap-1.5 cursor-pointer transition px-2.5 py-1 rounded-lg hover:bg-white/5 border border-transparent hover:border-slate-700">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-400/80"></i> Reset Progress
+          </button>
           <button onclick="app.showScreen('menu')" class="hover:text-white flex items-center gap-1 cursor-pointer">
             Main Menu <i data-lucide="home" class="w-3.5 h-3.5"></i>
           </button>
@@ -1563,6 +1566,40 @@
           </button>
           <button onclick="app.exitShellShuffleToMenu(); app.closeModal('modal-shellshuffle-pause');" class="w-full py-2.5 rounded-xl btn-secondary text-xs uppercase tracking-wider text-rose-400 hover:text-rose-300">
             Exit to Menu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL: RESET LEVEL PROGRESS CONFIRMATION       -->
+    <!-- ============================================== -->
+    <div id="modal-reset-progress" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="w-full max-w-sm nv-level-box rounded-3xl p-6 sm:p-7 flex flex-col items-center text-center relative border border-amber-500/40 shadow-2xl">
+        <!-- Close button -->
+        <button onclick="app.closeModal('modal-reset-progress')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 border border-slate-600/50 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3 shadow-lg">
+          <i data-lucide="rotate-ccw" class="w-7 h-7"></i>
+        </div>
+
+        <h3 class="text-xl font-black text-white tracking-wide mb-1">Reset Level Progress?</h3>
+        <p id="reset-modal-game-info" class="text-xs font-mono font-bold text-amber-300 uppercase tracking-wider mb-2">Shell Shuffle 3D • Hard</p>
+        <p class="text-xs text-slate-400 leading-relaxed mb-5">
+          This will reset your stars to 0 and lock Levels 2–10 so you can experience the new progressive update freshly from Level 1!
+        </p>
+
+        <div class="w-full flex flex-col gap-2">
+          <button onclick="app.gameSettingsManager.executeResetDifficulty()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-black font-black text-xs sm:text-sm tracking-wider uppercase shadow-lg transition cursor-pointer">
+            Reset This Difficulty (Level 1)
+          </button>
+          <button onclick="app.gameSettingsManager.executeResetAllDifficulties()" class="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold tracking-wide border border-slate-700/60 transition cursor-pointer">
+            Reset All Difficulties (Easy, Med, Hard)
+          </button>
+          <button onclick="app.closeModal('modal-reset-progress')" class="w-full py-1.5 text-xs text-slate-400 hover:text-white transition cursor-pointer">
+            Cancel
           </button>
         </div>
       </div>
