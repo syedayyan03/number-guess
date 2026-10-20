@@ -13,43 +13,43 @@ class SpeedMatrixGame {
     this.timerInterval = null;
     this.isGameOver = false;
 
-    // 10 Progressive Levels for each Difficulty (Monotonically strictly increasing hardness: seconds per tile shrinks steadily)
+    // 10 Progressive Levels for each Difficulty (Fair, realistic & humanly achievable cognitive challenge)
     this.difficultyConfigs = {
       easy: [
-        { level: 1,  cols: 3, total: 9,  time: 35 }, // 3.89s / tile
-        { level: 2,  cols: 3, total: 9,  time: 30 }, // 3.33s / tile
-        { level: 3,  cols: 3, total: 9,  time: 25 }, // 2.78s / tile
-        { level: 4,  cols: 4, total: 12, time: 30 }, // 2.50s / tile
-        { level: 5,  cols: 4, total: 12, time: 26 }, // 2.17s / tile
-        { level: 6,  cols: 4, total: 12, time: 22 }, // 1.83s / tile
-        { level: 7,  cols: 4, total: 16, time: 26 }, // 1.63s / tile
-        { level: 8,  cols: 4, total: 16, time: 23 }, // 1.44s / tile
-        { level: 9,  cols: 4, total: 16, time: 20 }, // 1.25s / tile
-        { level: 10, cols: 4, total: 16, time: 17 }  // 1.06s / tile
+        { level: 1,  cols: 3, total: 9,  time: 45 }, // 5.00s / tile
+        { level: 2,  cols: 3, total: 9,  time: 40 }, // 4.44s / tile
+        { level: 3,  cols: 3, total: 9,  time: 35 }, // 3.89s / tile
+        { level: 4,  cols: 4, total: 12, time: 40 }, // 3.33s / tile
+        { level: 5,  cols: 4, total: 12, time: 35 }, // 2.92s / tile
+        { level: 6,  cols: 4, total: 12, time: 30 }, // 2.50s / tile
+        { level: 7,  cols: 4, total: 16, time: 36 }, // 2.25s / tile
+        { level: 8,  cols: 4, total: 16, time: 32 }, // 2.00s / tile
+        { level: 9,  cols: 4, total: 16, time: 28 }, // 1.75s / tile
+        { level: 10, cols: 4, total: 16, time: 25 }  // 1.56s / tile
       ],
       medium: [
-        { level: 1,  cols: 5, total: 20, time: 20 }, // 1.00s / tile
-        { level: 2,  cols: 5, total: 20, time: 18 }, // 0.90s / tile
-        { level: 3,  cols: 5, total: 25, time: 21 }, // 0.84s / tile
-        { level: 4,  cols: 5, total: 25, time: 19 }, // 0.76s / tile
-        { level: 5,  cols: 5, total: 25, time: 17 }, // 0.68s / tile
-        { level: 6,  cols: 6, total: 30, time: 19 }, // 0.63s / tile
-        { level: 7,  cols: 6, total: 30, time: 17 }, // 0.57s / tile
-        { level: 8,  cols: 6, total: 30, time: 15 }, // 0.50s / tile
-        { level: 9,  cols: 6, total: 36, time: 16 }, // 0.44s / tile
-        { level: 10, cols: 6, total: 36, time: 14 }  // 0.39s / tile
+        { level: 1,  cols: 5, total: 20, time: 30 }, // 1.50s / tile
+        { level: 2,  cols: 5, total: 20, time: 28 }, // 1.40s / tile
+        { level: 3,  cols: 5, total: 25, time: 32 }, // 1.28s / tile
+        { level: 4,  cols: 5, total: 25, time: 30 }, // 1.20s / tile
+        { level: 5,  cols: 5, total: 25, time: 28 }, // 1.12s / tile
+        { level: 6,  cols: 6, total: 30, time: 31 }, // 1.03s / tile
+        { level: 7,  cols: 6, total: 30, time: 29 }, // 0.97s / tile
+        { level: 8,  cols: 6, total: 30, time: 27 }, // 0.90s / tile
+        { level: 9,  cols: 6, total: 36, time: 32 }, // 0.89s / tile
+        { level: 10, cols: 6, total: 36, time: 30 }  // 0.83s / tile
       ],
       hard: [
-        { level: 1,  cols: 6, total: 36, time: 13 }, // 0.36s / tile
-        { level: 2,  cols: 6, total: 36, time: 12 }, // 0.33s / tile
-        { level: 3,  cols: 7, total: 42, time: 13 }, // 0.31s / tile
-        { level: 4,  cols: 7, total: 42, time: 12 }, // 0.29s / tile
-        { level: 5,  cols: 7, total: 42, time: 11 }, // 0.26s / tile
-        { level: 6,  cols: 7, total: 49, time: 12 }, // 0.24s / tile
-        { level: 7,  cols: 7, total: 49, time: 11 }, // 0.22s / tile
-        { level: 8,  cols: 7, total: 49, time: 10 }, // 0.20s / tile
-        { level: 9,  cols: 7, total: 49, time: 9 },  // 0.18s / tile
-        { level: 10, cols: 7, total: 49, time: 8 }   // 0.16s / tile
+        { level: 1,  cols: 6, total: 36, time: 29 }, // 0.81s / tile
+        { level: 2,  cols: 6, total: 36, time: 28 }, // 0.78s / tile
+        { level: 3,  cols: 7, total: 42, time: 31 }, // 0.74s / tile
+        { level: 4,  cols: 7, total: 42, time: 30 }, // 0.71s / tile
+        { level: 5,  cols: 7, total: 42, time: 28 }, // 0.67s / tile
+        { level: 6,  cols: 7, total: 49, time: 29 }, // 0.59s / tile
+        { level: 7,  cols: 7, total: 49, time: 28 }, // 0.57s / tile
+        { level: 8,  cols: 7, total: 49, time: 27 }, // 0.55s / tile
+        { level: 9,  cols: 7, total: 49, time: 26 }, // 0.53s / tile
+        { level: 10, cols: 7, total: 49, time: 25 }  // 0.51s / tile (25 seconds for the 7x7 matrix!)
       ]
     };
   }

@@ -118,12 +118,12 @@ class DontTapGame {
       dangerChance = Math.min(0.36, 0.22 + (lvl - 1) * 0.016);
       maxConcurrent = lvl <= 3 ? 2 : 3;
     } else {
-      // Hard: literally fast, lightning reflex & strict inhibition!
-      quota = 22 + lvl * 2;
-      lifetime = Math.max(420, 800 - (lvl - 1) * 42);
-      spawnInterval = Math.max(320, 580 - (lvl - 1) * 28);
-      dangerChance = Math.min(0.55, 0.38 + (lvl - 1) * 0.018);
-      maxConcurrent = lvl <= 2 ? 3 : 4;
+      // Hard: lightning reflex & strict inhibition (intense but achievable)
+      quota = 20 + lvl * 2;
+      lifetime = Math.max(550, 850 - (lvl - 1) * 33);
+      spawnInterval = Math.max(420, 650 - (lvl - 1) * 25);
+      dangerChance = Math.min(0.48, 0.32 + (lvl - 1) * 0.016);
+      maxConcurrent = lvl <= 3 ? 3 : 4;
     }
 
     return { quota, lifetime, spawnInterval, dangerChance, maxConcurrent };

@@ -74,19 +74,19 @@ class ShellShuffleGame {
       cups = 3;
     } else if (difficulty === 'medium') {
       // Medium 1 to 10: Seamlessly picks up from Easy 10 and accelerates.
-      // Medium 1: 420ms, 9 swaps, 3 cups
-      // Medium 10: 204ms, 15 swaps, 4 cups
-      duration = Math.round(420 - (cleanLvl - 1) * 24);
+      // Medium 1: 440ms, 9 swaps, 3 cups
+      // Medium 10: 228ms, 15 swaps, 4 cups
+      duration = Math.round(440 - (cleanLvl - 1) * 23.5);
       swapCount = 9 + Math.floor((cleanLvl - 1) * 0.7);
       gapDelay = Math.max(15, 30 - (cleanLvl - 1) * 1.5);
       cups = cleanLvl >= 6 ? 4 : 3;
     } else {
-      // Hard 1 to 10: Serious cognitive visual tracking test!
-      // Hard 1: 190ms, 16 swaps, 4 cups
-      // Hard 10: 73ms, 26 swaps, 5 cups
-      duration = Math.round(190 - (cleanLvl - 1) * 13);
-      swapCount = 16 + Math.floor((cleanLvl - 1) * 1.1);
-      gapDelay = Math.max(0, 15 - cleanLvl * 1.5);
+      // Hard 1 to 10: High-speed tracking challenge (fair and trackable with focus)
+      // Hard 1: 220ms, 12 swaps, 4 cups
+      // Hard 10: 140ms, 20 swaps, 5 cups
+      duration = Math.round(220 - (cleanLvl - 1) * 8.8);
+      swapCount = 12 + Math.floor((cleanLvl - 1) * 0.9);
+      gapDelay = Math.max(10, 20 - cleanLvl * 1.0);
       cups = cleanLvl >= 5 ? 5 : 4;
     }
 
