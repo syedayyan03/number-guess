@@ -14,6 +14,113 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 
+// Body parser for JSON requests
+app.use(express.json());
+
+// SQLite Database Setup & Authentication
+const Database = require('better-sqlite3');
+const bcrypt = require('bcryptjs');
+
+const db = new Database(path.join(__dirname, 'numberverse.db'));
+db.pragma('journal_mode = WAL');
+
+// Ensure users table exists
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL COLLATE NOCASE,
+    username TEXT,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+const insertUserStmt = db.prepare('INSERT INTO users (email, username, password_hash) VALUES (?, ?, ?)');
+const getUserByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?');
+const getUserByIdStmt = db.prepare('SELECT id, email, username, created_at FROM users WHERE id = ?');
+
+// Auth API Endpoints
+app.post('/api/auth/signup', (req, res) => {
+  try {
+    const { email, password, confirmPassword, username } = req.body || {};
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, error: 'Email is required' });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid email address' });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ success: false, error: 'Passwords do not match' });
+    }
+
+    const cleanUsername = (username && username.trim()) ? username.trim() : cleanEmail.split('@')[0];
+
+    const existing = getUserByEmailStmt.get(cleanEmail);
+    if (existing) {
+      return res.status(409).json({ success: false, error: 'An account with this email already exists' });
+    }
+
+    const passwordHash = bcrypt.hashSync(password, 10);
+    const info = insertUserStmt.run(cleanEmail, cleanUsername, passwordHash);
+
+    return res.status(201).json({
+      success: true,
+      user: {
+        id: info.lastInsertRowid,
+        email: cleanEmail,
+        username: cleanUsername
+      }
+    });
+  } catch (err) {
+    console.error('Signup error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to create account. Please try again.' });
+  }
+});
+
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Email and password are required' });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    const user = getUserByEmailStmt.get(cleanEmail);
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    }
+
+    const isValid = bcrypt.compareSync(password, user.password_hash);
+    if (!isValid) {
+      return res.status(401).json({ success: false, error: 'Invalid email or password' });
+    }
+
+    return res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      }
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to log in. Please try again.' });
+  }
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const userId = req.query.id;
+  if (!userId) return res.status(400).json({ success: false, error: 'User ID required' });
+  const user = getUserByIdStmt.get(userId);
+  if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+  return res.json({ success: true, user });
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   maxAge: 0,

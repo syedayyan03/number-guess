@@ -3,6 +3,7 @@ class NumberVerseApp {
   constructor() {
     this.socket = null;
     this.currentScreen = 'menu';
+    this.authUser = null;
     this.player = {
       name: 'Player 1',
       avatar: 'NV'
@@ -28,6 +29,7 @@ class NumberVerseApp {
   }
 
   init() {
+    this.setupAuth();
     this.setupSocket();
     this.setupInitialName();
     this.setupAvatarPicker();
@@ -485,10 +487,12 @@ class NumberVerseApp {
     }
 
     this.currentScreen = screenId;
-    ['menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle', 'numberpath', 'sudoku', 'settings', 'levels'].forEach(s => {
+    ['landing', 'login', 'signup', 'menu', 'welcome', 'lobby', 'game', 'matrix', 'donttap', 'countdown', 'shellshuffle', 'numberpath', 'sudoku', 'settings', 'levels'].forEach(s => {
       const el = document.getElementById(`screen-${s}`);
       if (el) el.classList.toggle('hidden', s !== screenId);
     });
+
+    this.updateAuthNavUI();
 
     const navBadge = document.getElementById('nav-room-badge');
     if (navBadge) {
@@ -503,6 +507,288 @@ class NumberVerseApp {
     if (updateHistory) {
       this.syncUrlForScreen(screenId);
     }
+  }
+
+  // --- Authentication & User Session ---
+  setupAuth() {
+    try {
+      const savedUser = localStorage.getItem('numberverse_auth_user');
+      if (savedUser) {
+        this.authUser = JSON.parse(savedUser);
+        if (this.authUser && this.authUser.username) {
+          this.player.name = this.authUser.username;
+        }
+      }
+    } catch (e) {
+      console.warn('Auth load error:', e);
+    }
+    this.updateAuthNavUI();
+  }
+
+  updateAuthNavUI() {
+    const landingActions = document.getElementById('nav-landing-actions');
+    const authActions = document.getElementById('nav-auth-actions');
+    const arcadeActions = document.getElementById('nav-arcade-actions');
+    const userPill = document.getElementById('nav-user-pill');
+    const userName = document.getElementById('nav-user-name');
+    const userAvatar = document.getElementById('nav-user-avatar');
+
+    const isLanding = this.currentScreen === 'landing';
+    const isAuthScreen = this.currentScreen === 'login' || this.currentScreen === 'signup';
+
+    if (landingActions) {
+      landingActions.classList.toggle('hidden', !isLanding);
+      landingActions.classList.toggle('flex', isLanding);
+    }
+
+    if (authActions) {
+      authActions.classList.toggle('hidden', !isAuthScreen);
+      authActions.classList.toggle('flex', isAuthScreen);
+
+      const prompt = document.getElementById('nav-auth-prompt');
+      const toggleBtn = document.getElementById('nav-auth-toggle-btn');
+      if (this.currentScreen === 'login') {
+        if (prompt) prompt.innerText = "Don't have an account?";
+        if (toggleBtn) toggleBtn.innerText = 'Sign Up';
+      } else {
+        if (prompt) prompt.innerText = 'Already have an account?';
+        if (toggleBtn) toggleBtn.innerText = 'Log In';
+      }
+    }
+
+    if (arcadeActions) {
+      const showArcadeNav = !isLanding && !isAuthScreen;
+      arcadeActions.classList.toggle('hidden', !showArcadeNav);
+      arcadeActions.classList.toggle('flex', showArcadeNav);
+    }
+
+    if (this.authUser) {
+      if (userPill) {
+        userPill.classList.remove('hidden');
+        userPill.classList.add('flex');
+      }
+      if (userName) userName.innerText = this.authUser.username || this.authUser.email.split('@')[0];
+      if (userAvatar) {
+        const initials = (this.authUser.username || 'P1').slice(0, 2).toUpperCase();
+        userAvatar.innerText = initials;
+      }
+    } else {
+      if (userPill) {
+        userPill.classList.add('hidden');
+        userPill.classList.remove('flex');
+      }
+    }
+  }
+
+  handleBrandClick() {
+    if (this.authUser) {
+      this.navigateTo('/');
+    } else {
+      this.navigateTo('/landing');
+    }
+  }
+
+  toggleAuthScreen() {
+    if (this.currentScreen === 'login') {
+      this.navigateTo('/signup');
+    } else {
+      this.navigateTo('/login');
+    }
+  }
+
+  togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    const icon = btn.querySelector('[data-lucide]') || btn.querySelector('svg') || btn.querySelector('i');
+    if (icon) {
+      icon.setAttribute('data-lucide', isPass ? 'eye-off' : 'eye');
+      this.renderIcons();
+    }
+  }
+
+  async handleLoginSubmit() {
+    const emailInput = document.getElementById('login-email');
+    const passInput = document.getElementById('login-password');
+    const errBox = document.getElementById('login-error');
+    const errText = document.getElementById('login-error-text');
+    const submitBtn = document.getElementById('login-submit-btn');
+
+    if (!emailInput || !passInput) return;
+    const email = emailInput.value.trim();
+    const password = passInput.value;
+
+    if (!email || !password) {
+      if (errText) errText.innerText = 'Please enter both email and password';
+      if (errBox) errBox.classList.remove('hidden');
+      return;
+    }
+
+    if (errBox) errBox.classList.add('hidden');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-70');
+      submitBtn.innerText = 'Logging in...';
+    }
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        if (errText) errText.innerText = data.error || 'Invalid email or password';
+        if (errBox) errBox.classList.remove('hidden');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-70');
+          submitBtn.innerText = 'Log In';
+        }
+        return;
+      }
+
+      // Success: Save user & redirect to /
+      this.authUser = data.user;
+      try {
+        localStorage.setItem('numberverse_auth_user', JSON.stringify(data.user));
+        localStorage.setItem('numberverse_player_name', data.user.username);
+      } catch (e) {}
+
+      this.player.name = data.user.username;
+      this.showToast(`Welcome back, ${data.user.username}!`, 'success');
+      window.soundFx.playCorrect();
+
+      emailInput.value = '';
+      passInput.value = '';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-70');
+        submitBtn.innerText = 'Log In';
+      }
+
+      this.navigateTo('/');
+    } catch (err) {
+      console.error('Login error:', err);
+      if (errText) errText.innerText = 'Network error. Please try again.';
+      if (errBox) errBox.classList.remove('hidden');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-70');
+        submitBtn.innerText = 'Log In';
+      }
+    }
+  }
+
+  async handleSignupSubmit() {
+    const userInput = document.getElementById('signup-username');
+    const emailInput = document.getElementById('signup-email');
+    const passInput = document.getElementById('signup-password');
+    const confirmInput = document.getElementById('signup-confirm-password');
+    const errBox = document.getElementById('signup-error');
+    const errText = document.getElementById('signup-error-text');
+    const submitBtn = document.getElementById('signup-submit-btn');
+
+    if (!emailInput || !passInput || !confirmInput) return;
+    const username = userInput ? userInput.value.trim() : '';
+    const email = emailInput.value.trim();
+    const password = passInput.value;
+    const confirmPassword = confirmInput.value;
+
+    if (!email) {
+      if (errText) errText.innerText = 'Email is required';
+      if (errBox) errBox.classList.remove('hidden');
+      return;
+    }
+
+    if (password.length < 6) {
+      if (errText) errText.innerText = 'Password must be at least 6 characters';
+      if (errBox) errBox.classList.remove('hidden');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      if (errText) errText.innerText = 'Passwords do not match';
+      if (errBox) errBox.classList.remove('hidden');
+      return;
+    }
+
+    if (errBox) errBox.classList.add('hidden');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-70');
+      submitBtn.innerText = 'Creating account...';
+    }
+
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, confirmPassword, username })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        if (errText) errText.innerText = data.error || 'Failed to create account';
+        if (errBox) errBox.classList.remove('hidden');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-70');
+          submitBtn.innerText = 'Sign Up & Enter';
+        }
+        return;
+      }
+
+      // Success: Save user & redirect to /
+      this.authUser = data.user;
+      try {
+        localStorage.setItem('numberverse_auth_user', JSON.stringify(data.user));
+        localStorage.setItem('numberverse_player_name', data.user.username);
+      } catch (e) {}
+
+      this.player.name = data.user.username;
+      this.showToast(`Account created! Welcome, ${data.user.username}`, 'success');
+      this.triggerConfetti();
+      window.soundFx.playCorrect();
+
+      if (userInput) userInput.value = '';
+      emailInput.value = '';
+      passInput.value = '';
+      confirmInput.value = '';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-70');
+        submitBtn.innerText = 'Sign Up & Enter';
+      }
+
+      this.navigateTo('/');
+    } catch (err) {
+      console.error('Signup error:', err);
+      if (errText) errText.innerText = 'Network error. Please try again.';
+      if (errBox) errBox.classList.remove('hidden');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-70');
+        submitBtn.innerText = 'Sign Up & Enter';
+      }
+    }
+  }
+
+  logout() {
+    this.authUser = null;
+    try {
+      localStorage.removeItem('numberverse_auth_user');
+    } catch (e) {}
+    this.showToast('You have been logged out', 'info');
+    this.navigateTo('/landing');
+  }
+
+  navigateTo(path) {
+    window.history.pushState(null, '', path);
+    this.routeFromUrl(false);
   }
 
   // --- Profile Setup ---
@@ -612,6 +898,43 @@ class NumberVerseApp {
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get('room-id') || params.get('room');
 
+    // Route: /landing
+    if (cleanPath === '/landing') {
+      this.showScreen('landing', updateHistory);
+      return;
+    }
+
+    // Route: /login
+    if (cleanPath === '/login') {
+      if (this.authUser) {
+        this.navigateTo('/');
+        return;
+      }
+      this.showScreen('login', updateHistory);
+      return;
+    }
+
+    // Route: /signup
+    if (cleanPath === '/signup') {
+      if (this.authUser) {
+        this.navigateTo('/');
+        return;
+      }
+      this.showScreen('signup', updateHistory);
+      return;
+    }
+
+    // If player enters site at root '/' without login: redirect to /landing
+    if (cleanPath === '/' && !roomId) {
+      if (!this.authUser) {
+        window.history.replaceState(null, '', '/landing');
+        this.showScreen('landing', false);
+        return;
+      }
+      this.showScreen('menu', updateHistory);
+      return;
+    }
+
     // Handle legacy root link with room param e.g. /?room=XYZ or /?room-id=XYZ
     if (cleanPath === '/' && roomId) {
       const codeInput = document.getElementById('join-room-code-input');
@@ -693,7 +1016,12 @@ class NumberVerseApp {
         this.showScreen('welcome', updateHistory);
       }
     } else {
-      this.showScreen('menu', updateHistory);
+      if (!this.authUser) {
+        window.history.replaceState(null, '', '/landing');
+        this.showScreen('landing', false);
+      } else {
+        this.showScreen('menu', updateHistory);
+      }
     }
   }
 
@@ -701,7 +1029,13 @@ class NumberVerseApp {
     let targetPath = '/';
     let targetSearch = '';
 
-    if (screenId === 'menu') {
+    if (screenId === 'landing') {
+      targetPath = '/landing';
+    } else if (screenId === 'login') {
+      targetPath = '/login';
+    } else if (screenId === 'signup') {
+      targetPath = '/signup';
+    } else if (screenId === 'menu') {
       targetPath = '/';
     } else if (screenId === 'settings') {
       const cfg = this.gameSettingsManager ? this.gameSettingsManager.getGameConfigById(this.gameSettingsManager.activeGameId) : null;

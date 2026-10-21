@@ -3,3 +3,8 @@ node_modules/
 *.log
 .env
 scratch/
+*.db
+*.sqlite
+*.db-wal
+*.db-shm
+

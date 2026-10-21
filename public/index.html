@@ -25,12 +25,12 @@
   <header class="w-full border-b border-[#34364A] bg-[#0C0D19]/90 backdrop-blur-md sticky top-0 z-40">
     <div class="max-w-[1240px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <!-- Brand: Clean Transparent Logo with no background box -->
-      <div class="flex items-center gap-2.5 cursor-pointer select-none" onclick="app.showScreen('menu')">
+      <div class="flex items-center gap-2.5 cursor-pointer select-none" onclick="app.handleBrandClick()">
         <img src="/logo.png?v=3.0" alt="NumberVerse" class="w-8 h-8 object-contain">
         <div>
           <div class="font-bold text-base tracking-tight text-[#F5F5FF] flex items-center gap-2">
             NumberVerse
-            <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">Arcade</span>
+            <span id="nav-brand-badge" class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">Arcade</span>
           </div>
         </div>
       </div>
@@ -45,8 +45,32 @@
         </button>
       </div>
 
-      <!-- Header Actions -->
-      <div class="flex items-center gap-2.5">
+      <!-- Landing Navigation Actions: 2 Buttons (Log In & Sign Up) -->
+      <div id="nav-landing-actions" class="hidden items-center gap-3">
+        <button onclick="app.navigateTo('/login')" class="px-4 py-2 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] hover:border-amber-500/40 text-[#F5F5FF] hover:text-amber-200 text-xs font-semibold transition cursor-pointer">
+          Log In
+        </button>
+        <button onclick="app.navigateTo('/signup')" class="px-4 py-2 rounded-xl btn-solid-primary text-xs font-bold uppercase tracking-wider transition shadow-md shadow-[#D97706]/20 cursor-pointer">
+          Sign Up
+        </button>
+      </div>
+
+      <!-- Auth Navigation Action (when on Login or Signup page) -->
+      <div id="nav-auth-actions" class="hidden items-center gap-3">
+        <span id="nav-auth-prompt" class="text-xs text-[#858AA5] hidden sm:inline">Don't have an account?</span>
+        <button id="nav-auth-toggle-btn" onclick="app.toggleAuthScreen()" class="px-4 py-2 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] hover:border-amber-500/40 text-amber-300 text-xs font-semibold transition cursor-pointer">
+          Sign Up
+        </button>
+      </div>
+
+      <!-- Main Arcade Header Actions (Visible when Logged In) -->
+      <div id="nav-arcade-actions" class="flex items-center gap-2.5">
+        <!-- User Pill -->
+        <div id="nav-user-pill" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#191B2D] border border-[#34364A] text-xs font-mono">
+          <span id="nav-user-avatar" class="w-5 h-5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-[10px]">P1</span>
+          <span id="nav-user-name" class="font-medium text-slate-200 max-w-[100px] truncate">Player</span>
+        </div>
+
         <button onclick="app.toggleHowToPlay()" class="px-3.5 py-1.5 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] hover:border-amber-500/40 text-[#B8BCD0] hover:text-amber-200 text-xs font-medium flex items-center gap-1.5 transition">
           <i data-lucide="help-circle" class="w-3.5 h-3.5 text-[#858AA5]"></i>
           <span>Rules</span>
@@ -54,12 +78,135 @@
         <button id="sound-toggle-btn" onclick="app.toggleSound()" class="p-2 rounded-xl bg-[#191B2D] hover:bg-[#202238] border border-[#34364A] hover:border-amber-500/40 text-[#B8BCD0] hover:text-amber-200 transition" title="Toggle Sound">
           <i data-lucide="volume-2" id="sound-icon" class="w-4 h-4 text-amber-400"></i>
         </button>
+        <button id="nav-logout-btn" onclick="app.logout()" class="p-2 rounded-xl bg-[#191B2D] hover:bg-rose-950/40 border border-[#34364A] hover:border-rose-500/40 text-[#858AA5] hover:text-rose-300 transition" title="Log Out">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
       </div>
     </div>
   </header>
 
   <!-- Main Container -->
   <main class="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center justify-center">
+
+    <!-- ============================================== -->
+    <!-- SCREEN: SIMPLE LANDING PAGE (/landing) -->
+    <!-- ============================================== -->
+    <section id="screen-landing" class="w-full flex-1 flex flex-col items-center justify-center min-h-[65vh]">
+      <!-- Blank with website background color as requested -->
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN: LOGIN (/login) -->
+    <!-- ============================================== -->
+    <section id="screen-login" class="w-full max-w-md hidden flex-col items-center py-6 sm:py-12">
+      <div class="clean-card w-full p-7 sm:p-8 border border-[#34364A] shadow-2xl relative">
+        <div class="text-center mb-7">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono uppercase tracking-wider mb-2.5">
+            Member Access
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-[#F5F5FF] tracking-tight">Log In</h2>
+          <p class="text-xs text-[#858AA5] mt-1">Enter your credentials to enter the Cognitive Arcade</p>
+        </div>
+
+        <!-- Error Message Alert -->
+        <div id="login-error" class="hidden mb-5 p-3 rounded-xl bg-rose-950/70 border border-rose-500/50 text-xs text-rose-200 flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
+          <span id="login-error-text">Invalid email or password</span>
+        </div>
+
+        <form id="login-form" onsubmit="event.preventDefault(); app.handleLoginSubmit();" class="flex flex-col gap-4">
+          <div>
+            <label class="block text-xs font-medium text-[#B8BCD0] mb-1.5">Email Address</label>
+            <input type="email" id="login-email" required placeholder="player@example.com" class="clean-input w-full px-4 py-3 text-sm text-[#F5F5FF] placeholder-[#858AA5]/50 bg-[#191B2D] border border-[#34364A] rounded-xl focus:border-amber-500 focus:outline-none transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-[#B8BCD0] mb-1.5">Password</label>
+            <div class="relative">
+              <input type="password" id="login-password" required placeholder="Enter password" class="clean-input w-full pl-4 pr-11 py-3 text-sm text-[#F5F5FF] placeholder-[#858AA5]/50 bg-[#191B2D] border border-[#34364A] rounded-xl focus:border-amber-500 focus:outline-none transition">
+              <button type="button" onclick="app.togglePasswordVisibility('login-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#858AA5] hover:text-amber-300 transition cursor-pointer p-1" title="Toggle password visibility">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="login-submit-btn" class="mt-2 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#D97706]/25 transition hover:scale-[1.01]">
+            <span>Log In</span>
+          </button>
+        </form>
+
+        <div class="mt-6 pt-5 border-t border-[#34364A] text-center text-xs text-[#858AA5]">
+          Don't have an account? 
+          <button onclick="app.navigateTo('/signup')" class="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2 ml-1 cursor-pointer transition">
+            Sign Up
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN: SIGNUP (/signup) -->
+    <!-- ============================================== -->
+    <section id="screen-signup" class="w-full max-w-md hidden flex-col items-center py-6 sm:py-12">
+      <div class="clean-card w-full p-7 sm:p-8 border border-[#34364A] shadow-2xl relative">
+        <div class="text-center mb-7">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono uppercase tracking-wider mb-2.5">
+            New Registration
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-[#F5F5FF] tracking-tight">Create Account</h2>
+          <p class="text-xs text-[#858AA5] mt-1">Join NumberVerse and save your cognitive progression</p>
+        </div>
+
+        <!-- Error Message Alert -->
+        <div id="signup-error" class="hidden mb-5 p-3 rounded-xl bg-rose-950/70 border border-rose-500/50 text-xs text-rose-200 flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
+          <span id="signup-error-text">Passwords do not match</span>
+        </div>
+
+        <form id="signup-form" onsubmit="event.preventDefault(); app.handleSignupSubmit();" class="flex flex-col gap-4">
+          <div>
+            <label class="block text-xs font-medium text-[#B8BCD0] mb-1.5">Player Nickname</label>
+            <input type="text" id="signup-username" placeholder="Alex" class="clean-input w-full px-4 py-3 text-sm text-[#F5F5FF] placeholder-[#858AA5]/50 bg-[#191B2D] border border-[#34364A] rounded-xl focus:border-amber-500 focus:outline-none transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-[#B8BCD0] mb-1.5">Email Address</label>
+            <input type="email" id="signup-email" required placeholder="player@example.com" class="clean-input w-full px-4 py-3 text-sm text-[#F5F5FF] placeholder-[#858AA5]/50 bg-[#191B2D] border border-[#34364A] rounded-xl focus:border-amber-500 focus:outline-none transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-[#B8BCD0] mb-1.5">Password</label>
+            <div class="relative">
+              <input type="password" id="signup-password" required minlength="6" placeholder="At least 6 characters" class="clean-input w-full pl-4 pr-11 py-3 text-sm text-[#F5F5FF] placeholder-[#858AA5]/50 bg-[#191B2D] border border-[#34364A] rounded-xl focus:border-amber-500 focus:outline-none transition">
+              <button type="button" onclick="app.togglePasswordVisibility('signup-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#858AA5] hover:text-amber-300 transition cursor-pointer p-1" title="Toggle password visibility">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-[#B8BCD0] mb-1.5">Confirm Password</label>
+            <div class="relative">
+              <input type="password" id="signup-confirm-password" required minlength="6" placeholder="Re-enter password" class="clean-input w-full pl-4 pr-11 py-3 text-sm text-[#F5F5FF] placeholder-[#858AA5]/50 bg-[#191B2D] border border-[#34364A] rounded-xl focus:border-amber-500 focus:outline-none transition">
+              <button type="button" onclick="app.togglePasswordVisibility('signup-confirm-password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#858AA5] hover:text-amber-300 transition cursor-pointer p-1" title="Toggle password visibility">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="signup-submit-btn" class="mt-2 w-full py-3.5 rounded-xl btn-solid-primary text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#D97706]/25 transition hover:scale-[1.01]">
+            <span>Sign Up & Enter</span>
+          </button>
+        </form>
+
+        <div class="mt-6 pt-5 border-t border-[#34364A] text-center text-xs text-[#858AA5]">
+          Already have an account? 
+          <button onclick="app.navigateTo('/login')" class="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2 ml-1 cursor-pointer transition">
+            Log In
+          </button>
+        </div>
+      </div>
+    </section>
 
     <!-- ============================================== -->
     <!-- SCREEN 0: MAIN MENU / CINEMATIC COGNITIVE ARCADE -->
