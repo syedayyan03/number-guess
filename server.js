@@ -24,7 +24,7 @@ const bcrypt = require('bcryptjs');
 const db = new Database(path.join(__dirname, 'numberverse.db'));
 db.pragma('journal_mode = WAL');
 
-// Ensure users table exists
+// Ensure users and progress tables exist
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,12 +32,25 @@ db.exec(`
     username TEXT,
     password_hash TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
+  );
+
+  CREATE TABLE IF NOT EXISTS user_progress (
+    user_id INTEGER PRIMARY KEY,
+    progress_data TEXT NOT NULL DEFAULT '{}',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
 `);
 
 const insertUserStmt = db.prepare('INSERT INTO users (email, username, password_hash) VALUES (?, ?, ?)');
 const getUserByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?');
 const getUserByIdStmt = db.prepare('SELECT id, email, username, created_at FROM users WHERE id = ?');
+const getProgressStmt = db.prepare('SELECT progress_data FROM user_progress WHERE user_id = ?');
+const saveProgressStmt = db.prepare(`
+  INSERT INTO user_progress (user_id, progress_data)
+  VALUES (?, ?)
+  ON CONFLICT(user_id) DO UPDATE SET progress_data = excluded.progress_data, updated_at = CURRENT_TIMESTAMP
+`);
 
 // Auth API Endpoints
 app.post('/api/auth/signup', (req, res) => {
@@ -119,6 +132,33 @@ app.get('/api/auth/me', (req, res) => {
   const user = getUserByIdStmt.get(userId);
   if (!user) return res.status(404).json({ success: false, error: 'User not found' });
   return res.json({ success: true, user });
+});
+
+// User Game Progress Endpoints
+app.get('/api/user/progress', (req, res) => {
+  try {
+    const userId = req.query.userId || req.query.id;
+    if (!userId) return res.status(400).json({ success: false, error: 'User ID required' });
+    const row = getProgressStmt.get(userId);
+    const progress = row && row.progress_data ? JSON.parse(row.progress_data) : {};
+    return res.json({ success: true, progress });
+  } catch (err) {
+    console.error('Get progress error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to load progress' });
+  }
+});
+
+app.post('/api/user/progress', (req, res) => {
+  try {
+    const { userId, progress } = req.body || {};
+    if (!userId) return res.status(400).json({ success: false, error: 'User ID required' });
+    const progressStr = typeof progress === 'string' ? progress : JSON.stringify(progress || {});
+    saveProgressStmt.run(userId, progressStr);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Save progress error:', err);
+    return res.status(500).json({ success: false, error: 'Failed to save progress' });
+  }
 });
 
 app.use(express.static(path.join(__dirname, 'public'), {

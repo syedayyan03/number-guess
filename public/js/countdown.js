@@ -41,9 +41,18 @@ class CountdownCalculationGame {
   }
 
   // --- Persistence ---
+  getStorageKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_countdown_best`;
+  }
+
+  reloadUserState() {
+    this.bestScore = this.getSavedBestScore();
+  }
+
   getSavedBestScore() {
     try {
-      const saved = localStorage.getItem(this.storageKey);
+      const saved = localStorage.getItem(this.getStorageKey());
       return saved ? parseInt(saved, 10) || 0 : 0;
     } catch (e) {
       return 0;
@@ -55,22 +64,28 @@ class CountdownCalculationGame {
     if (this.score > this.bestScore) {
       this.bestScore = this.score;
       try {
-        localStorage.setItem(this.storageKey, this.bestScore.toString());
+        localStorage.setItem(this.getStorageKey(), this.bestScore.toString());
       } catch (e) {}
       isNewBest = true;
     }
     if (this.app && typeof this.app.updateCountdownMenuCard === 'function') {
       this.app.updateCountdownMenuCard();
+      if (typeof this.app.syncProgressToServer === 'function') {
+        this.app.syncProgressToServer();
+      }
     }
     return isNewBest;
   }
 
   resetBestScore() {
     try {
-      localStorage.removeItem(this.storageKey);
+      localStorage.removeItem(this.getStorageKey());
       this.bestScore = 0;
       if (this.app && typeof this.app.updateCountdownMenuCard === 'function') {
         this.app.updateCountdownMenuCard();
+        if (typeof this.app.syncProgressToServer === 'function') {
+          this.app.syncProgressToServer();
+        }
       }
     } catch (e) {}
   }

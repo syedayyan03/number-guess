@@ -286,7 +286,7 @@ class NumberVerseApp {
   }
 
   updateMatrixMenuCard() {
-    const savedLevel = this.matrixGame ? this.matrixGame.getSavedLevel() : parseInt(localStorage.getItem('numberverse_matrix_level') || '1', 10);
+    const savedLevel = this.matrixGame ? this.matrixGame.getSavedLevel() : 1;
     const badge = document.getElementById('matrix-card-badge');
     const btnText = document.getElementById('matrix-card-btn-text');
     const resetBtn = document.getElementById('matrix-card-reset-btn');
@@ -303,17 +303,17 @@ class NumberVerseApp {
   }
 
   resetMatrixProgress() {
-    if (this.matrixGame) {
+    if (this.gameSettingsManager) {
+      this.gameSettingsManager.resetAllProgressForGame('speed_grid');
+    } else if (this.matrixGame) {
       this.matrixGame.resetProgress();
-    } else {
-      localStorage.removeItem('numberverse_matrix_level');
     }
     this.updateMatrixMenuCard();
     this.showToast('Speed Matrix progress reset to Level 1', 'info');
   }
 
   updateDontTapMenuCard() {
-    const highScore = this.dontTapGame ? this.dontTapGame.highScore : parseInt(localStorage.getItem('numberverse_donttap_highscore') || '0', 10);
+    const highScore = this.dontTapGame ? this.dontTapGame.getSavedHighScore() : 0;
     const badge = document.getElementById('donttap-card-badge');
     const resetBtn = document.getElementById('donttap-card-reset-btn');
 
@@ -328,16 +328,13 @@ class NumberVerseApp {
   resetDontTapProgress() {
     if (this.dontTapGame) {
       this.dontTapGame.resetHighScore();
-    } else {
-      localStorage.removeItem('numberverse_donttap_highscore');
-      localStorage.removeItem('numberverse_donttap_highest_level');
     }
     this.updateDontTapMenuCard();
     this.showToast("Don't Tap! high score reset", 'info');
   }
 
   updateCountdownMenuCard() {
-    const bestScore = this.countdownGame ? this.countdownGame.bestScore : parseInt(localStorage.getItem('numberverse_countdown_best') || '0', 10);
+    const bestScore = this.countdownGame ? this.countdownGame.getSavedBestScore() : 0;
     const badge = document.getElementById('countdown-card-badge');
     const resetBtn = document.getElementById('countdown-card-reset-btn');
 
@@ -352,16 +349,18 @@ class NumberVerseApp {
   resetCountdownProgress() {
     if (this.countdownGame) {
       this.countdownGame.resetBestScore();
-    } else {
-      localStorage.removeItem('numberverse_countdown_best');
     }
     this.updateCountdownMenuCard();
     this.showToast('Countdown Calculation best score reset', 'info');
   }
 
   updateShellShuffleMenuCard() {
-    const savedLevel = this.shellShuffleGame ? this.shellShuffleGame.level : parseInt(localStorage.getItem('numberverse_shellshuffle_saved_level') || '1', 10);
-    const highScore = this.shellShuffleGame ? this.shellShuffleGame.highScore : parseInt(localStorage.getItem('numberverse_shellshuffle_highscore') || '0', 10);
+    let savedLevel = 1;
+    let highScore = 0;
+    if (this.shellShuffleGame) {
+      savedLevel = parseInt(localStorage.getItem(this.shellShuffleGame.getSavedLevelKey()) || '1', 10);
+      highScore = parseInt(localStorage.getItem(this.shellShuffleGame.getHighScoreKey()) || '0', 10);
+    }
     const badge = document.getElementById('shellshuffle-card-badge');
     const btnText = document.getElementById('shellshuffle-card-btn-text');
     const resetBtn = document.getElementById('shellshuffle-card-reset-btn');
@@ -392,17 +391,13 @@ class NumberVerseApp {
   resetShellShuffleProgress() {
     if (this.shellShuffleGame) {
       this.shellShuffleGame.resetProgress();
-    } else {
-      localStorage.removeItem('numberverse_shellshuffle_highscore');
-      localStorage.removeItem('numberverse_shellshuffle_best_level');
-      localStorage.removeItem('numberverse_shellshuffle_saved_level');
     }
     this.updateShellShuffleMenuCard();
     this.showToast('Shell Shuffle progress reset to Level 1', 'info');
   }
 
   updateNumberPathMenuCard() {
-    const savedLevel = this.numberPathGame ? this.numberPathGame.getSavedLevel() : parseInt(localStorage.getItem('numberverse_numberpath_level') || '1', 10);
+    const savedLevel = this.numberPathGame ? this.numberPathGame.getSavedLevel() : 1;
     const badge = document.getElementById('numberpath-card-badge');
     const btnText = document.getElementById('numberpath-card-btn-text');
     const resetBtn = document.getElementById('numberpath-card-reset-btn');
@@ -421,8 +416,6 @@ class NumberVerseApp {
   resetNumberPathProgress() {
     if (this.numberPathGame) {
       this.numberPathGame.resetProgress();
-    } else {
-      localStorage.removeItem('numberverse_numberpath_level');
     }
     this.updateNumberPathMenuCard();
     this.showToast('Zip progress reset to Level 1', 'info');
@@ -510,7 +503,15 @@ class NumberVerseApp {
   }
 
   // --- Authentication & User Session ---
-  setupAuth() {
+  getUserId() {
+    return this.authUser && this.authUser.id ? this.authUser.id : 'guest';
+  }
+
+  getUserKey(key) {
+    return `nv_u${this.getUserId()}_${key}`;
+  }
+
+  async setupAuth() {
     try {
       const savedUser = localStorage.getItem('numberverse_auth_user');
       if (savedUser) {
@@ -518,11 +519,80 @@ class NumberVerseApp {
         if (this.authUser && this.authUser.username) {
           this.player.name = this.authUser.username;
         }
+        await this.syncProgressFromServer();
       }
     } catch (e) {
       console.warn('Auth load error:', e);
     }
     this.updateAuthNavUI();
+    this.reloadAllGameProgress();
+  }
+
+  reloadAllGameProgress() {
+    if (this.dontTapGame && typeof this.dontTapGame.reloadUserState === 'function') {
+      this.dontTapGame.reloadUserState();
+    }
+    if (this.countdownGame && typeof this.countdownGame.reloadUserState === 'function') {
+      this.countdownGame.reloadUserState();
+    }
+    if (this.shellShuffleGame && typeof this.shellShuffleGame.reloadUserState === 'function') {
+      this.shellShuffleGame.reloadUserState();
+    }
+    this.updateMatrixMenuCard();
+    this.updateDontTapMenuCard();
+    this.updateCountdownMenuCard();
+    this.updateShellShuffleMenuCard();
+    this.updateNumberPathMenuCard();
+    this.updateSudokuMenuCard();
+  }
+
+  async syncProgressFromServer() {
+    if (!this.authUser || !this.authUser.id) return;
+    try {
+      const res = await fetch(`/api/user/progress?userId=${encodeURIComponent(this.authUser.id)}`);
+      const data = await res.json();
+      if (res.ok && data.success && data.progress) {
+        const p = data.progress;
+        const uid = this.getUserId();
+        Object.keys(p).forEach(k => {
+          const scopedKey = `nv_u${uid}_${k}`;
+          try {
+            const val = typeof p[k] === 'object' ? JSON.stringify(p[k]) : String(p[k]);
+            localStorage.setItem(scopedKey, val);
+          } catch (e) {}
+        });
+        this.reloadAllGameProgress();
+      }
+    } catch (e) {
+      console.warn('Sync from server error:', e);
+    }
+  }
+
+  async syncProgressToServer() {
+    if (!this.authUser || !this.authUser.id) return;
+    try {
+      const uid = this.getUserId();
+      const prefix = `nv_u${uid}_`;
+      const progress = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          const shortKey = key.slice(prefix.length);
+          try {
+            progress[shortKey] = JSON.parse(localStorage.getItem(key));
+          } catch (e) {
+            progress[shortKey] = localStorage.getItem(key);
+          }
+        }
+      }
+      await fetch('/api/user/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: this.authUser.id, progress })
+      });
+    } catch (e) {
+      console.warn('Sync to server error:', e);
+    }
   }
 
   updateAuthNavUI() {
@@ -662,6 +732,10 @@ class NumberVerseApp {
       this.showToast(`Welcome back, ${data.user.username}!`, 'success');
       window.soundFx.playCorrect();
 
+      // Sync progress for this user from SQLite & update all menu cards
+      await this.syncProgressFromServer();
+      this.reloadAllGameProgress();
+
       emailInput.value = '';
       passInput.value = '';
       if (submitBtn) {
@@ -754,6 +828,10 @@ class NumberVerseApp {
       this.triggerConfetti();
       window.soundFx.playCorrect();
 
+      // Brand new user: fresh progress isolated for this user
+      this.reloadAllGameProgress();
+      await this.syncProgressToServer();
+
       if (userInput) userInput.value = '';
       emailInput.value = '';
       passInput.value = '';
@@ -782,6 +860,7 @@ class NumberVerseApp {
     try {
       localStorage.removeItem('numberverse_auth_user');
     } catch (e) {}
+    this.reloadAllGameProgress();
     this.showToast('You have been logged out', 'info');
     this.navigateTo('/landing');
   }

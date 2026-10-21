@@ -62,7 +62,8 @@ class GameSettingsManager {
 
   // --- Storage & Progress Persistence ---
   getStorageKey(gameId) {
-    return `numberverse_v2_prog_${gameId}`;
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_v2_prog_${gameId}`;
   }
 
   getAllProgress(gameId) {
@@ -83,6 +84,9 @@ class GameSettingsManager {
   saveAllProgress(gameId, data) {
     try {
       localStorage.setItem(this.getStorageKey(gameId), JSON.stringify(data));
+      if (this.app && typeof this.app.syncProgressToServer === 'function') {
+        this.app.syncProgressToServer();
+      }
     } catch (e) {}
   }
 

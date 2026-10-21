@@ -47,9 +47,24 @@ class DontTapGame {
   }
 
   // --- Persistence ---
+  getHighScoreKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_donttap_highscore`;
+  }
+
+  getHighestLevelKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_donttap_highest_level`;
+  }
+
+  reloadUserState() {
+    this.highScore = this.getSavedHighScore();
+    this.highestLevel = this.getSavedHighestLevel();
+  }
+
   getSavedHighScore() {
     try {
-      const saved = localStorage.getItem(this.highScoreKey);
+      const saved = localStorage.getItem(this.getHighScoreKey());
       return saved ? parseInt(saved, 10) || 0 : 0;
     } catch (e) {
       return 0;
@@ -58,7 +73,7 @@ class DontTapGame {
 
   getSavedHighestLevel() {
     try {
-      const saved = localStorage.getItem(this.highestLevelKey);
+      const saved = localStorage.getItem(this.getHighestLevelKey());
       return saved ? parseInt(saved, 10) || 1 : 1;
     } catch (e) {
       return 1;
@@ -70,31 +85,37 @@ class DontTapGame {
     if (this.score > this.highScore) {
       this.highScore = this.score;
       try {
-        localStorage.setItem(this.highScoreKey, this.highScore.toString());
+        localStorage.setItem(this.getHighScoreKey(), this.highScore.toString());
       } catch (e) {}
       changed = true;
     }
     if (this.level > this.highestLevel) {
       this.highestLevel = this.level;
       try {
-        localStorage.setItem(this.highestLevelKey, this.highestLevel.toString());
+        localStorage.setItem(this.getHighestLevelKey(), this.highestLevel.toString());
       } catch (e) {}
       changed = true;
     }
     if (changed && this.app && typeof this.app.updateDontTapMenuCard === 'function') {
       this.app.updateDontTapMenuCard();
+      if (typeof this.app.syncProgressToServer === 'function') {
+        this.app.syncProgressToServer();
+      }
     }
     return changed;
   }
 
   resetHighScore() {
     try {
-      localStorage.removeItem(this.highScoreKey);
-      localStorage.removeItem(this.highestLevelKey);
+      localStorage.removeItem(this.getHighScoreKey());
+      localStorage.removeItem(this.getHighestLevelKey());
       this.highScore = 0;
       this.highestLevel = 1;
       if (this.app && typeof this.app.updateDontTapMenuCard === 'function') {
         this.app.updateDontTapMenuCard();
+        if (typeof this.app.syncProgressToServer === 'function') {
+          this.app.syncProgressToServer();
+        }
       }
     } catch (e) {}
   }

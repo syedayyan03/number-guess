@@ -2180,9 +2180,19 @@ class NumberPathGame {
   }
 
   // --- Storage & Level Management ---
+  getStorageKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_numberpath_level`;
+  }
+
+  getBestTimesKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_numberpath_best_times`;
+  }
+
   getSavedLevel() {
     try {
-      const saved = localStorage.getItem(this.storageKey);
+      const saved = localStorage.getItem(this.getStorageKey());
       if (saved) {
         const parsed = parseInt(saved, 10);
         if (!isNaN(parsed) && parsed >= 1 && parsed <= this.maxLevel) {
@@ -2196,19 +2206,25 @@ class NumberPathGame {
   saveProgress(lvl = this.level) {
     try {
       this.level = Math.min(this.maxLevel, Math.max(1, lvl));
-      localStorage.setItem(this.storageKey, this.level.toString());
+      localStorage.setItem(this.getStorageKey(), this.level.toString());
       if (this.app && typeof this.app.updateNumberPathMenuCard === 'function') {
         this.app.updateNumberPathMenuCard();
+        if (typeof this.app.syncProgressToServer === 'function') {
+          this.app.syncProgressToServer();
+        }
       }
     } catch (e) {}
   }
 
   resetProgress() {
     try {
-      localStorage.removeItem(this.storageKey);
+      localStorage.removeItem(this.getStorageKey());
       this.level = 1;
       if (this.app && typeof this.app.updateNumberPathMenuCard === 'function') {
         this.app.updateNumberPathMenuCard();
+        if (typeof this.app.syncProgressToServer === 'function') {
+          this.app.syncProgressToServer();
+        }
       }
     } catch (e) {}
   }
@@ -2794,11 +2810,11 @@ class NumberPathGame {
 
   recordBestTime() {
     try {
-      const bestTimes = JSON.parse(localStorage.getItem(this.bestTimesKey) || '{}');
+      const bestTimes = JSON.parse(localStorage.getItem(this.getBestTimesKey()) || '{}');
       const curBest = bestTimes[this.level] || 999999;
       if (this.secondsElapsed < curBest) {
         bestTimes[this.level] = this.secondsElapsed;
-        localStorage.setItem(this.bestTimesKey, JSON.stringify(bestTimes));
+        localStorage.setItem(this.getBestTimesKey(), JSON.stringify(bestTimes));
       }
     } catch (e) {}
   }

@@ -39,12 +39,7 @@ class ShellShuffleGame {
     this.streak = 0;
     this.accuracy = { correct: 0, total: 0 };
     this.isPaused = false;
-    this.storageKey = 'numberverse_shellshuffle_highscore';
-    this.bestLevelKey = 'numberverse_shellshuffle_best_level';
-    this.savedLevelKey = 'numberverse_shellshuffle_saved_level';
-    this.highScore = parseInt(localStorage.getItem(this.storageKey) || '0', 10);
-    this.highestLevel = parseInt(localStorage.getItem(this.bestLevelKey) || '1', 10);
-    this.level = parseInt(localStorage.getItem(this.savedLevelKey) || '1', 10);
+    this.reloadUserState();
 
     // Shuffle & Animation Queue
     this.slots = []; // Array of X coordinates for slots
@@ -57,6 +52,28 @@ class ShellShuffleGame {
     // Bound listeners for clean removal
     this.onPointerMove = this.handlePointerMove.bind(this);
     this.onPointerDown = this.handlePointerDown.bind(this);
+  }
+
+  // --- User-Scoped Storage Keys ---
+  getHighScoreKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_shellshuffle_highscore`;
+  }
+
+  getBestLevelKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_shellshuffle_best_level`;
+  }
+
+  getSavedLevelKey() {
+    const uid = (this.app && typeof this.app.getUserId === 'function') ? this.app.getUserId() : 'guest';
+    return `nv_u${uid}_shellshuffle_saved_level`;
+  }
+
+  reloadUserState() {
+    this.highScore = parseInt(localStorage.getItem(this.getHighScoreKey()) || '0', 10);
+    this.highestLevel = parseInt(localStorage.getItem(this.getBestLevelKey()) || '1', 10);
+    this.level = parseInt(localStorage.getItem(this.getSavedLevelKey()) || '1', 10);
   }
 
   // --- Dynamic Difficulty & Speed Progression (Strictly Monotonic Across 30 Levels) ---
@@ -750,11 +767,11 @@ class ShellShuffleGame {
 
       if (this.score > this.highScore) {
         this.highScore = this.score;
-        localStorage.setItem(this.storageKey, this.highScore.toString());
+        localStorage.setItem(this.getHighScoreKey(), this.highScore.toString());
       }
       if (this.level > this.highestLevel) {
         this.highestLevel = this.level;
-        localStorage.setItem(this.bestLevelKey, this.highestLevel.toString());
+        localStorage.setItem(this.getBestLevelKey(), this.highestLevel.toString());
       }
 
       this.updateHUD();
@@ -1022,7 +1039,7 @@ class ShellShuffleGame {
 
     this.level = 1;
     try {
-      localStorage.setItem(this.savedLevelKey, '1');
+      localStorage.setItem(this.getSavedLevelKey(), '1');
     } catch (e) {}
     this.score = 0;
     this.streak = 0;
@@ -1058,9 +1075,9 @@ class ShellShuffleGame {
 
   resetProgress() {
     try {
-      localStorage.removeItem(this.storageKey);
-      localStorage.removeItem(this.bestLevelKey);
-      localStorage.removeItem(this.savedLevelKey);
+      localStorage.removeItem(this.getHighScoreKey());
+      localStorage.removeItem(this.getBestLevelKey());
+      localStorage.removeItem(this.getSavedLevelKey());
       this.highScore = 0;
       this.highestLevel = 1;
       this.level = 1;
@@ -1069,6 +1086,9 @@ class ShellShuffleGame {
       this.updateHUD();
       if (this.app && typeof this.app.updateShellShuffleMenuCard === 'function') {
         this.app.updateShellShuffleMenuCard();
+        if (typeof this.app.syncProgressToServer === 'function') {
+          this.app.syncProgressToServer();
+        }
       }
     } catch (e) {}
   }
