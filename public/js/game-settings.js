@@ -440,12 +440,12 @@ class GameSettingsManager {
     all[difficulty] = { unlocked: 1, completed: {} };
     this.saveAllProgress(gameId, all);
 
-    // Clear legacy game-specific single-level keys
+    // Reset single-game level keys if appropriate
     try {
-      if (gameId === 'shell_shuffle') {
-        localStorage.setItem('numberverse_shellshuffle_saved_level', '1');
-      } else if (gameId === 'number_path') {
-        localStorage.setItem('numberverse_numberpath_level', '1');
+      if (gameId === 'shell_shuffle' && this.app && this.app.shellShuffleGame) {
+        localStorage.setItem(this.app.shellShuffleGame.getSavedLevelKey(), '1');
+      } else if (gameId === 'number_path' && this.app && this.app.numberPathGame) {
+        localStorage.setItem(this.app.numberPathGame.getStorageKey(), '1');
       }
     } catch (e) {}
 
@@ -468,11 +468,11 @@ class GameSettingsManager {
     this.saveAllProgress(gameId, all);
 
     try {
-      if (gameId === 'shell_shuffle') {
-        localStorage.setItem('numberverse_shellshuffle_saved_level', '1');
-        localStorage.removeItem('numberverse_shellshuffle_best_level');
-      } else if (gameId === 'number_path') {
-        localStorage.setItem('numberverse_numberpath_level', '1');
+      if (gameId === 'shell_shuffle' && this.app && this.app.shellShuffleGame) {
+        localStorage.setItem(this.app.shellShuffleGame.getSavedLevelKey(), '1');
+        localStorage.removeItem(this.app.shellShuffleGame.getBestLevelKey());
+      } else if (gameId === 'number_path' && this.app && this.app.numberPathGame) {
+        localStorage.setItem(this.app.numberPathGame.getStorageKey(), '1');
       }
     } catch (e) {}
 

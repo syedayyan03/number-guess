@@ -2203,6 +2203,10 @@ class NumberPathGame {
     return 1;
   }
 
+  reloadUserState() {
+    this.level = this.getSavedLevel();
+  }
+
   saveProgress(lvl = this.level) {
     try {
       this.level = Math.min(this.maxLevel, Math.max(1, lvl));

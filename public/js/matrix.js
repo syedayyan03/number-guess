@@ -62,6 +62,10 @@ class SpeedMatrixGame {
     return 1;
   }
 
+  reloadUserState() {
+    this.currentLevel = this.getSavedLevel();
+  }
+
   saveProgress(lvl = this.currentLevel) {
     if (this.app && this.app.gameSettingsManager) {
       const all = this.app.gameSettingsManager.getAllProgress('speed_grid');

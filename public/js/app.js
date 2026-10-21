@@ -29,12 +29,7 @@ class NumberVerseApp {
   }
 
   init() {
-    this.setupAuth();
-    this.setupSocket();
-    this.setupInitialName();
-    this.setupAvatarPicker();
-    this.setupKeyboardListeners();
-    this.setupInputSanitizer();
+    this.cleanLegacyStorage();
     if (window.SpeedMatrixGame) {
       this.matrixGame = new window.SpeedMatrixGame(this);
     }
@@ -56,6 +51,12 @@ class NumberVerseApp {
     if (window.GameSettingsManager) {
       this.gameSettingsManager = new window.GameSettingsManager(this);
     }
+    this.setupAuth();
+    this.setupSocket();
+    this.setupInitialName();
+    this.setupAvatarPicker();
+    this.setupKeyboardListeners();
+    this.setupInputSanitizer();
     this.updateMatrixMenuCard();
     this.updateDontTapMenuCard();
     this.updateCountdownMenuCard();
@@ -503,6 +504,28 @@ class NumberVerseApp {
   }
 
   // --- Authentication & User Session ---
+  cleanLegacyStorage() {
+    const legacyKeys = [
+      'numberverse_v2_prog_speed_grid',
+      'numberverse_v2_prog_dont_tap',
+      'numberverse_v2_prog_shell_shuffle',
+      'numberverse_v2_prog_number_path',
+      'numberverse_v2_prog_sudoku',
+      'numberverse_matrix_level',
+      'numberverse_donttap_highscore',
+      'numberverse_donttap_highest_level',
+      'numberverse_countdown_best',
+      'numberverse_shellshuffle_highscore',
+      'numberverse_shellshuffle_best_level',
+      'numberverse_shellshuffle_saved_level',
+      'numberverse_numberpath_level',
+      'numberverse_numberpath_best_times'
+    ];
+    legacyKeys.forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+  }
+
   getUserId() {
     return this.authUser && this.authUser.id ? this.authUser.id : 'guest';
   }
@@ -529,6 +552,9 @@ class NumberVerseApp {
   }
 
   reloadAllGameProgress() {
+    if (this.matrixGame && typeof this.matrixGame.reloadUserState === 'function') {
+      this.matrixGame.reloadUserState();
+    }
     if (this.dontTapGame && typeof this.dontTapGame.reloadUserState === 'function') {
       this.dontTapGame.reloadUserState();
     }
@@ -537,6 +563,12 @@ class NumberVerseApp {
     }
     if (this.shellShuffleGame && typeof this.shellShuffleGame.reloadUserState === 'function') {
       this.shellShuffleGame.reloadUserState();
+    }
+    if (this.numberPathGame && typeof this.numberPathGame.reloadUserState === 'function') {
+      this.numberPathGame.reloadUserState();
+    }
+    if (this.sudokuGame && typeof this.sudokuGame.reloadUserState === 'function') {
+      this.sudokuGame.reloadUserState();
     }
     this.updateMatrixMenuCard();
     this.updateDontTapMenuCard();
@@ -733,6 +765,7 @@ class NumberVerseApp {
       window.soundFx.playCorrect();
 
       // Sync progress for this user from SQLite & update all menu cards
+      this.cleanLegacyStorage();
       await this.syncProgressFromServer();
       this.reloadAllGameProgress();
 
@@ -829,6 +862,7 @@ class NumberVerseApp {
       window.soundFx.playCorrect();
 
       // Brand new user: fresh progress isolated for this user
+      this.cleanLegacyStorage();
       this.reloadAllGameProgress();
       await this.syncProgressToServer();
 
@@ -860,6 +894,7 @@ class NumberVerseApp {
     try {
       localStorage.removeItem('numberverse_auth_user');
     } catch (e) {}
+    this.cleanLegacyStorage();
     this.reloadAllGameProgress();
     this.showToast('You have been logged out', 'info');
     this.navigateTo('/landing');

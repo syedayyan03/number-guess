@@ -132,7 +132,7 @@ class ShellShuffleGame {
     }
 
     if (!this.level || this.level < 1) {
-      this.level = parseInt(localStorage.getItem(this.savedLevelKey) || '1', 10);
+      this.level = parseInt(localStorage.getItem(this.getSavedLevelKey()) || '1', 10);
     }
     this.setupScene();
     this.setupEventListeners();
